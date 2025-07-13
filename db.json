@@ -1,0 +1,145 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "$2b$10$abc123",
+      "role": "admin",
+      "name": "Admin User",
+      "email": "admin@clinic.com"
+    },
+    {
+      "id": 2,
+      "username": "doctor1",
+      "password": "$2b$10$abc123",
+      "role": "doctor",
+      "name": "Dr. John Smith",
+      "email": "john@clinic.com"
+    }
+  ],
+  "doctors": [
+    {
+      "id": 1,
+      "name": "Dr. John Smith",
+      "specialty": "Cardiology",
+      "email": "john@clinic.com",
+      "phone": "+1234567890",
+      "color": "#3b82f6"
+    },
+    {
+      "id": 2,
+      "name": "Dr. Sarah Johnson",
+      "specialty": "Dermatology",
+      "email": "sarah@clinic.com",
+      "phone": "+1234567891",
+      "color": "#ef4444"
+    }
+  ],
+  "patients": [
+    {
+      "id": 1,
+      "name": "Alice Johnson1",
+      "email": "alice@example.com",
+      "phone": "+1234567892",
+      "dateOfBirth": "1990-05-15",
+      "address": "123 Main St, City, State 12345"
+    },
+    {
+      "id": 2,
+      "name": "Bob Wilson",
+      "email": "bob@example.com",
+      "phone": "+1234567893",
+      "dateOfBirth": "1985-08-22",
+      "address": "456 Oak Ave, City, State 12345"
+    },
+    {
+      "id": 1752343850389,
+      "name": "JOhn Hang",
+      "email": "jo@jo.com",
+      "phone": "9929299",
+      "dateOfBirth": "1988-03-13",
+      "address": "sdvsd"
+    }
+  ],
+  "appointments": [
+    {
+      "id": 1,
+      "patientId": 1,
+      "doctorId": 1,
+      "startTime": "2025-07-13T12:00:00.000Z",
+      "endTime": "2025-07-13T13:00:00.000Z",
+      "title": "Regular Checkup",
+      "description": "Annual physical examination",
+      "status": "scheduled"
+    },
+    {
+      "id": 2,
+      "patientId": 2,
+      "doctorId": 2,
+      "startTime": "2025-07-14T10:00:00.000Z",
+      "endTime": "2025-07-14T11:00:00.000Z",
+      "title": "Skin Consultation",
+      "description": "Dermatology consultation",
+      "status": "scheduled"
+    },
+    {
+      "id": 1752347305774,
+      "title": "sdf",
+      "description": "sfs",
+      "patientId": 1,
+      "doctorId": 1,
+      "startTime": "2025-07-14T04:00:00.000Z",
+      "endTime": "2025-07-14T05:30:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 1752376344711,
+      "title": "asf",
+      "description": "asdf",
+      "patientId": 1752343850389,
+      "doctorId": 2,
+      "startTime": "2025-07-14T04:00:00.000Z",
+      "endTime": "2025-07-14T05:00:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 1752376490610,
+      "title": "ttt",
+      "description": "ttt",
+      "patientId": 1,
+      "doctorId": 1,
+      "startTime": "2025-07-14T06:00:00.000Z",
+      "endTime": "2025-07-14T07:00:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 1752377208829,
+      "title": "asdf",
+      "description": "asdf",
+      "patientId": 2,
+      "doctorId": 1,
+      "startTime": "2025-07-14T03:30:00.000Z",
+      "endTime": "2025-07-14T04:00:00.000Z",
+      "status": "scheduled"
+    }
+  ],
+  "settings": {
+    "workingHours": {
+      "start": "08:00",
+      "end": "18:00"
+    },
+    "holidays": [
+      "2025-07-04",
+      "2025-12-25"
+    ],
+    "workingDays": {
+      "monday": true,
+      "tuesday": true,
+      "wednesday": true,
+      "thursday": true,
+      "friday": true,
+      "saturday": false,
+      "sunday": false
+    }
+  }
+}

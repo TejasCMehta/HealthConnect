@@ -1,0 +1,167 @@
+<div class="overflow-x-auto">
+  <div class="min-w-full">
+    <!-- Week header -->
+    <div class="grid grid-cols-8 gap-px bg-gray-200 dark:bg-gray-700 mb-2">
+      <div class="bg-white dark:bg-gray-800 px-2 py-3 text-center">
+        <span class="text-sm font-medium text-gray-900 dark:text-white"
+          >Time</span
+        >
+      </div>
+      @for (day of weekDays; track day.toISOString()) {
+      <div class="bg-white dark:bg-gray-800 px-2 py-3 text-center">
+        <div class="text-sm font-medium text-gray-900 dark:text-white">
+          {{ day.toLocaleDateString("en-US", { weekday: "short" }) }}
+        </div>
+        <div
+          [class]="
+            'text-sm ' +
+            (isToday(day)
+              ? 'bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center mx-auto mt-1'
+              : 'text-gray-500 dark:text-gray-400')
+          "
+        >
+          {{ day.getDate() }}
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Week grid -->
+    <div class="grid grid-cols-8 gap-px bg-gray-200 dark:bg-gray-700">
+      @for (timeSlot of timeSlots; track timeSlot) {
+      <!-- Time column -->
+      <div
+        class="bg-white dark:bg-gray-800 px-2 py-3 text-center border-r border-gray-200 dark:border-gray-700"
+      >
+        <span class="text-xs text-gray-500 dark:text-gray-400">{{
+          timeSlot
+        }}</span>
+      </div>
+
+      <!-- Day columns -->
+      @for (day of weekDays; track day.toISOString()) {
+      <div
+        [class]="
+          'bg-white dark:bg-gray-800 min-h-[60px] p-1 relative ' +
+          (isPastTimeSlot(day, timeSlot) ? 'opacity-50' : '') +
+          ' ' +
+          'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'
+        "
+      >
+        @if (getAppointmentsForDateAndTime(day, timeSlot).length === 0) {
+        <!-- Check if time slot is occupied by a spanning appointment -->
+        @if (isTimeSlotOccupied(day, timeSlot)) {
+        <!-- Time slot is occupied by a spanning appointment - show as blocked but keep clickable area -->
+        <div class="flex h-full">
+          <div
+            class="flex-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded opacity-50 mr-1"
+          ></div>
+          <!-- Clickable area for new appointments (30% of the width) -->
+          <div
+            (click)="onTimeSlotClick(day, timeSlot)"
+            [class]="
+              'w-[30%] border border-dashed border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-colors flex items-center justify-center ' +
+              (isPastTimeSlot(day, timeSlot) ? 'cursor-not-allowed' : '')
+            "
+            [title]="
+              isPastTimeSlot(day, timeSlot)
+                ? 'Cannot create appointments in the past'
+                : 'Click to create new appointment'
+            "
+          >
+            @if (!isPastTimeSlot(day, timeSlot)) {
+            <i
+              class="ri-add-line text-gray-400 hover:text-blue-500 text-xs"
+            ></i>
+            }
+          </div>
+        </div>
+        } @else {
+        <!-- Empty time slot - clickable -->
+        <div
+          (click)="onTimeSlotClick(day, timeSlot)"
+          [class]="
+            'w-full h-full border border-dashed border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-colors flex items-center justify-center ' +
+            (isPastTimeSlot(day, timeSlot) ? 'cursor-not-allowed' : '')
+          "
+          [title]="
+            isPastTimeSlot(day, timeSlot)
+              ? 'Cannot create appointments in the past'
+              : 'Click to create new appointment'
+          "
+        >
+          @if (!isPastTimeSlot(day, timeSlot)) {
+          <i class="ri-add-line text-gray-400 hover:text-blue-500 text-xs"></i>
+          }
+        </div>
+        } } @else {
+        <!-- Appointments starting at this time slot -->
+        <div class="flex h-full">
+          <!-- Appointments container (70% width) -->
+          <div
+            class="w-[70%] relative overflow-visible mr-1"
+            style="z-index: 10"
+          >
+            @for (appointmentData of
+            getOverlappingAppointments(getAppointmentsForDateAndTime(day,
+            timeSlot)); track appointmentData.appointment.id) {
+            <div
+              [style.left]="
+                appointmentData.column * (70 / appointmentData.totalColumns) +
+                '%'
+              "
+              [style.width]="70 / appointmentData.totalColumns + '%'"
+              [style.z-index]="20 - appointmentData.column"
+              [style.height.px]="
+                getAppointmentHeight(appointmentData.appointment)
+              "
+              [style.top.px]="
+                getAppointmentTopOffset(appointmentData.appointment, timeSlot)
+              "
+              [class]="'absolute overflow-visible appointment-wrapper'"
+            >
+              <app-appointment-card
+                [appointment]="appointmentData.appointment"
+                [compact]="true"
+                (click)="
+                  onAppointmentClick(appointmentData.appointment);
+                  debugAppointment(appointmentData.appointment)
+                "
+                [class]="
+                  'h-full block ' +
+                  (appointmentData.column > 0
+                    ? 'shadow-lg border border-white dark:border-gray-800'
+                    : '')
+                "
+              >
+              </app-appointment-card>
+            </div>
+            }
+          </div>
+
+          <!-- Clickable area for new appointments (30% of the width) -->
+          <div
+            (click)="onTimeSlotClick(day, timeSlot)"
+            [class]="
+              'w-[30%] border border-dashed border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-colors flex items-center justify-center ' +
+              (isPastTimeSlot(day, timeSlot) ? 'cursor-not-allowed' : '')
+            "
+            [title]="
+              isPastTimeSlot(day, timeSlot)
+                ? 'Cannot create appointments in the past'
+                : 'Click to create new appointment'
+            "
+          >
+            @if (!isPastTimeSlot(day, timeSlot)) {
+            <i
+              class="ri-add-line text-gray-400 hover:text-blue-500 text-xs"
+            ></i>
+            }
+          </div>
+        </div>
+        }
+      </div>
+      } }
+    </div>
+  </div>
+</div>

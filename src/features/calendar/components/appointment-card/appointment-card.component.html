@@ -1,0 +1,74 @@
+<div
+  [class]="
+    'appointment-card cursor-pointer transition-colors border-l-4 border-blue-500 flex flex-col h-full ' +
+    (compact()
+      ? 'p-1 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-md'
+      : 'p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm rounded-r-md')
+  "
+>
+  <div class="flex items-start justify-between flex-1">
+    <div class="flex-1 min-w-0">
+      <h4
+        [class]="
+          'font-medium truncate ' +
+          (compact()
+            ? 'text-xs text-blue-800 dark:text-blue-200'
+            : 'text-sm text-gray-900 dark:text-white')
+        "
+        [title]="appointment().title"
+      >
+        {{ appointment().title }}
+      </h4>
+
+      @if (!compact()) {
+      <div
+        class="mt-1 flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400"
+      >
+        <span>{{ startTime }} - {{ endTime }}</span>
+        <span>•</span>
+        <span>{{ duration }} min</span>
+      </div>
+
+      @if (appointment().description) {
+      <p class="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
+        {{ appointment().description }}
+      </p>
+      } } @else {
+      <!-- Compact mode: show essential info only -->
+      <div class="mt-1 text-xs text-blue-600 dark:text-blue-300 truncate">
+        {{ startTime }}
+      </div>
+      }
+    </div>
+
+    @if (!compact()) {
+    <div class="flex-shrink-0 ml-2">
+      <span
+        [class]="
+          'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ' +
+          statusColor
+        "
+      >
+        {{ appointment().status }}
+      </span>
+    </div>
+    } @else {
+    <!-- Compact mode: show status as a small dot -->
+    <div class="flex-shrink-0 ml-1">
+      <div
+        [class]="
+          'w-2 h-2 rounded-full ' +
+          (appointment().status === 'scheduled'
+            ? 'bg-blue-500'
+            : appointment().status === 'completed'
+            ? 'bg-green-500'
+            : appointment().status === 'cancelled'
+            ? 'bg-red-500'
+            : 'bg-gray-500')
+        "
+        [title]="appointment().status"
+      ></div>
+    </div>
+    }
+  </div>
+</div>

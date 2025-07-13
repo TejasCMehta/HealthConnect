@@ -1,0 +1,52 @@
+<div class="p-4">
+  <!-- Month header -->
+  <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 mb-2">
+    @for (day of weekDays; track day) {
+      <div class="bg-white dark:bg-gray-800 px-2 py-3 text-center">
+        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ day }}</span>
+      </div>
+    }
+  </div>
+  
+  <!-- Month grid -->
+  <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700">
+    @for (day of monthDays; track day.toISOString()) {
+      <div 
+        [class]="'bg-white dark:bg-gray-800 min-h-[120px] p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ' + 
+                 (isPastDate(day) ? 'opacity-50' : '') + ' ' +
+                 (!isCurrentMonth(day) ? 'bg-gray-50 dark:bg-gray-700' : '')"
+        (click)="onDateClick(day)">
+        
+        <!-- Day number -->
+        <div class="flex items-center justify-between mb-1">
+          <span 
+            [class]="'text-sm font-medium ' + 
+                     (isToday(day) ? 'bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center' : 
+                      isCurrentMonth(day) ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500')">
+            {{ day.getDate() }}
+          </span>
+        </div>
+        
+        <!-- Appointments -->
+        <div class="space-y-1">
+          @for (appointment of getAppointmentsForDate(day); track appointment.id; let i = $index) {
+            @if (i < 3) {
+              <app-appointment-card
+                [appointment]="appointment"
+                [compact]="true"
+                (click)="onAppointmentClick(appointment); $event.stopPropagation()">
+              </app-appointment-card>
+            }
+          }
+          
+          <!-- Show more indicator -->
+          @if (getAppointmentsForDate(day).length > 3) {
+            <div class="text-xs text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300">
+              +{{ getAppointmentsForDate(day).length - 3 }} more
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

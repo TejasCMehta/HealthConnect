@@ -1,0 +1,63 @@
+:host {
+  display: block;
+  height: 100%;
+  // Ensure appointment cards stay below forms/modals
+  z-index: inherit;
+  position: relative;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Ensure appointment cards align perfectly with time slot borders
+.appointment-card {
+  height: 100%;
+  box-sizing: border-box;
+  margin: 0;
+
+  // Ensure proper border alignment
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+
+  &:first-child {
+    border-top: none;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+// Compact mode specific styles
+:host(.compact) {
+  .appointment-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+
+    &:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// Status indicator styles
+.status-dot {
+  transition: all 0.2s ease-in-out;
+}
+
+// Hover effects
+.appointment-card {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}

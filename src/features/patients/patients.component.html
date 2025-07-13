@@ -1,0 +1,359 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="md:flex md:items-center md:justify-between">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
+        Patients
+      </h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Manage patient information and records
+      </p>
+    </div>
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <button
+        (click)="onNewPatient()"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <i class="ri-user-add-line mr-2"></i>
+        Add Patient
+      </button>
+    </div>
+  </div>
+  
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+      <div class="flex">
+        <i class="ri-error-warning-line text-red-400 mr-2"></i>
+        <div class="text-sm text-red-700 dark:text-red-400">
+          {{ error() }}
+        </div>
+      </div>
+    </div>
+  }
+  
+  <!-- Controls -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+      <!-- Search -->
+      <div class="flex-1 max-w-md">
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="Search patients..."
+            [value]="searchQuery()"
+            (input)="onSearch($any($event.target).value)"
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+          <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
+        </div>
+      </div>
+      
+      <!-- View Controls -->
+      <div class="flex items-center space-x-4">
+        <!-- View Mode Toggle -->
+        <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <button
+            (click)="setViewMode('cards')"
+            [class]="'p-2 rounded-md transition-colors ' + 
+                     (viewMode() === 'cards' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300')">
+            <i class="ri-grid-line"></i>
+          </button>
+          <button
+            (click)="setViewMode('table')"
+            [class]="'p-2 rounded-md transition-colors ' + 
+                     (viewMode() === 'table' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300')">
+            <i class="ri-list-check"></i>
+          </button>
+        </div>
+        
+        <!-- Bulk Actions -->
+        @if (selectedPatients().length > 0) {
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              {{ selectedPatients().length }} selected
+            </span>
+            <button
+              (click)="onDeleteSelected()"
+              class="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+          </div>
+        }
+        
+        <!-- Page Size -->
+        <select
+          [value]="pageSize()"
+          (change)="onPageSizeChange(+$any($event.target).value)"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+          <option value="10">10 per page</option>
+          <option value="25">25 per page</option>
+          <option value="50">50 per page</option>
+          <option value="100">100 per page</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex items-center justify-center h-64">
+      <i class="ri-loader-4-line animate-spin text-4xl text-gray-400"></i>
+    </div>
+  } @else {
+    <!-- Content -->
+    @if (viewMode() === 'cards') {
+      <!-- Cards View -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (patient of patients(); track patient.id) {
+          <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedPatients().includes(patient.id)"
+                    (change)="onSelectPatient(patient.id)"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                  <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <i class="ri-user-line text-blue-600 dark:text-blue-400 text-xl"></i>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button
+                    (click)="onEditPatient(patient)"
+                    class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                    <i class="ri-edit-line"></i>
+                  </button>
+                  <button
+                    (click)="onDeletePatient(patient)"
+                    class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="space-y-3">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ patient.name }}
+                  </h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Age: {{ calculateAge(patient.dateOfBirth) }} years
+                  </p>
+                </div>
+                
+                <div class="space-y-2">
+                  <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                    <i class="ri-mail-line mr-2"></i>
+                    <span class="truncate">{{ patient.email }}</span>
+                  </div>
+                  <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                    <i class="ri-phone-line mr-2"></i>
+                    <span>{{ patient.phone }}</span>
+                  </div>
+                  <div class="flex items-start text-sm text-gray-600 dark:text-gray-300">
+                    <i class="ri-map-pin-line mr-2 mt-0.5"></i>
+                    <span class="line-clamp-2">{{ patient.address }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Table View -->
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th class="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    [checked]="selectAll()"
+                    (change)="onSelectAll()"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                </th>
+                <th 
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
+                  (click)="onSort('name')">
+                  <div class="flex items-center space-x-1">
+                    <span>Name</span>
+                    @if (sortField() === 'name') {
+                      <i [class]="'ri-arrow-' + (sortOrder() === 'asc' ? 'up' : 'down') + '-line'"></i>
+                    }
+                  </div>
+                </th>
+                <th 
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
+                  (click)="onSort('email')">
+                  <div class="flex items-center space-x-1">
+                    <span>Email</span>
+                    @if (sortField() === 'email') {
+                      <i [class]="'ri-arrow-' + (sortOrder() === 'asc' ? 'up' : 'down') + '-line'"></i>
+                    }
+                  </div>
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Phone
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Age
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Address
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              @for (patient of patients(); track patient.id) {
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      [checked]="selectedPatients().includes(patient.id)"
+                      (change)="onSelectPatient(patient.id)"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                        <i class="ri-user-line text-blue-600 dark:text-blue-400"></i>
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">
+                          {{ patient.name }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900 dark:text-white">{{ patient.email }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900 dark:text-white">{{ patient.phone }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900 dark:text-white">{{ calculateAge(patient.dateOfBirth) }}</div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900 dark:text-white max-w-xs truncate">{{ patient.address }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="flex items-center justify-end space-x-2">
+                      <button
+                        (click)="onEditPatient(patient)"
+                        class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button
+                        (click)="onDeletePatient(patient)"
+                        class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6 rounded-lg shadow">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button
+            (click)="onPageChange(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+            Previous
+          </button>
+          <button
+            (click)="onPageChange(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+            Next
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              {{ paginationInfo }}
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                (click)="onPageChange(currentPage() - 1)"
+                [disabled]="currentPage() === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              
+              @for (page of paginationPages; track page) {
+                <button
+                  (click)="onPageChange(page)"
+                  [class]="'relative inline-flex items-center px-4 py-2 border text-sm font-medium ' + 
+                           (page === currentPage() ? 
+                            'z-10 bg-blue-50 dark:bg-blue-900 border-blue-500 text-blue-600 dark:text-blue-400' : 
+                            'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600')">
+                  {{ page }}
+                </button>
+              }
+              
+              <button
+                (click)="onPageChange(currentPage() + 1)"
+                [disabled]="currentPage() === totalPages()"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    }
+    
+    <!-- Empty State -->
+    @if (patients().length === 0) {
+      <div class="text-center py-12">
+        <i class="ri-user-line text-6xl text-gray-400 mb-4"></i>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          No patients found
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          @if (searchQuery()) {
+            Try adjusting your search terms or filters.
+          } @else {
+            Get started by adding your first patient.
+          }
+        </p>
+        @if (!searchQuery()) {
+          <button
+            (click)="onNewPatient()"
+            class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+            <i class="ri-user-add-line mr-2"></i>
+            Add First Patient
+          </button>
+        }
+      </div>
+    }
+  }
+  
+  <!-- Patient Form -->
+  @if (isFormOpen()) {
+    <app-patient-form
+      [patient]="selectedPatient()"
+      (close)="onFormClose()"
+      (save)="onPatientSave()">
+    </app-patient-form>
+  }
+  
+  <!-- Confirmation Dialog -->
+  <app-confirmation-dialog></app-confirmation-dialog>
+</div>

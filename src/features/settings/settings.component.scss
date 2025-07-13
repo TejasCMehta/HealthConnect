@@ -1,0 +1,159 @@
+:host {
+  display: block;
+}
+
+/* Custom form styling */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+/* Time input styling */
+input[type="time"] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+/* Date input styling */
+input[type="date"] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+/* Holiday card hover effects */
+.holiday-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.holiday-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .holiday-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Theme button animations */
+.theme-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.theme-button:hover {
+  transform: translateY(-1px);
+}
+
+.theme-button.active {
+  transform: none;
+}
+
+/* Working hours preview */
+.working-hours-preview {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Success and error message animations */
+.alert-message {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Loading state */
+.settings-loading {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.dark .settings-loading {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Custom scrollbar for long holiday lists */
+.holiday-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.holiday-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.holiday-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.holiday-list::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.holiday-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+.dark .holiday-list::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.5);
+}
+
+.dark .holiday-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.7);
+}

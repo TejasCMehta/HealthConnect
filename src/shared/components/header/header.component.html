@@ -1,0 +1,63 @@
+<header
+  class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Mobile menu button -->
+      <button
+        (click)="toggleSidebar.emit()"
+        class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+      >
+        <i class="ri-menu-line text-xl"></i>
+      </button>
+
+      <!-- Desktop sidebar collapse/expand button -->
+      <button
+        (click)="toggleSidebarCollapse.emit()"
+        class="hidden lg:block p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      >
+        <i
+          [class]="
+            'text-xl ' +
+            (isSidebarCollapsed() ? 'ri-menu-unfold-line' : 'ri-menu-fold-line')
+          "
+        ></i>
+      </button>
+
+      <!-- Page title - will be updated by child components -->
+      <div class="flex-1 lg:flex-none">
+        <h1
+          class="text-xl font-semibold text-gray-900 dark:text-white ml-4 lg:ml-0"
+        >
+          Clinic Management
+        </h1>
+      </div>
+
+      <!-- Header actions -->
+      <div class="flex items-center space-x-4">
+        <!-- Notifications -->
+        <button
+          class="p-2 rounded-full text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <i class="ri-notification-line text-xl"></i>
+        </button>
+
+        <!-- Theme toggle -->
+        <app-theme-toggle></app-theme-toggle>
+
+        <!-- Profile dropdown -->
+        <div class="relative">
+          <button
+            class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <div
+              class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center"
+            >
+              <i class="ri-user-line text-white text-sm"></i>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

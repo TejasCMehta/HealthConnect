@@ -1,0 +1,67 @@
+Full App Generation Prompt for Bolt.dev
+Build a clinic appointment booking web app in Angular 20 using TailwindCSS v3.4.17 and Remix Icons, following a modular project structure.
+
+🌐 Core Features:
+Admin panel with mobile-first layout: sidebar, header, and main content area.
+
+Support Dark / Light / System mode with Tailwind theme switching.
+
+Use Angular Signals for state management, @angular/core control flow syntax, and HttpResource for API calls.
+
+Fetch mock data from json-server (db.json) via RESTful endpoints.
+
+Implement auth with JWT: Login routes for Admin and Doctor, using Route Guards + HTTP Interceptors.
+
+📆 Calendar Module:
+Create a custom Calendar system with Month / Week / Day views using reusable components:
+
+Navigation bar with dynamic month/year/week navigation controls.
+
+Views should sync across modes (changing month updates all views).
+
+Show appointment cards with correct start/end time blocks.
+
++x more indicator on Month View should redirect to Day View (not open popover).
+
+On Week & Month views, clicking an event should open a popover (not modal):
+
+Popover must respect viewport space, flip vertically/horizontally using getBoundingClientRect(), and be rendered outside parent (e.g., inside <body>).
+
+Popover should auto-close when clicking edit, which opens right-side sliding form.
+
+In Day View, popover is skipped. Clicking an event opens the form directly.
+
+🟩 Appointment Cards:
+Color-coded by doctor or appointment type.
+
+Overlapping appointments (e.g., 2 PM – 3 PM and 2:30 PM – 3:30 PM) must appear side-by-side using flex or grid strategy.
+
+Past time slots and holidays must appear grayed out (weekends or configured holidays).
+
+Block creating/editing/deleting past appointments.
+
+Resizing and dragging should:
+
+Map vertical mouse position to grid time slot (30 min)
+
+Prevent end time < start time (e.g., 2 PM – 10 AM is invalid)
+
+Show a real-time time preview while dragging
+
+Show modal to confirm updated time and show error if validation fails
+
+🔧 Admin Features:
+Configure clinic working hours (time slots shown dynamically in Week/Day View).
+
+CRUD for Holidays, Patients, Doctors.
+
+Admin can view all appointments; doctors can view only their own.
+
+Confirm delete with modal dialog.
+
+📁 Project Structure:
+Modular layout with /features, /shared/components, /core, /auth, /calendar, /patients, /doctors, /settings.
+
+Lazy load routes; keep components and pages separated.
+
+Follow clean architecture, scalable and production-ready setup.

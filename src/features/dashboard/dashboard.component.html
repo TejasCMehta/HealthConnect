@@ -1,0 +1,246 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="md:flex md:items-center md:justify-between">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
+        Dashboard
+      </h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Welcome back, {{ authService.currentUser()?.name }}
+      </p>
+    </div>
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <button
+        routerLink="/calendar"
+        class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <i class="ri-calendar-line mr-2"></i>
+        View Calendar
+      </button>
+    </div>
+  </div>
+  
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="ri-calendar-line text-2xl text-blue-600"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                Total Appointments
+              </dt>
+              <dd class="text-lg font-medium text-gray-900 dark:text-white">
+                {{ stats().totalAppointments }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="ri-calendar-check-line text-2xl text-green-600"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                Today's Appointments
+              </dt>
+              <dd class="text-lg font-medium text-gray-900 dark:text-white">
+                {{ stats().todayAppointments }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="ri-user-heart-line text-2xl text-purple-600"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                Total Patients
+              </dt>
+              <dd class="text-lg font-medium text-gray-900 dark:text-white">
+                {{ stats().totalPatients }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    @if (authService.hasRole('admin')) {
+      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <i class="ri-user-star-line text-2xl text-orange-600"></i>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  Total Doctors
+                </dt>
+                <dd class="text-lg font-medium text-gray-900 dark:text-white">
+                  {{ stats().totalDoctors }}
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+  
+  <!-- Recent Activity -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Appointments -->
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+          Recent Appointments
+        </h3>
+        <div class="mt-5">
+          @if (recentAppointments().length === 0) {
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              No recent appointments found.
+            </p>
+          } @else {
+            <div class="space-y-3">
+              @for (appointment of recentAppointments(); track appointment.id) {
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                      <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                        <i class="ri-calendar-line text-white text-sm"></i>
+                      </div>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-gray-900 dark:text-white">
+                        {{ appointment.title }}
+                      </p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ formatDate(appointment.startTime) }} at {{ formatTime(appointment.startTime) }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                      {{ appointment.status }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div class="mt-5">
+          <a
+            routerLink="/calendar"
+            class="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-600 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800">
+            View all appointments
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Upcoming Appointments -->
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+          Upcoming Appointments
+        </h3>
+        <div class="mt-5">
+          @if (upcomingAppointments().length === 0) {
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              No upcoming appointments found.
+            </p>
+          } @else {
+            <div class="space-y-3">
+              @for (appointment of upcomingAppointments(); track appointment.id) {
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                      <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                        <i class="ri-time-line text-white text-sm"></i>
+                      </div>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-gray-900 dark:text-white">
+                        {{ appointment.title }}
+                      </p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ formatDate(appointment.startTime) }} at {{ formatTime(appointment.startTime) }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                      upcoming
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div class="mt-5">
+          <a
+            routerLink="/patients"
+            class="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-green-600 bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800">
+            Manage patients
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quick Actions -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+        Quick Actions
+      </h3>
+      <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button
+          routerLink="/calendar"
+          class="flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+          <i class="ri-calendar-line mr-2"></i>
+          Schedule Appointment
+        </button>
+        <button
+          routerLink="/patients"
+          class="flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+          <i class="ri-user-add-line mr-2"></i>
+          Add Patient
+        </button>
+        @if (authService.hasRole('admin')) {
+          <button
+            routerLink="/doctors"
+            class="flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <i class="ri-user-star-line mr-2"></i>
+            Manage Doctors
+          </button>
+          <button
+            routerLink="/settings"
+            class="flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <i class="ri-settings-line mr-2"></i>
+            Settings
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

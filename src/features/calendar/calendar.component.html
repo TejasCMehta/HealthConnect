@@ -1,0 +1,55 @@
+<div class="space-y-6">
+  <!-- Calendar Navigation -->
+  <app-calendar-navigation
+    [currentView]="currentView()"
+    [currentDate]="currentDate()"
+    (viewChange)="onViewChange($event)"
+    (dateChange)="onDateChange($event)"
+    (newAppointment)="onNewAppointment()"
+  >
+  </app-calendar-navigation>
+
+  <!-- Calendar Views -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+    @if (isLoading()) {
+    <div class="flex items-center justify-center h-96">
+      <i class="ri-loader-4-line animate-spin text-4xl text-gray-400"></i>
+    </div>
+    } @else { @switch (currentView()) { @case ('month') {
+    <app-month-view
+      [currentDate]="currentDate()"
+      [appointments]="appointments()"
+      (appointmentSelect)="onAppointmentSelect($event)"
+      (dateSelect)="onDateChange($event)"
+    >
+    </app-month-view>
+    } @case ('week') {
+    <app-week-view
+      [currentDate]="currentDate()"
+      [appointments]="appointments()"
+      (appointmentSelect)="onAppointmentSelect($event)"
+      (timeSlotSelect)="onTimeSlotSelect($event)"
+    >
+    </app-week-view>
+    } @case ('day') {
+    <app-day-view
+      [currentDate]="currentDate()"
+      [appointments]="appointments()"
+      (appointmentSelect)="onAppointmentSelect($event)"
+      (timeSlotSelect)="onTimeSlotSelect($event)"
+    >
+    </app-day-view>
+    } } }
+  </div>
+
+  <!-- Appointment Form Sidebar -->
+  @if (isFormOpen()) {
+  <app-appointment-form
+    [appointment]="selectedAppointment()"
+    [selectedTimeSlot]="selectedTimeSlot()"
+    (close)="onFormClose()"
+    (save)="onAppointmentSave()"
+  >
+  </app-appointment-form>
+  }
+</div>

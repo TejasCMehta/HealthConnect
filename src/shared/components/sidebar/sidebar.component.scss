@@ -1,0 +1,51 @@
+:host {
+  display: block;
+}
+
+// Ensure sidebar takes full height
+aside {
+  min-height: 100vh;
+  height: 100vh;
+  transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+// Enhanced transitions for sidebar collapse/expand
+// Smooth icon transitions
+.nav-icon {
+  transition: margin 0.3s ease-in-out;
+}
+
+// Better hover effects for collapsed state
+@media (min-width: 1024px) {
+  .sidebar-collapsed {
+    .nav-item {
+      position: relative;
+
+      &:hover {
+        .nav-tooltip {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(0);
+        }
+      }
+    }
+
+    .nav-tooltip {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%) translateX(-10px);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease-in-out;
+      z-index: 1000;
+      margin-left: 0.5rem;
+    }
+  }
+}

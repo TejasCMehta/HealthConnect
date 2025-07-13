@@ -1,0 +1,115 @@
+:host {
+  display: block;
+}
+
+.day-slot {
+  position: relative;
+  overflow: visible;
+}
+
+.appointment-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+
+  // Ensure lower z-index than forms/modals (which typically use z-index: 50+)
+  z-index: 20 !important;
+
+  app-appointment-card {
+    display: block;
+    height: 100%;
+    width: 100%;
+
+    // Ensure the inner card content aligns with borders
+    > div {
+      height: 100%;
+      box-sizing: border-box;
+    }
+  }
+}
+
+// Overlapping appointments styles for week view
+.appointments-container {
+  .appointment-column {
+    position: absolute;
+
+    &.column-0 {
+      z-index: 20;
+    }
+
+    &.column-1 {
+      z-index: 19;
+      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1),
+        0 1px 2px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    &.column-2 {
+      z-index: 18;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15),
+        0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// Add button styling for week view
+.add-appointment-area {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.02); // Smaller scale for week view
+  }
+
+  .ri-add-line {
+    transition: all 0.2s ease-in-out;
+  }
+}
+
+// Week view specific adjustments
+.week-time-slot {
+  &:hover {
+    .add-appointment-area {
+      border-color: theme("colors.blue.400");
+      background-color: theme("colors.blue.50");
+
+      .ri-add-line {
+        color: theme("colors.blue.500");
+      }
+    }
+  }
+}
+
+// Dark mode adjustments for week view
+.dark {
+  .week-time-slot:hover {
+    .add-appointment-area {
+      border-color: theme("colors.blue.600");
+      background-color: theme("colors.blue.900/40");
+
+      .ri-add-line {
+        color: theme("colors.blue.400");
+      }
+    }
+  }
+}
+
+// Compact appointments in week view
+.week-appointment {
+  .appointment-card {
+    padding: 2px 4px;
+    font-size: 10px;
+
+    .appointment-title {
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .appointment-time {
+      font-size: 9px;
+      opacity: 0.8;
+    }
+  }
+}
