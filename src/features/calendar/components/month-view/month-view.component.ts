@@ -18,6 +18,11 @@ export class MonthViewComponent {
   public appointments = input<Appointment[]>([]);
 
   public appointmentSelect = output<Appointment>();
+  public appointmentClick = output<{
+    appointment: Appointment;
+    clickEvent: MouseEvent;
+  }>();
+  public moreAppointmentsClick = output<Date>();
   public dateSelect = output<Date>();
 
   get monthDays(): Date[] {
@@ -79,7 +84,13 @@ export class MonthViewComponent {
     this.dateSelect.emit(date);
   }
 
-  onAppointmentClick(appointment: Appointment): void {
-    this.appointmentSelect.emit(appointment);
+  onAppointmentClick(appointment: Appointment, event: MouseEvent): void {
+    event.stopPropagation();
+    this.appointmentClick.emit({ appointment, clickEvent: event });
+  }
+
+  onMoreClick(date: Date, event: MouseEvent): void {
+    event.stopPropagation();
+    this.moreAppointmentsClick.emit(date);
   }
 }

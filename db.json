@@ -93,16 +93,6 @@
       "status": "scheduled"
     },
     {
-      "id": 1752376344711,
-      "title": "asf",
-      "description": "asdf",
-      "patientId": 1752343850389,
-      "doctorId": 2,
-      "startTime": "2025-07-14T04:00:00.000Z",
-      "endTime": "2025-07-14T05:00:00.000Z",
-      "status": "scheduled"
-    },
-    {
       "id": 1752376490610,
       "title": "ttt",
       "description": "ttt",

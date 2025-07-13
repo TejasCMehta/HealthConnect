@@ -124,8 +124,7 @@
                 [appointment]="appointmentData.appointment"
                 [compact]="true"
                 (click)="
-                  onAppointmentClick(appointmentData.appointment);
-                  debugAppointment(appointmentData.appointment)
+                  onAppointmentClick(appointmentData.appointment, $event)
                 "
                 [class]="
                   'h-full block ' +

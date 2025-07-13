@@ -18,6 +18,10 @@ export class WeekViewComponent {
   public appointments = input<Appointment[]>([]);
 
   public appointmentSelect = output<Appointment>();
+  public appointmentClick = output<{
+    appointment: Appointment;
+    clickEvent: MouseEvent;
+  }>();
   public timeSlotSelect = output<{ date: Date; time: string }>();
 
   get weekDays(): Date[] {
@@ -165,8 +169,9 @@ export class WeekViewComponent {
     return slotTime < now;
   }
 
-  onAppointmentClick(appointment: Appointment): void {
-    this.appointmentSelect.emit(appointment);
+  onAppointmentClick(appointment: Appointment, event: MouseEvent): void {
+    event.stopPropagation();
+    this.appointmentClick.emit({ appointment, clickEvent: event });
   }
 
   onTimeSlotClick(date: Date, timeSlot: string): void {
@@ -178,40 +183,6 @@ export class WeekViewComponent {
     this.timeSlotSelect.emit({
       date: date,
       time: timeSlot,
-    });
-  }
-
-  // Debug method to understand appointment duration and positioning in week view
-  debugAppointment(appointment: Appointment): void {
-    const start = new Date(appointment.startTime);
-    const end = new Date(appointment.endTime);
-    const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-    const height = this.getAppointmentHeight(appointment);
-    const slotsSpanned = durationMinutes / 30;
-
-    // Find the corresponding time slot
-    const startHour = start.getHours();
-    const startMinute = start.getMinutes();
-    const timeSlot = `${startHour.toString().padStart(2, "0")}:${startMinute
-      .toString()
-      .padStart(2, "0")}`;
-    const topOffset = this.getAppointmentTopOffset(appointment, timeSlot);
-
-    console.log("Week View Appointment Debug:", {
-      title: appointment.title,
-      startTime: start.toLocaleString(),
-      endTime: end.toLocaleString(),
-      durationMinutes,
-      slotsSpanned,
-      calculatedHeight: height,
-      topOffset: topOffset + "px (reduced by 4px for week view alignment)",
-      timeSlot,
-      exactSlotAlignment:
-        startMinute % 30 === 0
-          ? "Aligned with 4px offset for week view"
-          : "Offset by " + (startMinute % 30) + " minutes + 4px adjustment",
-      zIndex: "20 (lower than forms which use 50+)",
-      viewType: "Week View",
     });
   }
 }
