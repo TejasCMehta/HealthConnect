@@ -208,7 +208,7 @@ export class AppointmentDragDropService {
     today.setHours(0, 0, 0, 0); // Reset to start of day
     const appointmentDate = new Date(startTime);
     appointmentDate.setHours(0, 0, 0, 0); // Reset to start of day
-    
+
     if (appointmentDate < today) {
       return {
         isValid: false,
@@ -382,10 +382,11 @@ export class AppointmentDragDropService {
     today.setHours(0, 0, 0, 0);
     const slotDate = new Date(date);
     slotDate.setHours(0, 0, 0, 0);
-    
+
     // Only block past time slots if it's today
-    if (slotDate.getTime() === today.getTime() && slotDateTime < now) return true;
-    
+    if (slotDate.getTime() === today.getTime() && slotDateTime < now)
+      return true;
+
     // Block dates before today
     if (slotDate < today) return true;
 
