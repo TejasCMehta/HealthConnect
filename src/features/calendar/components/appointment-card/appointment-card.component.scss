@@ -6,6 +6,39 @@
   position: relative;
 }
 
+// Global styles for resize state
+:host-context(body.appointment-resizing) {
+  .appointment-card:not(.actively-resizing) {
+    opacity: 0.4;
+    filter: grayscale(20%);
+    transform: scale(0.98);
+    transition: opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease;
+    // Remove pointer-events: none to allow interaction with other appointments
+
+    // Only disable main click events, but allow resize handle interaction
+    > *:not(.resize-handle) {
+      pointer-events: none;
+    }
+
+    // Ensure resize handles remain interactive
+    .resize-handle {
+      pointer-events: auto !important;
+      opacity: 0.6 !important; // Make them more visible during global resize
+    }
+
+    // Allow hover to bring appointment to front for potential resize
+    &:hover {
+      opacity: 0.8 !important;
+      transform: scale(1) !important;
+      z-index: 600 !important;
+
+      .resize-handle {
+        opacity: 1 !important;
+      }
+    }
+  }
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -16,9 +49,10 @@
 
 // Ensure appointment cards align perfectly with time slot borders
 .appointment-card {
-  height: 100%;
   box-sizing: border-box;
   margin: 0;
+  transition: height 0.1s ease-out, z-index 0s; // Smooth height transitions during resize
+  position: relative; // Ensure z-index works
 
   // Ensure proper border alignment
   border-top: 1px solid transparent;
@@ -31,6 +65,252 @@
   &:last-child {
     border-bottom: none;
   }
+
+  // Special styling for the actively resizing appointment
+  &.actively-resizing {
+    box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5),
+      0 6px 15px rgba(59, 130, 246, 0.4);
+    border: 3px solid theme("colors.blue.500");
+    transform: scale(1.05);
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.15),
+      rgba(99, 179, 237, 0.08)
+    );
+    z-index: 1000 !important; // Highest z-index for actively resizing
+
+    // Add animated border glow
+    &::before {
+      content: "";
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.4),
+        rgba(99, 179, 237, 0.3)
+      );
+      border-radius: 8px;
+      z-index: -1;
+      filter: blur(6px);
+      animation: glowPulse 2s ease-in-out infinite alternate;
+    }
+
+    // Add title highlight
+    h4 {
+      color: theme("colors.blue.700") !important;
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  // Add a bottom hover zone to make resize more discoverable
+  &:not(.actively-resizing) {
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: transparent;
+      cursor: ns-resize;
+      z-index: 250;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover::after {
+      opacity: 1;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(59, 130, 246, 0.1)
+      );
+    }
+  }
+
+  // Resize state styling
+  &.resizing {
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4),
+      0 4px 12px rgba(59, 130, 246, 0.3);
+    border: 2px solid theme("colors.blue.500");
+    border-bottom: 3px solid theme("colors.blue.600");
+    z-index: 100; // Ensure resizing appointment is on top
+    transform: scale(1.02); // Slightly scale up to make it more prominent
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.1),
+      rgba(99, 179, 237, 0.05)
+    );
+
+    // Add a subtle glow effect
+    &::before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.3),
+        rgba(99, 179, 237, 0.2)
+      );
+      border-radius: 6px;
+      z-index: -1;
+      filter: blur(4px);
+    }
+
+    .resize-handle {
+      opacity: 1 !important;
+      background-color: theme("colors.blue.500");
+
+      // Add pulsing animation to the resize handle
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 3px;
+        background: theme("colors.blue.400");
+        border-radius: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+    }
+  }
+
+  // Show resize handle on hover for overlapping appointments
+  &:hover {
+    z-index: 500 !important; // Force to front on hover, higher than any other appointment
+    position: relative; // Ensure z-index takes effect
+
+    .resize-handle {
+      opacity: 1 !important;
+      z-index: 1050 !important; // Even higher z-index for the handle itself
+    }
+  }
+
+  // Ensure appointments remain hoverable even during global resize
+  &:not(.actively-resizing) {
+    &:hover {
+      cursor: default; // Reset cursor for appointment body
+
+      .resize-handle {
+        cursor: ns-resize !important; // Ensure resize cursor on handle
+      }
+    }
+  }
+}
+
+// Resize handle styling
+.resize-handle {
+  z-index: 1000 !important; // Extremely high z-index to ensure visibility above all appointments
+  border-radius: 0 0 4px 4px; // Rounded bottom corners
+  position: relative; // Ensure z-index takes effect
+  pointer-events: auto !important; // Always ensure pointer events work
+
+  // Make handle more visible with a subtle background
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(59, 130, 246, 0.1)
+    );
+    border-radius: inherit;
+    z-index: inherit;
+  }
+
+  &:hover {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    z-index: 1100 !important; // Even higher on hover
+
+    &::before {
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(59, 130, 246, 0.25)
+      );
+    }
+  }
+
+  &:active {
+    background-color: rgba(59, 130, 246, 0.3) !important;
+    z-index: 1200 !important; // Highest when active
+  }
+}
+
+// Ensure resize handles are always interactive, even during global resize
+:host-context(body.appointment-resizing) .resize-handle {
+  pointer-events: auto !important;
+  cursor: ns-resize !important;
+  z-index: 1100 !important;
+
+  &:hover {
+    z-index: 1200 !important;
+    background-color: rgba(59, 130, 246, 0.2) !important;
+  }
+}
+
+// Visual feedback during resize
+.resizing {
+  .resize-handle::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      theme("colors.blue.500"),
+      transparent
+    );
+    animation: resizeGlow 1s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes resizeGlow {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 // Compact mode specific styles
@@ -42,6 +322,17 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
         0 2px 4px -1px rgba(0, 0, 0, 0.06);
       transform: translateY(-1px);
+    }
+  }
+}
+
+// Disable hover effects when disableHover is true
+:host(.disable-hover) {
+  .appointment-card {
+    &:hover {
+      transform: none !important;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
     }
   }
 }

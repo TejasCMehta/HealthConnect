@@ -45,6 +45,8 @@
         <app-appointment-card
           [appointment]="appointment"
           [compact]="true"
+          [enableResize]="false"
+          [disableHover]="true"
           (click)="onAppointmentClick(appointment, $event)"
         >
         </app-appointment-card>

@@ -2,20 +2,12 @@
   <!-- Day header -->
   <div class="mb-6">
     <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-      {{
-        currentDate().toLocaleDateString("en-US", {
-          weekday: "long",
-          month: "long",
-          day: "numeric",
-          year: "numeric"
-        })
-      }}
+      {{ currentDate().toLocaleDateString("en-US", { weekday: "long", month:
+      "long", day: "numeric", year: "numeric" }) }}
     </h2>
     <p class="text-sm text-gray-500 dark:text-gray-400">
-      {{ dayAppointments.length }} appointment{{
-        dayAppointments.length !== 1 ? "s" : ""
-      }}
-      scheduled
+      {{ dayAppointments.length }} appointment{{ dayAppointments.length !== 1 ?
+      "s" : "" }} scheduled
     </p>
   </div>
 
@@ -101,6 +93,9 @@
               "
               [style.width]="75 / appointmentData.totalColumns + '%'"
               [style.z-index]="30 - appointmentData.column"
+              [style.height.px]="
+                getAppointmentHeight(appointmentData.appointment)
+              "
               [style.top.px]="
                 getAppointmentTopOffset(appointmentData.appointment, timeSlot)
               "
@@ -119,7 +114,7 @@
                 (resizeUpdate)="onResizeUpdate($event)"
                 (resizeComplete)="onResizeComplete($event)"
                 [class]="
-                  'block mr-1 ' +
+                  'h-full block mr-1 ' +
                   (appointmentData.column > 0
                     ? 'shadow-lg border-2 border-white dark:border-gray-800'
                     : '')

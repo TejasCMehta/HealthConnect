@@ -212,4 +212,13 @@ export class CalendarComponent implements OnInit {
     this.loadAppointments();
     this.onFormClose();
   }
+
+  onAppointmentUpdate(updatedAppointment: Appointment): void {
+    // Update the appointment in the local state
+    this.appointments.update((appointments) =>
+      appointments.map((apt) =>
+        apt.id === updatedAppointment.id ? updatedAppointment : apt
+      )
+    );
+  }
 }

@@ -23,37 +23,37 @@
     <div class="space-y-px">
       @for (timeSlot of timeSlots; track timeSlot) {
       <div
-        class="grid grid-cols-8 gap-px bg-gray-100 dark:bg-gray-700 min-h-[75px]"
+        class="grid grid-cols-8 gap-px bg-gray-100 dark:bg-gray-700 min-h-[60px]"
       >
         <!-- Time label -->
         <div
           class="bg-white dark:bg-gray-800 px-2 py-3 flex items-center justify-center"
         >
-          <span class="text-sm text-gray-500 dark:text-gray-400">{{
-            timeSlot
-          }}</span>
+          <span class="text-sm text-gray-500 dark:text-gray-400"
+            >{{ timeSlot }}</span
+          >
         </div>
 
         <!-- Day columns -->
         @for (day of weekDays; track day.toISOString()) {
         <div
-          class="bg-white dark:bg-gray-800 relative overflow-visible min-h-[75px] group"
-          [class.past-time]="isPastTimeSlot(day, timeSlot)"
+          class="bg-white dark:bg-gray-800 relative overflow-visible min-h-[60px] group"
+          [class.past-time]="isPastTimeSlot(timeSlot, day)"
         >
           <!-- Empty time slot click area -->
-          @if (getAppointmentsForDateAndTime(day, timeSlot).length === 0) {
+          @if (getAppointmentsForTimeSlot(timeSlot, day).length === 0) {
           <div
-            (click)="onTimeSlotClick(day, timeSlot)"
+            (click)="onTimeSlotClick(timeSlot, day)"
             class="absolute inset-0 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center justify-center"
-            [class.cursor-not-allowed]="isPastTimeSlot(day, timeSlot)"
-            [class.opacity-50]="isPastTimeSlot(day, timeSlot)"
+            [class.cursor-not-allowed]="isPastTimeSlot(timeSlot, day)"
+            [class.opacity-50]="isPastTimeSlot(timeSlot, day)"
             [title]="
-              isPastTimeSlot(day, timeSlot)
+              isPastTimeSlot(timeSlot, day)
                 ? 'Cannot create appointments in the past'
                 : 'Click to create new appointment'
             "
           >
-            @if (!isPastTimeSlot(day, timeSlot)) {
+            @if (!isPastTimeSlot(timeSlot, day)) {
             <i
               class="ri-add-line text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
             ></i>
@@ -62,8 +62,8 @@
           } @else {
           <!-- Appointments for this time slot -->
           @for (appointmentData of
-          getOverlappingAppointments(getAppointmentsForDateAndTime(day,
-          timeSlot)); track appointmentData.appointment.id) {
+          getOverlappingAppointments(getAppointmentsForTimeSlot(timeSlot, day));
+          track appointmentData.appointment.id) {
           <div
             [style.left]="
               appointmentData.column * (100 / appointmentData.totalColumns) +
@@ -71,6 +71,9 @@
             "
             [style.width]="100 / appointmentData.totalColumns + '%'"
             [style.z-index]="30 - appointmentData.column"
+            [style.height.px]="
+              getAppointmentHeight(appointmentData.appointment)
+            "
             [style.top.px]="
               getAppointmentTopOffset(appointmentData.appointment, timeSlot)
             "
@@ -80,13 +83,15 @@
               [appointment]="appointmentData.appointment"
               [compact]="true"
               [enableResize]="true"
-              [slotHeight]="75"
-              (click)="onAppointmentClick(appointmentData.appointment, $event)"
+              [slotHeight]="60"
+              (click)="
+                onAppointmentClick(appointmentData.appointment, $event)
+              "
               (resizeStart)="onResizeStart($event)"
               (resizeUpdate)="onResizeUpdate($event)"
               (resizeComplete)="onResizeComplete($event)"
               [class]="
-                'block ' +
+                'h-full block ' +
                 (appointmentData.column > 0
                   ? 'shadow-lg border border-white dark:border-gray-800'
                   : '')
@@ -101,7 +106,7 @@
     </div>
 
     <!-- Empty state -->
-    @if (appointments().length === 0) {
+    @if (weekAppointments.length === 0) {
     <div class="text-center py-12">
       <i class="ri-calendar-week-line text-6xl text-gray-400 mb-4"></i>
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">

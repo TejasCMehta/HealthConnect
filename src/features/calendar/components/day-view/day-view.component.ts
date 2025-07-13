@@ -1,24 +1,39 @@
-import { Component, input, output, inject } from "@angular/core";
+import { Component, input, output, inject, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Appointment } from "../../../../shared/models/appointment.model";
 import { AppointmentCardComponent } from "../appointment-card/appointment-card.component";
+import { ResizeConfirmationModalComponent } from "../resize-confirmation-modal/resize-confirmation-modal.component";
 import { CalendarService } from "../../services/calendar.service";
+import { AppointmentResizeService } from "../../services/appointment-resize.service";
+import { ToasterService } from "../../../../shared/services/toaster.service";
 
 @Component({
   selector: "app-day-view",
   standalone: true,
-  imports: [CommonModule, AppointmentCardComponent],
+  imports: [
+    CommonModule,
+    AppointmentCardComponent,
+    ResizeConfirmationModalComponent,
+  ],
   templateUrl: "./day-view.component.html",
   styleUrl: "./day-view.component.scss",
 })
 export class DayViewComponent {
   private calendarService = inject(CalendarService);
+  private resizeService = inject(AppointmentResizeService);
+  private toasterService = inject(ToasterService);
 
   public currentDate = input<Date>(new Date());
   public appointments = input<Appointment[]>([]);
 
   public appointmentSelect = output<Appointment>();
   public timeSlotSelect = output<{ date: Date; time: string }>();
+  public appointmentUpdate = output<Appointment>();
+
+  // Resize confirmation modal state
+  public showResizeModal = signal<boolean>(false);
+  public resizeAppointment = signal<Appointment | null>(null);
+  public newEndTime = signal<string>("");
 
   get timeSlots(): string[] {
     const slots: string[] = [];
@@ -197,5 +212,85 @@ export class DayViewComponent {
           : "Offset by " + (startMinute % 30) + " minutes + 12px adjustment",
       zIndex: "30 (lower than forms which use 50+)",
     });
+  }
+
+  /**
+   * Handle resize start event from appointment card
+   */
+  onResizeStart(event: { appointment: Appointment; startY: number }): void {
+    console.log("Resize started for appointment:", event.appointment.title);
+  }
+
+  /**
+   * Handle resize update event from appointment card
+   */
+  onResizeUpdate(event: {
+    appointment: Appointment;
+    newEndTime: string;
+  }): void {
+    console.log(
+      "Resize updated:",
+      event.appointment.title,
+      "New end time:",
+      event.newEndTime
+    );
+  }
+
+  /**
+   * Handle resize complete event from appointment card
+   */
+  onResizeComplete(event: {
+    appointment: Appointment;
+    newEndTime: string;
+  }): void {
+    this.resizeAppointment.set(event.appointment);
+    this.newEndTime.set(event.newEndTime);
+    this.showResizeModal.set(true);
+  }
+
+  /**
+   * Confirm resize operation
+   */
+  onResizeConfirm(): void {
+    const resizeOperation = this.resizeService.completeResize();
+    if (resizeOperation) {
+      resizeOperation.subscribe({
+        next: (updatedAppointment) => {
+          this.appointmentUpdate.emit(updatedAppointment);
+          this.toasterService.showSuccess(
+            "Appointment Resized",
+            "The appointment duration has been updated successfully."
+          );
+          this.closeResizeModal();
+        },
+        error: (error) => {
+          console.error("Failed to resize appointment:", error);
+          this.toasterService.showError(
+            "Resize Failed",
+            "Failed to update appointment. Please try again."
+          );
+          this.closeResizeModal();
+        },
+      });
+    } else {
+      this.closeResizeModal();
+    }
+  }
+
+  /**
+   * Cancel resize operation
+   */
+  onResizeCancel(): void {
+    this.resizeService.cancelResize();
+    this.closeResizeModal();
+  }
+
+  /**
+   * Close resize modal
+   */
+  private closeResizeModal(): void {
+    this.showResizeModal.set(false);
+    this.resizeAppointment.set(null);
+    this.newEndTime.set("");
   }
 }

@@ -1,23 +1,34 @@
 <div
   [class]="
-    'appointment-card cursor-pointer transition-colors border-l-4 border-blue-500 flex flex-col h-full ' +
+    'appointment-card cursor-pointer transition-colors border-l-4 border-blue-500 flex flex-col relative ' +
     (compact()
-      ? 'p-1 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-md'
-      : 'p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm rounded-r-md')
+      ? 'p-1 bg-blue-50 dark:bg-blue-900/20 rounded-md' +
+        (disableHover() ? '' : ' hover:bg-blue-100 dark:hover:bg-blue-900/40')
+      : 'p-3 bg-white dark:bg-gray-800 shadow-sm rounded-r-md' +
+        (disableHover() ? '' : ' hover:bg-gray-50 dark:hover:bg-gray-700')) +
+    (isResizing() ? ' resizing' : '')
   "
+  [style.height.px]="dynamicHeight"
+  [style.min-height.px]="slotHeight()"
 >
   <div class="flex items-start justify-between flex-1">
     <div class="flex-1 min-w-0">
       <h4
         [class]="
-          'font-medium truncate ' +
+          'font-medium truncate transition-all duration-200 ' +
           (compact()
             ? 'text-xs text-blue-800 dark:text-blue-200'
-            : 'text-sm text-gray-900 dark:text-white')
+            : 'text-sm text-gray-900 dark:text-white') +
+          (isResizing() ? ' font-bold text-blue-700 dark:text-blue-300' : '')
         "
         [title]="appointment().title"
       >
         {{ appointment().title }}
+        @if (isResizing()) {
+        <span class="ml-1 text-xs font-normal text-blue-500 animate-pulse">
+          (resizing...)
+        </span>
+        }
       </h4>
 
       @if (!compact()) {
@@ -71,4 +82,58 @@
     </div>
     }
   </div>
+
+  <!-- Resize Handle (if resize is enabled, show in both compact and non-compact modes) -->
+  @if (enableResize()) {
+  <div
+    [class]="
+      'resize-handle absolute bottom-0 left-0 right-0 cursor-ns-resize flex items-center justify-center transition-all duration-200 group ' +
+      (compact() ? 'h-2' : 'h-4')
+    "
+    [class.opacity-100]="isResizing()"
+    [class.opacity-20]="!isResizing()"
+    [class.hover:opacity-100]="!isResizing()"
+    [class.bg-blue-100]="isResizing()"
+    [class.hover:bg-blue-50]="!isResizing()"
+    (mousedown)="onResizeStart($event)"
+    title="Drag to resize appointment"
+    style="z-index: 500 !important; pointer-events: auto !important"
+  >
+    <!-- Resize indicator (smaller for compact mode) -->
+    <div
+      [class]="
+        'bg-blue-500 rounded-full group-hover:bg-blue-600 transition-all duration-200 shadow-sm ' +
+        (compact() ? 'w-6 h-0.5' : 'w-10 h-1') +
+        (isResizing()
+          ? compact()
+            ? ' bg-blue-600 w-8 h-1'
+            : ' bg-blue-600 w-12 h-1.5'
+          : '')
+      "
+    ></div>
+
+    <!-- Additional resize dots for better visibility (only in non-compact mode) -->
+    @if (!compact()) {
+    <div
+      class="absolute inset-x-0 bottom-0 flex justify-center space-x-1 pb-0.5"
+    >
+      <div class="w-1 h-1 bg-blue-400 rounded-full opacity-60"></div>
+      <div class="w-1 h-1 bg-blue-400 rounded-full opacity-60"></div>
+      <div class="w-1 h-1 bg-blue-400 rounded-full opacity-60"></div>
+    </div>
+    }
+
+    <!-- Visual feedback during resize -->
+    @if (isResizing()) {
+    <div
+      [class]="
+        'absolute left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2 py-1 rounded shadow-lg z-50 ' +
+        (compact() ? 'text-xs -bottom-5' : 'text-xs -bottom-6')
+      "
+    >
+      {{ endTime }}
+    </div>
+    }
+  </div>
+  }
 </div>

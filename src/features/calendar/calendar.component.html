@@ -32,6 +32,7 @@
       (appointmentSelect)="onAppointmentSelect($event)"
       (appointmentClick)="onAppointmentClick($event)"
       (timeSlotSelect)="onTimeSlotSelect($event)"
+      (appointmentUpdate)="onAppointmentUpdate($event)"
     >
     </app-week-view>
     } @case ('day') {
@@ -40,6 +41,7 @@
       [appointments]="appointments()"
       (appointmentSelect)="onAppointmentSelect($event)"
       (timeSlotSelect)="onTimeSlotSelect($event)"
+      (appointmentUpdate)="onAppointmentUpdate($event)"
     >
     </app-day-view>
     } } }

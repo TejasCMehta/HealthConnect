@@ -1,0 +1,104 @@
+<!-- Resize Confirmation Modal -->
+@if (isOpen()) {
+<div
+  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+  (click)="onBackdropClick($event)"
+>
+  <div
+    class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800"
+  >
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+        Confirm Appointment Resize
+      </h3>
+      <button
+        (click)="onCancel()"
+        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+      >
+        <i class="ri-close-line text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Appointment Details -->
+    <div class="mb-6">
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+        <h4 class="font-medium text-gray-900 dark:text-white mb-2">
+          {{ appointment()?.title }}
+        </h4>
+
+        <!-- Original Time -->
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Original:</span>
+            <span class="text-gray-900 dark:text-white font-medium">
+              {{ originalStartTime }} - {{ originalEndTime }} ({{
+                originalDuration
+              }}
+              min)
+            </span>
+          </div>
+
+          <!-- New Time -->
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">New:</span>
+            <span class="text-blue-600 dark:text-blue-400 font-medium">
+              {{ originalStartTime }} - {{ newFormattedEndTime }} ({{
+                newDuration
+              }}
+              min)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editable End Time -->
+    <div class="mb-6">
+      <label
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+      >
+        Adjust End Time (24-hour format)
+      </label>
+      <input
+        type="time"
+        [(ngModel)]="editableEndTime"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+      />
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        Start time remains: {{ originalStartTime }}
+      </p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex space-x-3">
+      <button
+        (click)="onCancel()"
+        class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="onConfirm()"
+        class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Confirm Resize
+      </button>
+    </div>
+
+    <!-- Doctor Availability Warning -->
+    <div
+      class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 rounded"
+    >
+      <div class="flex">
+        <i class="ri-information-line text-yellow-400 mr-2 mt-0.5"></i>
+        <div class="text-sm">
+          <p class="text-yellow-800 dark:text-yellow-200">
+            Please verify doctor availability for the new time slot.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}

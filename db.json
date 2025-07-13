@@ -66,8 +66,8 @@
       "id": 1,
       "patientId": 1,
       "doctorId": 1,
-      "startTime": "2025-07-13T12:00:00.000Z",
-      "endTime": "2025-07-13T13:00:00.000Z",
+      "startTime": "2025-07-16T12:00:00.000Z",
+      "endTime": "2025-07-16T12:30:00.000Z",
       "title": "Regular Checkup",
       "description": "Annual physical examination",
       "status": "scheduled"
@@ -76,8 +76,8 @@
       "id": 2,
       "patientId": 2,
       "doctorId": 2,
-      "startTime": "2025-07-14T10:00:00.000Z",
-      "endTime": "2025-07-14T11:00:00.000Z",
+      "startTime": "2025-07-14T09:30:00.000Z",
+      "endTime": "2025-07-14T10:30:00.000Z",
       "title": "Skin Consultation",
       "description": "Dermatology consultation",
       "status": "scheduled"
@@ -88,9 +88,25 @@
       "description": "sfs",
       "patientId": 1,
       "doctorId": 1,
-      "startTime": "2025-07-14T04:00:00.000Z",
-      "endTime": "2025-07-14T05:30:00.000Z",
-      "status": "scheduled"
+      "startTime": "2025-07-14T02:30:00.000Z",
+      "endTime": "2025-07-14T04:00:00.000Z",
+      "status": "scheduled",
+      "patient": {
+        "id": 1,
+        "name": "Alice Johnson1",
+        "email": "alice@example.com",
+        "phone": "+1234567892",
+        "dateOfBirth": "1990-05-15",
+        "address": "123 Main St, City, State 12345"
+      },
+      "doctor": {
+        "id": 1,
+        "name": "Dr. John Smith",
+        "specialty": "Cardiology",
+        "email": "john@clinic.com",
+        "phone": "+1234567890",
+        "color": "#3b82f6"
+      }
     },
     {
       "id": 1752376490610,
@@ -98,8 +114,8 @@
       "description": "ttt",
       "patientId": 1,
       "doctorId": 1,
-      "startTime": "2025-07-14T06:00:00.000Z",
-      "endTime": "2025-07-14T07:00:00.000Z",
+      "startTime": "2025-07-14T07:00:00.000Z",
+      "endTime": "2025-07-14T08:00:00.000Z",
       "status": "scheduled"
     },
     {
@@ -108,8 +124,18 @@
       "description": "asdf",
       "patientId": 2,
       "doctorId": 1,
-      "startTime": "2025-07-14T03:30:00.000Z",
-      "endTime": "2025-07-14T04:00:00.000Z",
+      "startTime": "2025-07-14T05:00:00.000Z",
+      "endTime": "2025-07-14T05:30:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 1752405398717,
+      "title": "awa",
+      "description": "dada",
+      "patientId": 1,
+      "doctorId": 2,
+      "startTime": "2025-07-14T05:00:00.000Z",
+      "endTime": "2025-07-14T06:00:00.000Z",
       "status": "scheduled"
     }
   ],
