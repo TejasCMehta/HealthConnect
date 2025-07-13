@@ -7,8 +7,14 @@
       : 'p-3 bg-white dark:bg-gray-800 shadow-sm rounded-r-md' +
         (disableHover() ? '' : ' hover:bg-gray-50 dark:hover:bg-gray-700')) +
     (isResizing() ? ' resizing' : '') +
-    (isDragging() ? ' dragging cursor-grabbing' : (enableDrag() ? ' cursor-grab' : ' cursor-pointer')) +
-    (isDragging() && dragPreview() && !dragPreview()!.isValidTarget ? ' invalid-drag-target' : '')
+    (isDragging()
+      ? ' dragging cursor-grabbing'
+      : enableDrag()
+      ? ' cursor-grab'
+      : ' cursor-pointer') +
+    (isDragging() && dragPreview() && !dragPreview()!.isValidTarget
+      ? ' invalid-drag-target'
+      : '')
   "
   [style.height.px]="dynamicHeight"
   [style.min-height.px]="slotHeight()"
@@ -32,21 +38,17 @@
         <span class="ml-1 text-xs font-normal text-blue-500 animate-pulse">
           (resizing...)
         </span>
-        }
-        @if (isDragging()) {
-        <span 
+        } @if (isDragging()) {
+        <span
           [class]="
             'ml-1 text-xs font-normal animate-pulse ' +
-            (dragPreview() && dragPreview()!.isValidTarget 
-              ? 'text-green-500' 
+            (dragPreview() && dragPreview()!.isValidTarget
+              ? 'text-green-500'
               : 'text-red-500')
           "
         >
-          @if (dragPreview() && dragPreview()!.isValidTarget) {
-            (moving...)
-          } @else {
-            (invalid position)
-          }
+          @if (dragPreview() && dragPreview()!.isValidTarget) { (moving...) }
+          @else { (invalid position) }
         </span>
         }
       </h4>

@@ -1,4 +1,12 @@
-import { Component, input, output, inject, signal, ViewChild, ElementRef } from "@angular/core";
+import {
+  Component,
+  input,
+  output,
+  inject,
+  signal,
+  ViewChild,
+  ElementRef,
+} from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Appointment } from "../../../../shared/models/appointment.model";
 import { Doctor } from "../../../../shared/models/doctor.model";
@@ -7,7 +15,10 @@ import { ResizeConfirmationModalComponent } from "../resize-confirmation-modal/r
 import { DragDropConfirmationComponent } from "../drag-drop-confirmation/drag-drop-confirmation.component";
 import { CalendarService } from "../../services/calendar.service";
 import { AppointmentResizeService } from "../../services/appointment-resize.service";
-import { AppointmentDragDropService, DragDropConfirmation } from "../../services/appointment-drag-drop.service";
+import {
+  AppointmentDragDropService,
+  DragDropConfirmation,
+} from "../../services/appointment-drag-drop.service";
 import { DoctorService } from "../../../doctors/services/doctor.service";
 import { ToasterService } from "../../../../shared/services/toaster.service";
 
@@ -30,7 +41,8 @@ export class WeekViewComponent {
   private doctorService = inject(DoctorService);
   private toasterService = inject(ToasterService);
 
-  @ViewChild('gridContainer', { static: false }) gridContainer!: ElementRef<HTMLElement>;
+  @ViewChild("gridContainer", { static: false })
+  gridContainer!: ElementRef<HTMLElement>;
 
   public currentDate = input<Date>(new Date());
   public appointments = input<Appointment[]>([]);
@@ -245,9 +257,26 @@ export class WeekViewComponent {
     appointment: Appointment;
     newEndTime: string;
   }): void {
-    this.resizeAppointment.set(event.appointment);
-    this.newEndTime.set(event.newEndTime);
-    this.showResizeModal.set(true);
+    // Automatically save resize without showing modal
+    const resizeOperation = this.resizeService.completeResize();
+    if (resizeOperation) {
+      resizeOperation.subscribe({
+        next: (updatedAppointment) => {
+          this.appointmentUpdate.emit(updatedAppointment);
+          this.toasterService.showSuccess(
+            "Appointment Resized",
+            "The appointment duration has been updated successfully."
+          );
+        },
+        error: (error) => {
+          console.error("Failed to resize appointment:", error);
+          this.toasterService.showError(
+            "Resize Failed",
+            "Failed to update appointment. Please try again."
+          );
+        },
+      });
+    }
   }
 
   /**
@@ -301,7 +330,11 @@ export class WeekViewComponent {
   /**
    * Handle drag start event from appointment card
    */
-  onDragStart(event: { appointment: Appointment; startX: number; startY: number }): void {
+  onDragStart(event: {
+    appointment: Appointment;
+    startX: number;
+    startY: number;
+  }): void {
     console.log("Drag started:", event);
   }
 
@@ -346,7 +379,7 @@ export class WeekViewComponent {
               "Failed to fetch doctor details. Please try again."
             );
             this.dragDropService.cancelDrag();
-          }
+          },
         });
       } else {
         this.dragDropConfirmation.set(confirmationData);
@@ -360,7 +393,7 @@ export class WeekViewComponent {
    */
   onDragDropConfirm(): void {
     this.isDragDropLoading.set(true);
-    
+
     // First validate with doctor availability check
     this.dragDropService.validateDragComplete().subscribe({
       next: (validation) => {
@@ -371,15 +404,18 @@ export class WeekViewComponent {
               this.appointmentUpdate.emit(updatedAppointment);
               const confirmationData = this.dragDropConfirmation();
               let message = "Appointment moved successfully.";
-              
-              if (confirmationData?.changes.timeChanged && confirmationData?.changes.doctorChanged) {
+
+              if (
+                confirmationData?.changes.timeChanged &&
+                confirmationData?.changes.doctorChanged
+              ) {
                 message = "Appointment time and doctor updated successfully.";
               } else if (confirmationData?.changes.timeChanged) {
                 message = "Appointment time updated successfully.";
               } else if (confirmationData?.changes.doctorChanged) {
                 message = "Appointment doctor updated successfully.";
               }
-              
+
               this.toasterService.showSuccess("Appointment Updated", message);
               this.closeDragDropModal();
             },
@@ -390,12 +426,13 @@ export class WeekViewComponent {
                 "Failed to update appointment. Please try again."
               );
               this.closeDragDropModal();
-            }
+            },
           });
         } else {
           this.toasterService.showError(
             "Invalid Position",
-            validation.errorMessage || "Cannot move appointment to this position."
+            validation.errorMessage ||
+              "Cannot move appointment to this position."
           );
           this.closeDragDropModal();
         }
@@ -407,7 +444,7 @@ export class WeekViewComponent {
           "Failed to validate appointment position. Please try again."
         );
         this.closeDragDropModal();
-      }
+      },
     });
   }
 

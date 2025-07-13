@@ -51,7 +51,11 @@ export class AppointmentCardComponent implements OnDestroy {
   }>();
 
   // Drag and drop outputs
-  public dragStart = output<{ appointment: Appointment; startX: number; startY: number }>();
+  public dragStart = output<{
+    appointment: Appointment;
+    startX: number;
+    startY: number;
+  }>();
   public dragUpdate = output<{
     appointment: Appointment;
     newStartTime: string;
@@ -92,7 +96,7 @@ export class AppointmentCardComponent implements OnDestroy {
   ngOnDestroy() {
     this.cleanupResizeListeners();
     this.cleanupDragListeners();
-    
+
     // Clean up global classes if this component is destroyed during resize
     if (this.isResizing()) {
       document.body.classList.remove("appointment-resizing");
@@ -120,7 +124,7 @@ export class AppointmentCardComponent implements OnDestroy {
     if (this.isDragging() && this.dragPreview()) {
       timeToUse = this.dragPreview()!.newStartTime;
     }
-    
+
     const date = new Date(timeToUse);
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
@@ -132,13 +136,13 @@ export class AppointmentCardComponent implements OnDestroy {
   get endTime(): string {
     // Use drag preview or current end time during operations, otherwise use original
     let timeToUse = this.appointment().endTime;
-    
+
     if (this.isDragging() && this.dragPreview()) {
       timeToUse = this.dragPreview()!.newEndTime;
     } else if (this.isResizing()) {
       timeToUse = this.currentEndTime();
     }
-    
+
     const date = new Date(timeToUse);
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
@@ -150,14 +154,14 @@ export class AppointmentCardComponent implements OnDestroy {
   get duration(): number {
     let startTimeToUse = this.appointment().startTime;
     let endTimeToUse = this.appointment().endTime;
-    
+
     if (this.isDragging() && this.dragPreview()) {
       startTimeToUse = this.dragPreview()!.newStartTime;
       endTimeToUse = this.dragPreview()!.newEndTime;
     } else if (this.isResizing()) {
       endTimeToUse = this.currentEndTime();
     }
-    
+
     const start = new Date(startTimeToUse);
     const end = new Date(endTimeToUse);
     return Math.round((end.getTime() - start.getTime()) / (1000 * 60)); // minutes
@@ -169,14 +173,14 @@ export class AppointmentCardComponent implements OnDestroy {
   get dynamicHeight(): number {
     let startTimeToUse = this.appointment().startTime;
     let endTimeToUse = this.appointment().endTime;
-    
+
     if (this.isDragging() && this.dragPreview()) {
       startTimeToUse = this.dragPreview()!.newStartTime;
       endTimeToUse = this.dragPreview()!.newEndTime;
     } else if (this.isResizing()) {
       endTimeToUse = this.currentEndTime();
     }
-    
+
     const start = new Date(startTimeToUse);
     const end = new Date(endTimeToUse);
     const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
@@ -332,12 +336,12 @@ export class AppointmentCardComponent implements OnDestroy {
   onMouseDown(event: MouseEvent): void {
     // Don't start drag if clicking on resize handle or if resize is disabled
     if (!this.enableDrag() || this.isResizing()) return;
-    
+
     const target = event.target as HTMLElement;
-    if (target.closest('.resize-handle')) return;
+    if (target.closest(".resize-handle")) return;
 
     event.preventDefault();
-    
+
     this.dragStartX = event.clientX;
     this.dragStartY = event.clientY;
 
@@ -345,12 +349,12 @@ export class AppointmentCardComponent implements OnDestroy {
     const onMouseMove = (e: MouseEvent) => this.onPotentialDragMove(e);
     const onMouseUp = () => this.onPotentialDragEnd();
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
 
     this.dragListeners = [
-      () => document.removeEventListener('mousemove', onMouseMove),
-      () => document.removeEventListener('mouseup', onMouseUp),
+      () => document.removeEventListener("mousemove", onMouseMove),
+      () => document.removeEventListener("mouseup", onMouseUp),
     ];
   }
 
@@ -360,7 +364,7 @@ export class AppointmentCardComponent implements OnDestroy {
   private onPotentialDragMove(event: MouseEvent): void {
     const deltaX = Math.abs(event.clientX - this.dragStartX);
     const deltaY = Math.abs(event.clientY - this.dragStartY);
-    
+
     // Check if movement exceeds threshold to start drag
     if (deltaX > this.dragThreshold || deltaY > this.dragThreshold) {
       this.startDrag(event);
@@ -379,9 +383,9 @@ export class AppointmentCardComponent implements OnDestroy {
    */
   private startDrag(event: MouseEvent): void {
     this.cleanupDragListeners(); // Clean up potential drag listeners
-    
+
     this.isDragging.set(true);
-    
+
     // Add global class to document body to indicate drag mode
     document.body.classList.add("appointment-dragging");
 

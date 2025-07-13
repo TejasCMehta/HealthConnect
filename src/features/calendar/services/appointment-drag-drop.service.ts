@@ -68,7 +68,7 @@ export class AppointmentDragDropService {
   // Working hours configuration (can be made configurable)
   private readonly workingHours = {
     start: 8, // 8 AM
-    end: 18,  // 6 PM
+    end: 18, // 6 PM
   };
 
   // Holidays configuration (can be loaded from API)
@@ -88,8 +88,11 @@ export class AppointmentDragDropService {
     startY: number,
     slotHeight: number = 30
   ): void {
-    const duration = this.calculateDuration(appointment.startTime, appointment.endTime);
-    
+    const duration = this.calculateDuration(
+      appointment.startTime,
+      appointment.endTime
+    );
+
     this.dragState.set({
       isDragging: true,
       appointment,
@@ -116,7 +119,12 @@ export class AppointmentDragDropService {
     currentY: number,
     gridContainer: HTMLElement,
     doctors?: Doctor[]
-  ): { newStartTime: string; newEndTime: string; newDoctorId: number; isValidTarget: boolean } {
+  ): {
+    newStartTime: string;
+    newEndTime: string;
+    newDoctorId: number;
+    isValidTarget: boolean;
+  } {
     const state = this.dragState();
     if (!state.appointment) {
       return {
@@ -133,11 +141,16 @@ export class AppointmentDragDropService {
     // Calculate new start time based on vertical movement (snap to 30-min slots)
     const slotsMovedY = Math.round(deltaY / state.slotHeight);
     const originalStart = new Date(state.originalStartTime);
-    const newStartTime = new Date(originalStart.getTime() + (slotsMovedY * 30 * 60 * 1000));
-    
+    const newStartTime = new Date(
+      originalStart.getTime() + slotsMovedY * 30 * 60 * 1000
+    );
+
     // Calculate new end time maintaining duration
-    const duration = this.calculateDuration(state.originalStartTime, state.originalEndTime);
-    const newEndTime = new Date(newStartTime.getTime() + (duration * 60 * 1000));
+    const duration = this.calculateDuration(
+      state.originalStartTime,
+      state.originalEndTime
+    );
+    const newEndTime = new Date(newStartTime.getTime() + duration * 60 * 1000);
 
     // Calculate new doctor based on horizontal movement (for day view with multiple doctors)
     let newDoctorId = state.originalDoctorId;
@@ -146,7 +159,7 @@ export class AppointmentDragDropService {
       const doctorColumnWidth = containerRect.width / doctors.length;
       const relativeX = currentX - containerRect.left;
       const doctorIndex = Math.floor(relativeX / doctorColumnWidth);
-      
+
       if (doctorIndex >= 0 && doctorIndex < doctors.length) {
         newDoctorId = doctors[doctorIndex].id;
       }
@@ -160,7 +173,7 @@ export class AppointmentDragDropService {
     ).isValid;
 
     // Update state
-    this.dragState.update(current => ({
+    this.dragState.update((current) => ({
       ...current,
       newStartTime: newStartTime.toISOString(),
       newEndTime: newEndTime.toISOString(),
@@ -190,8 +203,13 @@ export class AppointmentDragDropService {
     const endTime = new Date(newEndTime);
     const now = new Date();
 
-    // Check if start time is in the past
-    if (startTime < now) {
+    // Check if start time is in the past (only check date, not time)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day
+    const appointmentDate = new Date(startTime);
+    appointmentDate.setHours(0, 0, 0, 0); // Reset to start of day
+    
+    if (appointmentDate < today) {
       return {
         isValid: false,
         errorMessage: "Cannot schedule appointment in the past",
@@ -210,10 +228,12 @@ export class AppointmentDragDropService {
     const startHour = startTime.getHours();
     const endHour = endTime.getHours();
     const endMinutes = endTime.getMinutes();
-    
-    if (startHour < this.workingHours.start || 
-        (endHour > this.workingHours.end) ||
-        (endHour === this.workingHours.end && endMinutes > 0)) {
+
+    if (
+      startHour < this.workingHours.start ||
+      endHour > this.workingHours.end ||
+      (endHour === this.workingHours.end && endMinutes > 0)
+    ) {
       return {
         isValid: false,
         errorMessage: `Appointment must be within clinic hours (${this.workingHours.start} AM - ${this.workingHours.end} PM)`,
@@ -230,7 +250,7 @@ export class AppointmentDragDropService {
     }
 
     // Check if it's a holiday
-    const dateStr = startTime.toISOString().split('T')[0];
+    const dateStr = startTime.toISOString().split("T")[0];
     if (this.holidays.includes(dateStr)) {
       return {
         isValid: false,
@@ -263,11 +283,11 @@ export class AppointmentDragDropService {
 
     // TODO: Call API to check doctor availability
     // For now, simulate API call
-    return new Observable<DragValidationResult>(observer => {
+    return new Observable<DragValidationResult>((observer) => {
       setTimeout(() => {
         // Simulate doctor availability check
         const isAvailable = Math.random() > 0.1; // 90% chance doctor is available
-        
+
         if (isAvailable) {
           observer.next({ isValid: true });
         } else {
@@ -288,8 +308,9 @@ export class AppointmentDragDropService {
     const state = this.dragState();
     if (!state.appointment) return null;
 
-    const timeChanged = state.originalStartTime !== state.newStartTime ||
-                       state.originalEndTime !== state.newEndTime;
+    const timeChanged =
+      state.originalStartTime !== state.newStartTime ||
+      state.originalEndTime !== state.newEndTime;
     const doctorChanged = state.originalDoctorId !== state.newDoctorId;
 
     return {
@@ -319,7 +340,10 @@ export class AppointmentDragDropService {
       doctorId: state.newDoctorId,
     };
 
-    return this.appointmentService.updateAppointment(state.appointment.id, updatedAppointment);
+    return this.appointmentService.updateAppointment(
+      state.appointment.id,
+      updatedAppointment
+    );
   }
 
   /**
@@ -348,24 +372,33 @@ export class AppointmentDragDropService {
    * Check if a time slot is blocked (past, weekend, holiday, outside working hours)
    */
   isTimeSlotBlocked(date: Date, timeSlot: string): boolean {
-    const [hour, minute] = timeSlot.split(':').map(Number);
+    const [hour, minute] = timeSlot.split(":").map(Number);
     const slotDateTime = new Date(date);
     slotDateTime.setHours(hour, minute, 0, 0);
 
+    // Check if in the past (only for today's slots that have already passed)
     const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const slotDate = new Date(date);
+    slotDate.setHours(0, 0, 0, 0);
     
-    // Check if in the past
-    if (slotDateTime < now) return true;
+    // Only block past time slots if it's today
+    if (slotDate.getTime() === today.getTime() && slotDateTime < now) return true;
+    
+    // Block dates before today
+    if (slotDate < today) return true;
 
     // Check if weekend
     if (date.getDay() === 0 || date.getDay() === 6) return true;
 
     // Check if holiday
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = date.toISOString().split("T")[0];
     if (this.holidays.includes(dateStr)) return true;
 
     // Check if outside working hours
-    if (hour < this.workingHours.start || hour >= this.workingHours.end) return true;
+    if (hour < this.workingHours.start || hour >= this.workingHours.end)
+      return true;
 
     return false;
   }

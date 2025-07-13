@@ -27,7 +27,9 @@
         'flex items-start border-b border-gray-200 dark:border-gray-700 py-3 time-slot ' +
         (isPastTimeSlot(timeSlot) ? 'opacity-50 past' : '') +
         (isTimeSlotBlocked(timeSlot) ? ' blocked' : '') +
-        (currentDate().getDay() === 0 || currentDate().getDay() === 6 ? ' weekend' : '')
+        (currentDate().getDay() === 0 || currentDate().getDay() === 6
+          ? ' weekend'
+          : '')
       "
     >
       <!-- Time label -->
