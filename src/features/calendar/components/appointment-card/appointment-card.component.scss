@@ -205,6 +205,104 @@
       }
     }
   }
+
+  /* Drag and drop styles */
+  user-select: none;
+  touch-action: none;
+
+  &.dragging {
+    opacity: 0.8;
+    transform: scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    position: relative;
+    transition: none; // Disable transitions during drag for smooth movement
+
+    &.invalid-drag-target {
+      opacity: 0.6;
+      border-left-color: #ef4444; // red-500
+
+      .resize-handle {
+        display: none; // Hide resize handle during invalid drag
+      }
+    }
+  }
+
+  &.compact.dragging {
+    transform: scale(1.05);
+  }
+}
+
+// Global styles for drag state
+:host-context(body.appointment-dragging) {
+  .appointment-card:not(.actively-dragging) {
+    opacity: 0.4;
+    filter: grayscale(20%);
+    transform: scale(0.98);
+    transition: opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease;
+
+    // Disable interaction during drag
+    > *:not(.resize-handle) {
+      pointer-events: none;
+    }
+  }
+
+  .time-slot {
+    pointer-events: none;
+
+    &.blocked {
+      background-color: rgba(156, 163, 175, 0.1); // gray-400 with opacity
+      opacity: 0.5;
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba(156, 163, 175, 0.2) 10px,
+          rgba(156, 163, 175, 0.2) 20px
+        );
+        pointer-events: none;
+      }
+    }
+
+    &.past::before {
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 8px,
+        rgba(107, 114, 128, 0.3) 8px,
+        rgba(107, 114, 128, 0.3) 16px
+      );
+    }
+
+    &.weekend::before {
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 12px,
+        rgba(239, 68, 68, 0.2) 12px,
+        rgba(239, 68, 68, 0.2) 24px
+      );
+    }
+
+    &.holiday::before {
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 15px,
+        rgba(245, 101, 101, 0.25) 15px,
+        rgba(245, 101, 101, 0.25) 30px
+      );
+    }
+  }
 }
 
 // Resize handle styling

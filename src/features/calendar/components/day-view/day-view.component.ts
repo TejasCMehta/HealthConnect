@@ -1,10 +1,14 @@
-import { Component, input, output, inject, signal } from "@angular/core";
+import { Component, input, output, inject, signal, ViewChild, ElementRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Appointment } from "../../../../shared/models/appointment.model";
+import { Doctor } from "../../../../shared/models/doctor.model";
 import { AppointmentCardComponent } from "../appointment-card/appointment-card.component";
 import { ResizeConfirmationModalComponent } from "../resize-confirmation-modal/resize-confirmation-modal.component";
+import { DragDropConfirmationComponent } from "../drag-drop-confirmation/drag-drop-confirmation.component";
 import { CalendarService } from "../../services/calendar.service";
 import { AppointmentResizeService } from "../../services/appointment-resize.service";
+import { AppointmentDragDropService, DragDropConfirmation } from "../../services/appointment-drag-drop.service";
+import { DoctorService } from "../../../doctors/services/doctor.service";
 import { ToasterService } from "../../../../shared/services/toaster.service";
 
 @Component({
@@ -14,6 +18,7 @@ import { ToasterService } from "../../../../shared/services/toaster.service";
     CommonModule,
     AppointmentCardComponent,
     ResizeConfirmationModalComponent,
+    DragDropConfirmationComponent,
   ],
   templateUrl: "./day-view.component.html",
   styleUrl: "./day-view.component.scss",
@@ -21,10 +26,15 @@ import { ToasterService } from "../../../../shared/services/toaster.service";
 export class DayViewComponent {
   private calendarService = inject(CalendarService);
   private resizeService = inject(AppointmentResizeService);
+  private dragDropService = inject(AppointmentDragDropService);
+  private doctorService = inject(DoctorService);
   private toasterService = inject(ToasterService);
+
+  @ViewChild('gridContainer', { static: false }) gridContainer!: ElementRef<HTMLElement>;
 
   public currentDate = input<Date>(new Date());
   public appointments = input<Appointment[]>([]);
+  public doctors = input<Doctor[]>([]);
 
   public appointmentSelect = output<Appointment>();
   public timeSlotSelect = output<{ date: Date; time: string }>();
@@ -34,6 +44,11 @@ export class DayViewComponent {
   public showResizeModal = signal<boolean>(false);
   public resizeAppointment = signal<Appointment | null>(null);
   public newEndTime = signal<string>("");
+
+  // Drag and drop confirmation modal state
+  public showDragDropModal = signal<boolean>(false);
+  public dragDropConfirmation = signal<DragDropConfirmation | null>(null);
+  public isDragDropLoading = signal<boolean>(false);
 
   get timeSlots(): string[] {
     const slots: string[] = [];
@@ -292,5 +307,148 @@ export class DayViewComponent {
     this.showResizeModal.set(false);
     this.resizeAppointment.set(null);
     this.newEndTime.set("");
+  }
+
+  // Drag and Drop Methods
+
+  /**
+   * Handle drag start event from appointment card
+   */
+  onDragStart(event: { appointment: Appointment; startX: number; startY: number }): void {
+    console.log("Drag started:", event);
+  }
+
+  /**
+   * Handle drag update event from appointment card
+   */
+  onDragUpdate(event: {
+    appointment: Appointment;
+    newStartTime: string;
+    newEndTime: string;
+    newDoctorId: number;
+    isValidTarget: boolean;
+  }): void {
+    // Update visual feedback if needed
+    console.log("Drag update:", event);
+  }
+
+  /**
+   * Handle drag complete event from appointment card
+   */
+  onDragComplete(event: {
+    appointment: Appointment;
+    newStartTime: string;
+    newEndTime: string;
+    newDoctorId: number;
+  }): void {
+    // Get confirmation data from the drag drop service
+    const confirmationData = this.dragDropService.getDragConfirmation();
+    if (confirmationData) {
+      // If doctor changed, fetch the new doctor details
+      if (confirmationData.changes.doctorChanged) {
+        this.doctorService.getDoctor(confirmationData.newDoctorId).subscribe({
+          next: (doctor) => {
+            confirmationData.newDoctor = doctor;
+            this.dragDropConfirmation.set(confirmationData);
+            this.showDragDropModal.set(true);
+          },
+          error: (error) => {
+            console.error("Failed to fetch doctor details:", error);
+            this.toasterService.showError(
+              "Error",
+              "Failed to fetch doctor details. Please try again."
+            );
+            this.dragDropService.cancelDrag();
+          }
+        });
+      } else {
+        this.dragDropConfirmation.set(confirmationData);
+        this.showDragDropModal.set(true);
+      }
+    }
+  }
+
+  /**
+   * Confirm drag and drop operation
+   */
+  onDragDropConfirm(): void {
+    this.isDragDropLoading.set(true);
+    
+    // First validate with doctor availability check
+    this.dragDropService.validateDragComplete().subscribe({
+      next: (validation) => {
+        if (validation.isValid) {
+          // Complete the drag operation
+          this.dragDropService.completeDrag().subscribe({
+            next: (updatedAppointment) => {
+              this.appointmentUpdate.emit(updatedAppointment);
+              const confirmationData = this.dragDropConfirmation();
+              let message = "Appointment moved successfully.";
+              
+              if (confirmationData?.changes.timeChanged && confirmationData?.changes.doctorChanged) {
+                message = "Appointment time and doctor updated successfully.";
+              } else if (confirmationData?.changes.timeChanged) {
+                message = "Appointment time updated successfully.";
+              } else if (confirmationData?.changes.doctorChanged) {
+                message = "Appointment doctor updated successfully.";
+              }
+              
+              this.toasterService.showSuccess("Appointment Updated", message);
+              this.closeDragDropModal();
+            },
+            error: (error) => {
+              console.error("Failed to update appointment:", error);
+              this.toasterService.showError(
+                "Update Failed",
+                "Failed to update appointment. Please try again."
+              );
+              this.closeDragDropModal();
+            }
+          });
+        } else {
+          this.toasterService.showError(
+            "Invalid Position",
+            validation.errorMessage || "Cannot move appointment to this position."
+          );
+          this.closeDragDropModal();
+        }
+      },
+      error: (error) => {
+        console.error("Failed to validate appointment position:", error);
+        this.toasterService.showError(
+          "Validation Failed",
+          "Failed to validate appointment position. Please try again."
+        );
+        this.closeDragDropModal();
+      }
+    });
+  }
+
+  /**
+   * Cancel drag and drop operation
+   */
+  onDragDropCancel(): void {
+    this.dragDropService.cancelDrag();
+    this.closeDragDropModal();
+  }
+
+  /**
+   * Close drag drop modal
+   */
+  private closeDragDropModal(): void {
+    this.isDragDropLoading.set(false);
+    this.showDragDropModal.set(false);
+    this.dragDropConfirmation.set(null);
+  }
+
+  /**
+   * Check if a time slot is blocked for drag and drop
+   */
+  isTimeSlotBlocked(timeSlot: string): boolean {
+    const [hour, minute] = timeSlot.split(':').map(Number);
+    const slotDateTime = new Date(this.currentDate());
+    slotDateTime.setHours(hour, minute, 0, 0);
+    
+    return this.dragDropService.isTimeSlotBlocked(this.currentDate(), timeSlot);
   }
 }

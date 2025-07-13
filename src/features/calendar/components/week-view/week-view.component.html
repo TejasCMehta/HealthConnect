@@ -20,7 +20,7 @@
     </div>
 
     <!-- Time slots -->
-    <div class="space-y-px">
+    <div class="space-y-px" #gridContainer>
       @for (timeSlot of timeSlots; track timeSlot) {
       <div
         class="grid grid-cols-8 gap-px bg-gray-100 dark:bg-gray-700 min-h-[75px]"
@@ -80,11 +80,17 @@
               [appointment]="appointmentData.appointment"
               [compact]="true"
               [enableResize]="true"
+              [enableDrag]="true"
               [slotHeight]="75"
+              [doctors]="doctors()"
+              [gridContainer]="gridContainer"
               (click)="onAppointmentClick(appointmentData.appointment, $event)"
               (resizeStart)="onResizeStart($event)"
               (resizeUpdate)="onResizeUpdate($event)"
               (resizeComplete)="onResizeComplete($event)"
+              (dragStart)="onDragStart($event)"
+              (dragUpdate)="onDragUpdate($event)"
+              (dragComplete)="onDragComplete($event)"
               [class]="
                 'block ' +
                 (appointmentData.column > 0
@@ -123,3 +129,13 @@
   (confirm)="onResizeConfirm()"
   (cancel)="onResizeCancel()"
 ></app-resize-confirmation-modal>
+
+<!-- Drag and Drop Confirmation Modal -->
+@if (showDragDropModal()) {
+<app-drag-drop-confirmation
+  [confirmationData]="dragDropConfirmation()"
+  [isLoading]="isDragDropLoading()"
+  (confirm)="onDragDropConfirm()"
+  (cancel)="onDragDropCancel()"
+></app-drag-drop-confirmation>
+}

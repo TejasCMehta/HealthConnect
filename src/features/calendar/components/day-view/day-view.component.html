@@ -20,12 +20,14 @@
   </div>
 
   <!-- Time slots -->
-  <div class="space-y-px">
+  <div class="space-y-px" #gridContainer>
     @for (timeSlot of timeSlots; track timeSlot) {
     <div
       [class]="
-        'flex items-start border-b border-gray-200 dark:border-gray-700 py-3 ' +
-        (isPastTimeSlot(timeSlot) ? 'opacity-50' : '')
+        'flex items-start border-b border-gray-200 dark:border-gray-700 py-3 time-slot ' +
+        (isPastTimeSlot(timeSlot) ? 'opacity-50 past' : '') +
+        (isTimeSlotBlocked(timeSlot) ? ' blocked' : '') +
+        (currentDate().getDay() === 0 || currentDate().getDay() === 6 ? ' weekend' : '')
       "
     >
       <!-- Time label -->
@@ -110,7 +112,10 @@
                 [appointment]="appointmentData.appointment"
                 [compact]="appointmentData.totalColumns > 1"
                 [enableResize]="true"
+                [enableDrag]="true"
                 [slotHeight]="65"
+                [doctors]="doctors()"
+                [gridContainer]="gridContainer"
                 (click)="
                   onAppointmentClick(appointmentData.appointment);
                   debugAppointment(appointmentData.appointment)
@@ -118,6 +123,9 @@
                 (resizeStart)="onResizeStart($event)"
                 (resizeUpdate)="onResizeUpdate($event)"
                 (resizeComplete)="onResizeComplete($event)"
+                (dragStart)="onDragStart($event)"
+                (dragUpdate)="onDragUpdate($event)"
+                (dragComplete)="onDragComplete($event)"
                 [class]="
                   'block mr-1 ' +
                   (appointmentData.column > 0
@@ -177,3 +185,13 @@
   (confirm)="onResizeConfirm()"
   (cancel)="onResizeCancel()"
 ></app-resize-confirmation-modal>
+
+<!-- Drag and Drop Confirmation Modal -->
+@if (showDragDropModal()) {
+<app-drag-drop-confirmation
+  [confirmationData]="dragDropConfirmation()"
+  [isLoading]="isDragDropLoading()"
+  (confirm)="onDragDropConfirm()"
+  (cancel)="onDragDropCancel()"
+></app-drag-drop-confirmation>
+}
