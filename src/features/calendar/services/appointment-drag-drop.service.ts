@@ -118,7 +118,8 @@ export class AppointmentDragDropService {
     currentX: number,
     currentY: number,
     gridContainer: HTMLElement,
-    doctors?: Doctor[]
+    doctors?: Doctor[],
+    weekDays?: Date[]
   ): {
     newStartTime: string;
     newEndTime: string;
@@ -141,20 +142,64 @@ export class AppointmentDragDropService {
     // Calculate new start time based on vertical movement (snap to 30-min slots)
     const slotsMovedY = Math.round(deltaY / state.slotHeight);
     const originalStart = new Date(state.originalStartTime);
-    const newStartTime = new Date(
+
+    // Start with time change based on vertical movement
+    let newStartTime = new Date(
       originalStart.getTime() + slotsMovedY * 30 * 60 * 1000
     );
 
-    // Calculate new end time maintaining duration
-    const duration = this.calculateDuration(
-      state.originalStartTime,
-      state.originalEndTime
-    );
-    const newEndTime = new Date(newStartTime.getTime() + duration * 60 * 1000);
-
-    // Calculate new doctor based on horizontal movement (for day view with multiple doctors)
+    // Check if we're in week view (has weekDays array)
     let newDoctorId = state.originalDoctorId;
-    if (doctors && doctors.length > 1) {
+    if (weekDays && weekDays.length === 7) {
+      // Week view - handle cross-day dragging
+      const containerRect = gridContainer.getBoundingClientRect();
+
+      // Find the grid structure - we need to account for the time column
+      // Grid has 8 columns: 1 time column + 7 day columns
+      const timeColumnWidth = containerRect.width / 8; // Time column is 1/8 of total width
+      const dayColumnsWidth = containerRect.width - timeColumnWidth; // Remaining 7/8 for days
+      const dayColumnWidth = dayColumnsWidth / 7; // Each day column width
+
+      // Calculate which day column we're over
+      const relativeX = currentX - containerRect.left;
+      const dayAreaX = relativeX - timeColumnWidth; // Subtract time column width
+      const dayIndex = Math.floor(dayAreaX / dayColumnWidth);
+
+      // Ensure we're within valid day bounds
+      if (dayIndex >= 0 && dayIndex < 7) {
+        const targetDay = weekDays[dayIndex];
+        const originalStart = new Date(state.originalStartTime);
+
+        // Debug logging
+        console.log("Cross-day drag detected:", {
+          dayIndex,
+          targetDay: targetDay.toDateString(),
+          originalDate: originalStart.toDateString(),
+          timeAdjustedStartTime: newStartTime.toISOString(),
+        });
+
+        // Get the date components without time
+        const originalDate = new Date(
+          originalStart.getFullYear(),
+          originalStart.getMonth(),
+          originalStart.getDate()
+        );
+        const targetDate = new Date(
+          targetDay.getFullYear(),
+          targetDay.getMonth(),
+          targetDay.getDate()
+        );
+
+        // Calculate the day difference in milliseconds
+        const dayDifference = targetDate.getTime() - originalDate.getTime();
+
+        // Apply day difference to the time-adjusted start time
+        newStartTime = new Date(newStartTime.getTime() + dayDifference);
+
+        console.log("Final new start time:", newStartTime.toISOString());
+      }
+    } else if (doctors && doctors.length > 1) {
+      // Day view - calculate new doctor based on horizontal movement
       const containerRect = gridContainer.getBoundingClientRect();
       const doctorColumnWidth = containerRect.width / doctors.length;
       const relativeX = currentX - containerRect.left;
@@ -164,6 +209,13 @@ export class AppointmentDragDropService {
         newDoctorId = doctors[doctorIndex].id;
       }
     }
+
+    // Calculate new end time maintaining duration
+    const duration = this.calculateDuration(
+      state.originalStartTime,
+      state.originalEndTime
+    );
+    const newEndTime = new Date(newStartTime.getTime() + duration * 60 * 1000);
 
     // Validate the new position
     const isValidTarget = this.validateDragTarget(

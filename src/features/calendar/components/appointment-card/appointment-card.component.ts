@@ -32,6 +32,7 @@ export class AppointmentCardComponent implements OnDestroy {
   public slotHeight = input<number>(30); // Height of each 30-minute slot
   public doctors = input<Doctor[]>([]); // Available doctors for horizontal drag
   public gridContainer = input<HTMLElement | null>(null); // Grid container for drag calculations
+  public weekDays = input<Date[]>([]); // Week days array for cross-day dragging in week view
 
   @HostBinding("class.compact") get isCompact() {
     return this.compact();
@@ -429,7 +430,8 @@ export class AppointmentCardComponent implements OnDestroy {
       event.clientX,
       event.clientY,
       gridContainer,
-      this.doctors()
+      this.doctors(),
+      this.weekDays()
     );
 
     // Update preview
