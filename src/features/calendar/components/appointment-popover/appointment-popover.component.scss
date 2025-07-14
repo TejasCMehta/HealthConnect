@@ -11,61 +11,79 @@
   text-overflow: ellipsis;
 }
 
-// Diamond Arrow Pointer - Points clearly toward appointment
+// Modern Triangle Arrow Pointer - Points clearly toward appointment
 .popover-arrow {
   position: absolute;
   z-index: 1001;
-  width: 16px;
-  height: 16px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  transform: rotate(45deg);
-  animation: diamondAppear 0.3s ease-out forwards;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 0;
+  height: 0;
+  animation: triangleAppear 0.3s ease-out forwards;
 }
 
-:host-context(.dark) .popover-arrow {
-  background: #1f2937;
-  border-color: #374151;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-// Diamond pointing UP (popover below appointment) - More visible shadow
+// Triangle pointing UP (popover below appointment)
 .popover-arrow-top {
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 16px solid white;
+  border-top: none;
+  // filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
 }
 
-// Diamond pointing DOWN (popover above appointment) - More visible shadow
+:host-context(.dark) .popover-arrow-top {
+  border-bottom-color: #1f2937;
+}
+
+// Triangle pointing DOWN (popover above appointment)
 .popover-arrow-bottom {
-  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, 0.2));
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 16px solid white;
+  border-bottom: none;
+  //filter: drop-shadow(0 -2px 8px rgba(0, 0, 0, 0.15));
 }
 
-// Diamond pointing LEFT (popover right of appointment) - More visible shadow
+:host-context(.dark) .popover-arrow-bottom {
+  border-top-color: #1f2937;
+}
+
+// Triangle pointing LEFT (popover right of appointment)
 .popover-arrow-left {
-  filter: drop-shadow(2px 0 6px rgba(0, 0, 0, 0.2));
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-right: 16px solid white;
+  border-left: none;
+  //filter: drop-shadow(2px 0 8px rgba(0, 0, 0, 0.15));
 }
 
-// Diamond pointing RIGHT (popover left of appointment) - More visible shadow
+:host-context(.dark) .popover-arrow-left {
+  border-right-color: #1f2937;
+}
+
+// Triangle pointing RIGHT (popover left of appointment)
 .popover-arrow-right {
-  filter: drop-shadow(-2px 0 6px rgba(0, 0, 0, 0.2));
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 16px solid white;
+  border-right: none;
+  //filter: drop-shadow(-2px 0 8px rgba(0, 0, 0, 0.15));
 }
 
-@keyframes diamondAppear {
+:host-context(.dark) .popover-arrow-right {
+  border-left-color: #1f2937;
+}
+
+@keyframes triangleAppear {
   0% {
-    transform: rotate(45deg) scale(0.5);
     opacity: 0;
+    transform: scale(0.5);
   }
   60% {
-    transform: rotate(45deg) scale(1.1);
     opacity: 0.8;
+    transform: scale(1.1);
   }
   100% {
-    transform: rotate(45deg) scale(1);
     opacity: 1;
+    transform: scale(1);
   }
 }
 

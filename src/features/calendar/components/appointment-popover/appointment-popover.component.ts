@@ -75,20 +75,22 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
       display: "block",
     };
 
-    // Diamond size is 16px, so we need -8px offset to center it
-    const diamondOffset = -8;
+    // Triangle arrow dimensions: 24px wide (12px + 12px), 16px tall
+    // For centering: -12px for width, -8px for height
+    const triangleHalfWidth = 12;
+    const triangleHeight = 16;
 
-    // Position the diamond arrow to point toward appointment
+    // Position the triangle arrow to point toward appointment
     switch (placement) {
       case "top":
         // Popover is below trigger, arrow points UP toward the appointment
         const leftPosition = Math.max(
           16, // Minimum distance from left edge
-          Math.min(triggerCenterX - pos.x + diamondOffset, 320 - 32) // Maximum distance from right edge
+          Math.min(triggerCenterX - pos.x - triangleHalfWidth, 320 - 32) // Maximum distance from right edge
         );
         pointerStyles = {
           ...pointerStyles,
-          top: `${diamondOffset}px`,
+          top: `-${triangleHeight}px`,
           left: `${leftPosition}px`,
         };
         break;
@@ -96,11 +98,11 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
         // Popover is above trigger, arrow points DOWN toward the appointment
         const leftPositionBottom = Math.max(
           16,
-          Math.min(triggerCenterX - pos.x + diamondOffset, 320 - 32)
+          Math.min(triggerCenterX - pos.x - triangleHalfWidth, 320 - 32)
         );
         pointerStyles = {
           ...pointerStyles,
-          bottom: `${diamondOffset}px`,
+          bottom: `-${triangleHeight}px`,
           left: `${leftPositionBottom}px`,
         };
         break;
@@ -108,11 +110,11 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
         // Popover is to the right of trigger, arrow points LEFT toward the appointment
         const topPositionLeft = Math.max(
           16,
-          Math.min(triggerCenterY - pos.y + diamondOffset, 350 - 32)
+          Math.min(triggerCenterY - pos.y - triangleHalfWidth, 350 - 32)
         );
         pointerStyles = {
           ...pointerStyles,
-          left: `${diamondOffset}px`,
+          left: `-${triangleHeight}px`,
           top: `${topPositionLeft}px`,
         };
         break;
@@ -120,11 +122,11 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
         // Popover is to the left of trigger, arrow points RIGHT toward the appointment
         const topPositionRight = Math.max(
           16,
-          Math.min(triggerCenterY - pos.y + diamondOffset, 350 - 32)
+          Math.min(triggerCenterY - pos.y - triangleHalfWidth, 350 - 32)
         );
         pointerStyles = {
           ...pointerStyles,
-          right: `${diamondOffset}px`,
+          right: `-${triangleHeight}px`,
           top: `${topPositionRight}px`,
         };
         break;
