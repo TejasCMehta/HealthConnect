@@ -14,7 +14,10 @@ import { MonthViewComponent } from "./components/month-view/month-view.component
 import { WeekViewComponent } from "./components/week-view/week-view.component";
 import { DayViewComponent } from "./components/day-view/day-view.component";
 import { AppointmentFormComponent } from "./components/appointment-form/appointment-form.component";
-import { AppointmentPopoverComponent } from "./components/appointment-popover/appointment-popover.component";
+import {
+  AppointmentPopoverComponent,
+  PopoverPosition,
+} from "./components/appointment-popover/appointment-popover.component";
 import { ConfirmationDialogComponent } from "../../shared/components/confirmation-dialog/confirmation-dialog.component";
 import { CalendarService } from "./services/calendar.service";
 import { AppointmentService } from "./services/appointment.service";
@@ -68,7 +71,7 @@ export class CalendarComponent implements OnInit {
   // Popover state
   public isPopoverOpen = signal(false);
   public popoverAppointment = signal<Appointment | null>(null);
-  public popoverPosition = signal<{ x: number; y: number }>({ x: 0, y: 0 });
+  public popoverPosition = signal<PopoverPosition>({ x: 0, y: 0 });
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -135,7 +138,8 @@ export class CalendarComponent implements OnInit {
   }
 
   private showPopover(appointment: Appointment, clickEvent: MouseEvent): void {
-    const rect = (clickEvent.target as HTMLElement).getBoundingClientRect();
+    const targetElement = clickEvent.target as HTMLElement;
+    const rect = targetElement.getBoundingClientRect();
 
     // Calculate initial position
     let x = rect.left + rect.width / 2;
@@ -158,14 +162,30 @@ export class CalendarComponent implements OnInit {
       x = x - popoverWidth / 2;
     }
 
+    // Determine placement based on available space
+    let placement: "top" | "bottom" | "left" | "right" = "top"; // Default: popover below trigger, pointer points up
+
     // Adjust vertical position with better spacing
     if (y + popoverHeight > viewportHeight - 16) {
       // Position above the element
       y = rect.top - popoverHeight - 8;
+      placement = "bottom"; // Popover above trigger, pointer points down
 
-      // If still doesn't fit, position at top with margin
+      // If still doesn't fit, check horizontal placement
       if (y < 16) {
-        y = 16;
+        // Try positioning to the side
+        if (rect.right + popoverWidth + 16 < viewportWidth) {
+          x = rect.right + 16;
+          y = Math.max(16, rect.top + rect.height / 2 - popoverHeight / 2);
+          placement = "left"; // Popover to the right, pointer points left
+        } else if (rect.left - popoverWidth - 16 > 0) {
+          x = rect.left - popoverWidth - 16;
+          y = Math.max(16, rect.top + rect.height / 2 - popoverHeight / 2);
+          placement = "right"; // Popover to the left, pointer points right
+        } else {
+          y = 16; // Fallback to top of viewport
+          placement = "bottom"; // Popover above trigger, pointer points down
+        }
       }
     }
 
@@ -174,7 +194,12 @@ export class CalendarComponent implements OnInit {
       y = 16;
     }
 
-    this.popoverPosition.set({ x, y });
+    this.popoverPosition.set({
+      x,
+      y,
+      triggerRect: rect,
+      placement,
+    });
     this.popoverAppointment.set(appointment);
     this.isPopoverOpen.set(true);
   }
