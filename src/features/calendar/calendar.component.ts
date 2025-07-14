@@ -5,6 +5,7 @@ import {
   OnInit,
   ElementRef,
   ViewChild,
+  HostBinding,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router } from "@angular/router";
@@ -14,9 +15,12 @@ import { WeekViewComponent } from "./components/week-view/week-view.component";
 import { DayViewComponent } from "./components/day-view/day-view.component";
 import { AppointmentFormComponent } from "./components/appointment-form/appointment-form.component";
 import { AppointmentPopoverComponent } from "./components/appointment-popover/appointment-popover.component";
+import { ConfirmationDialogComponent } from "../../shared/components/confirmation-dialog/confirmation-dialog.component";
 import { CalendarService } from "./services/calendar.service";
 import { AppointmentService } from "./services/appointment.service";
+import { DoctorService } from "../doctors/services/doctor.service";
 import { Appointment } from "../../shared/models/appointment.model";
+import { Doctor } from "../../shared/models/doctor.model";
 
 export type CalendarView = "month" | "week" | "day";
 
@@ -31,6 +35,7 @@ export type CalendarView = "month" | "week" | "day";
     DayViewComponent,
     AppointmentFormComponent,
     AppointmentPopoverComponent,
+    ConfirmationDialogComponent,
   ],
   templateUrl: "./calendar.component.html",
   styleUrl: "./calendar.component.scss",
@@ -38,14 +43,23 @@ export type CalendarView = "month" | "week" | "day";
 export class CalendarComponent implements OnInit {
   private calendarService = inject(CalendarService);
   private appointmentService = inject(AppointmentService);
+  private doctorService = inject(DoctorService);
   private router = inject(Router);
 
   @ViewChild("calendarContainer", { read: ElementRef })
   calendarContainer!: ElementRef;
 
+  @ViewChild(ConfirmationDialogComponent)
+  confirmationDialog!: ConfirmationDialogComponent;
+
+  @HostBinding("class.popover-open") get hasPopoverOpen() {
+    return this.isPopoverOpen();
+  }
+
   public currentView = signal<CalendarView>("month");
   public currentDate = signal(new Date());
   public appointments = signal<Appointment[]>([]);
+  public doctors = signal<Doctor[]>([]);
   public isLoading = signal(true);
   public isFormOpen = signal(false);
   public selectedAppointment = signal<Appointment | null>(null);
@@ -58,6 +72,7 @@ export class CalendarComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAppointments();
+    this.loadDoctors();
   }
 
   private loadAppointments(): void {
@@ -70,6 +85,17 @@ export class CalendarComponent implements OnInit {
       error: (error) => {
         console.error("Error loading appointments:", error);
         this.isLoading.set(false);
+      },
+    });
+  }
+
+  private loadDoctors(): void {
+    this.doctorService.getDoctors().subscribe({
+      next: (doctors) => {
+        this.doctors.set(doctors);
+      },
+      error: (error) => {
+        console.error("Error loading doctors:", error);
       },
     });
   }
@@ -172,16 +198,30 @@ export class CalendarComponent implements OnInit {
   onPopoverDelete(): void {
     const appointment = this.popoverAppointment();
     if (appointment) {
-      // Handle deletion - you might want to add a confirmation dialog
-      this.appointmentService.deleteAppointment(appointment.id).subscribe({
-        next: () => {
-          this.loadAppointments();
-          this.closePopover();
-        },
-        error: (error) => {
-          console.error("Error deleting appointment:", error);
-        },
-      });
+      // Show confirmation dialog
+      this.confirmationDialog
+        .open({
+          title: "Delete Appointment",
+          message: `Are you sure you want to delete the appointment "${appointment.title}"? This action cannot be undone.`,
+          confirmText: "Delete",
+          cancelText: "Cancel",
+          confirmButtonClass: "bg-red-600 hover:bg-red-700",
+        })
+        .then((confirmed) => {
+          if (confirmed) {
+            this.appointmentService
+              .deleteAppointment(appointment.id)
+              .subscribe({
+                next: () => {
+                  this.loadAppointments();
+                  this.closePopover();
+                },
+                error: (error) => {
+                  console.error("Error deleting appointment:", error);
+                },
+              });
+          }
+        });
     }
   }
 

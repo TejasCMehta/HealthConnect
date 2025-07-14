@@ -11,7 +11,7 @@
   </div>
 
   <!-- Month grid -->
-  <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700">
+  <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700" #monthGrid>
     @for (day of monthDays; track day.toISOString()) {
     <div
       [class]="
@@ -46,8 +46,16 @@
           [appointment]="appointment"
           [compact]="true"
           [enableResize]="false"
+          [enableDrag]="true"
           [disableHover]="true"
+          [slotHeight]="20"
+          [doctors]="doctors()"
+          [gridContainer]="monthGrid"
+          [monthDays]="monthDays"
           (click)="onAppointmentClick(appointment, $event)"
+          (dragStart)="onDragStart($event)"
+          (dragUpdate)="onDragUpdate($event)"
+          (dragComplete)="onDragComplete($event)"
         >
         </app-appointment-card>
         } }
@@ -66,3 +74,13 @@
     }
   </div>
 </div>
+
+<!-- Drag and Drop Confirmation Modal -->
+@if (showDragDropModal()) {
+<app-drag-drop-confirmation
+  [confirmationData]="dragDropConfirmation()"
+  [isLoading]="isDragDropLoading()"
+  (confirm)="onDragDropConfirm()"
+  (cancel)="onDragDropCancel()"
+></app-drag-drop-confirmation>
+}

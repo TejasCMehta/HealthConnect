@@ -4,7 +4,7 @@
 
 <!-- Popover -->
 <div
-  class="fixed z-50 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 transform transition-all duration-200 ease-out"
+  class="fixed z-50 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 transform transition-all duration-200 ease-out"
   [style.left.px]="position().x"
   [style.top.px]="position().y"
   (click)="$event.stopPropagation()"
@@ -41,8 +41,10 @@
 
     @if (appointment().description) {
     <div class="flex items-start text-sm text-gray-600 dark:text-gray-300">
-      <i class="ri-file-text-line mr-2 mt-0.5 text-green-500"></i>
-      <span>{{ appointment().description }}</span>
+      <i class="ri-file-text-line mr-2 mt-0.5 text-green-500 flex-shrink-0"></i>
+      <span class="line-clamp-3 break-words overflow-hidden">{{
+        appointment().description
+      }}</span>
     </div>
     }
 

@@ -33,12 +33,16 @@ export class AppointmentCardComponent implements OnDestroy {
   public doctors = input<Doctor[]>([]); // Available doctors for horizontal drag
   public gridContainer = input<HTMLElement | null>(null); // Grid container for drag calculations
   public weekDays = input<Date[]>([]); // Week days array for cross-day dragging in week view
+  public monthDays = input<Date[]>([]); // Month days array for cross-day dragging in month view
 
   @HostBinding("class.compact") get isCompact() {
     return this.compact();
   }
   @HostBinding("class.disable-hover") get isHoverDisabled() {
     return this.disableHover();
+  }
+  @HostBinding("class.disable-resize") get isResizeDisabled() {
+    return !this.enableResize();
   }
 
   public resizeStart = output<{ appointment: Appointment; startY: number }>();
@@ -335,13 +339,14 @@ export class AppointmentCardComponent implements OnDestroy {
    * Handle mouse down for potential drag start
    */
   onMouseDown(event: MouseEvent): void {
-    // Don't start drag if clicking on resize handle or if resize is disabled
-    if (!this.enableDrag() || this.isResizing()) return;
+    // Don't start drag if already dragging, resizing, or drag is disabled
+    if (!this.enableDrag() || this.isResizing() || this.isDragging()) return;
 
     const target = event.target as HTMLElement;
     if (target.closest(".resize-handle")) return;
 
     event.preventDefault();
+    event.stopPropagation();
 
     this.dragStartX = event.clientX;
     this.dragStartY = event.clientY;
@@ -383,6 +388,9 @@ export class AppointmentCardComponent implements OnDestroy {
    * Start drag operation
    */
   private startDrag(event: MouseEvent): void {
+    // Prevent multiple drag starts
+    if (this.isDragging()) return;
+
     this.cleanupDragListeners(); // Clean up potential drag listeners
 
     this.isDragging.set(true);
@@ -424,14 +432,52 @@ export class AppointmentCardComponent implements OnDestroy {
     if (!this.isDragging()) return;
 
     const gridContainer = this.gridContainer();
-    if (!gridContainer) return;
+    if (!gridContainer) {
+      // If no grid container, mark as invalid
+      this.dragPreview.set({
+        newStartTime: this.appointment().startTime,
+        newEndTime: this.appointment().endTime,
+        newDoctorId: this.appointment().doctorId,
+        isValidTarget: false,
+      });
+      return;
+    }
 
+    // Check if mouse is outside the grid container bounds
+    const rect = gridContainer.getBoundingClientRect();
+    const mouseOutside =
+      event.clientX < rect.left ||
+      event.clientX > rect.right ||
+      event.clientY < rect.top ||
+      event.clientY > rect.bottom;
+
+    if (mouseOutside) {
+      // Mouse is outside the valid drop area
+      this.dragPreview.set({
+        newStartTime: this.appointment().startTime,
+        newEndTime: this.appointment().endTime,
+        newDoctorId: this.appointment().doctorId,
+        isValidTarget: false,
+      });
+
+      this.dragUpdate.emit({
+        appointment: this.appointment(),
+        newStartTime: this.appointment().startTime,
+        newEndTime: this.appointment().endTime,
+        newDoctorId: this.appointment().doctorId,
+        isValidTarget: false,
+      });
+      return;
+    }
+
+    // Mouse is within bounds, proceed with normal drag calculation
     const result = this.dragDropService.updateDrag(
       event.clientX,
       event.clientY,
       gridContainer,
       this.doctors(),
-      this.weekDays()
+      this.weekDays(),
+      this.monthDays()
     );
 
     // Update preview
@@ -464,6 +510,8 @@ export class AppointmentCardComponent implements OnDestroy {
       });
 
     const preview = this.dragPreview();
+
+    // Only emit dragComplete if the drop target is valid
     if (preview && preview.isValidTarget) {
       this.dragComplete.emit({
         appointment: this.appointment(),
@@ -472,10 +520,20 @@ export class AppointmentCardComponent implements OnDestroy {
         newDoctorId: preview.newDoctorId,
       });
     } else {
-      // Reset drag state
+      // Drag was canceled or dropped in invalid location
+      console.log("Drag canceled - invalid drop target or outside bounds");
+
+      // Reset drag state in service
       this.dragDropService.cancelDrag();
+
+      // Reset visual state
+      this.dragPreview.set(null);
+
+      // You could emit a dragCancel event here if needed
+      // this.dragCancel.emit({ appointment: this.appointment() });
     }
 
+    // Always reset preview after handling
     this.dragPreview.set(null);
   };
 
@@ -485,15 +543,29 @@ export class AppointmentCardComponent implements OnDestroy {
   private addDragListeners(): void {
     const onMouseMove = this.onDragMove;
     const onMouseUp = this.onDragEnd;
+    const onMouseLeave = this.onDragEnd;
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
-    document.addEventListener("mouseleave", onMouseUp);
+
+    // Add mouseleave to window and key elements to handle drag cancellation
+    window.addEventListener("mouseleave", onMouseLeave);
+    document.addEventListener("mouseleave", onMouseLeave);
+
+    // Add escape key listener to cancel drag
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        this.onDragEnd(new MouseEvent("mouseup"));
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
 
     this.dragListeners = [
       () => document.removeEventListener("mousemove", onMouseMove),
       () => document.removeEventListener("mouseup", onMouseUp),
-      () => document.removeEventListener("mouseleave", onMouseUp),
+      () => window.removeEventListener("mouseleave", onMouseLeave),
+      () => document.removeEventListener("mouseleave", onMouseLeave),
+      () => document.removeEventListener("keydown", onKeyDown),
     ];
   }
 

@@ -7,19 +7,36 @@
       : 'p-3 bg-white dark:bg-gray-800 shadow-sm rounded-r-md' +
         (disableHover() ? '' : ' hover:bg-gray-50 dark:hover:bg-gray-700')) +
     (isResizing() ? ' resizing' : '') +
-    (isDragging()
-      ? ' dragging cursor-grabbing'
-      : enableDrag()
-      ? ' cursor-grab'
-      : ' cursor-pointer') +
+    (isDragging() ? ' dragging cursor-grabbing' : '') +
     (isDragging() && dragPreview() && !dragPreview()!.isValidTarget
       ? ' invalid-drag-target'
-      : '')
+      : '') +
+    (enableDrag() && !enableResize()
+      ? ' month-view-appointment cursor-pointer'
+      : '') +
+    (enableResize() ? ' day-week-view-appointment cursor-grab' : '')
   "
   [style.height.px]="dynamicHeight"
   [style.min-height.px]="slotHeight()"
-  (mousedown)="enableDrag() ? onMouseDown($event) : null"
 >
+  <!-- Central Drag Handle for All Views -->
+  @if (enableDrag() && !isDragging()) {
+  <div
+    class="drag-handle-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100 transition-opacity duration-200 cursor-move z-20"
+    (mousedown)="onMouseDown($event)"
+    title="Drag to move appointment"
+    style="pointer-events: auto"
+  >
+    <div class="bg-blue-500 text-white rounded-full p-1 shadow-lg drag-icon">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M13,6V11H18V7.75L22.25,12L18,16.25V13H13V18H16.25L12,22.25L7.75,18H11V13H6V16.25L1.75,12L6,7.75V11H11V6H7.75L12,1.75L16.25,6H13Z"
+        />
+      </svg>
+    </div>
+  </div>
+  }
+
   <div class="flex items-start justify-between flex-1">
     <div class="flex-1 min-w-0">
       <h4

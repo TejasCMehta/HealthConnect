@@ -1,3 +1,70 @@
 :host {
   display: block;
 }
+
+// When popover is open, ensure appointment cards stay stable and below popover
+:host.popover-open {
+  // Target all appointment cards in all views (month, week, day)
+  app-month-view app-appointment-card,
+  app-week-view app-appointment-card,
+  app-day-view app-appointment-card {
+    // Force stable state, override any hover effects
+    background-color: rgb(239 246 255) !important; // bg-blue-50
+    z-index: 1 !important; // Keep below popover (z-index 50)
+    position: relative;
+
+    &:hover {
+      background-color: rgb(239 246 255) !important; // Keep same color
+      transform: none !important;
+      z-index: 1 !important; // Prevent cards from going above popover
+    }
+
+    // Override ANY and ALL high z-index values from appointment card component
+    .appointment-card,
+    * {
+      z-index: 1 !important;
+
+      &:hover,
+      &:active,
+      &:focus,
+      &.active,
+      &.dragging,
+      &.resizing,
+      &.actively-resizing {
+        z-index: 1 !important;
+      }
+    }
+
+    // Override all child elements and pseudo elements
+    *,
+    *::before,
+    *::after {
+      z-index: 1 !important;
+    }
+
+    // Force override for drag handles and resize handles
+    .drag-handle,
+    .resize-handle,
+    .appointment-drag-handle {
+      z-index: 1 !important;
+
+      &:hover,
+      &:active {
+        z-index: 1 !important;
+      }
+    }
+  }
+
+  // Also handle dark mode for all views
+  &:host-context(.dark) {
+    app-month-view app-appointment-card,
+    app-week-view app-appointment-card,
+    app-day-view app-appointment-card {
+      background-color: rgb(30 58 138 / 0.2) !important; // dark:bg-blue-900/20
+
+      &:hover {
+        background-color: rgb(30 58 138 / 0.2) !important; // Keep same color
+      }
+    }
+  }
+}

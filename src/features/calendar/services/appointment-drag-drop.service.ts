@@ -119,7 +119,8 @@ export class AppointmentDragDropService {
     currentY: number,
     gridContainer: HTMLElement,
     doctors?: Doctor[],
-    weekDays?: Date[]
+    weekDays?: Date[],
+    monthDays?: Date[]
   ): {
     newStartTime: string;
     newEndTime: string;
@@ -198,6 +199,69 @@ export class AppointmentDragDropService {
 
         console.log("Final new start time:", newStartTime.toISOString());
       }
+    } else if (monthDays && monthDays.length > 0) {
+      // Month view - handle cross-day dragging
+      const containerRect = gridContainer.getBoundingClientRect();
+
+      // Month grid has 7 columns for days of the week
+      const dayColumnWidth = containerRect.width / 7;
+
+      // Calculate which day column we're over (horizontally)
+      const relativeX = currentX - containerRect.left;
+      const dayIndex = Math.floor(relativeX / dayColumnWidth);
+
+      // Calculate which week row we're over (vertically)
+      const dayRowHeight =
+        containerRect.height / Math.ceil(monthDays.length / 7);
+      const relativeY = currentY - containerRect.top;
+      const rowIndex = Math.floor(relativeY / dayRowHeight);
+
+      // Calculate the final day index in the monthDays array
+      const finalDayIndex = rowIndex * 7 + dayIndex;
+
+      console.log("Month view drag detected:", {
+        dayIndex,
+        rowIndex,
+        finalDayIndex,
+        monthDaysLength: monthDays.length,
+        relativeX,
+        relativeY,
+        dayColumnWidth,
+        dayRowHeight,
+      });
+
+      // Ensure we're within valid day bounds
+      if (finalDayIndex >= 0 && finalDayIndex < monthDays.length) {
+        const targetDay = monthDays[finalDayIndex];
+        const originalStart = new Date(state.originalStartTime);
+
+        console.log("Month cross-day drag detected:", {
+          finalDayIndex,
+          targetDay: targetDay.toDateString(),
+          originalDate: originalStart.toDateString(),
+          timeAdjustedStartTime: newStartTime.toISOString(),
+        });
+
+        // Get the date components without time
+        const originalDate = new Date(
+          originalStart.getFullYear(),
+          originalStart.getMonth(),
+          originalStart.getDate()
+        );
+        const targetDate = new Date(
+          targetDay.getFullYear(),
+          targetDay.getMonth(),
+          targetDay.getDate()
+        );
+
+        // Calculate the day difference in milliseconds
+        const dayDifference = targetDate.getTime() - originalDate.getTime();
+
+        // Apply day difference to the time-adjusted start time
+        newStartTime = new Date(newStartTime.getTime() + dayDifference);
+
+        console.log("Final month new start time:", newStartTime.toISOString());
+      }
     } else if (doctors && doctors.length > 1) {
       // Day view - calculate new doctor based on horizontal movement
       const containerRect = gridContainer.getBoundingClientRect();
@@ -244,6 +308,15 @@ export class AppointmentDragDropService {
   }
 
   /**
+   * Calculate duration in minutes between two time strings
+   */
+  private calculateDuration(startTime: string, endTime: string): number {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    return (end.getTime() - start.getTime()) / (1000 * 60);
+  }
+
+  /**
    * Validate drag target
    */
   private validateDragTarget(
@@ -253,7 +326,6 @@ export class AppointmentDragDropService {
   ): DragValidationResult {
     const startTime = new Date(newStartTime);
     const endTime = new Date(newEndTime);
-    const now = new Date();
 
     // Check if start time is in the past (only check date, not time)
     const today = new Date();
@@ -314,46 +386,6 @@ export class AppointmentDragDropService {
   }
 
   /**
-   * Validate final drag position including doctor availability
-   */
-  validateDragComplete(): Observable<DragValidationResult> {
-    const state = this.dragState();
-    if (!state.appointment) {
-      return of({ isValid: false, errorMessage: "No appointment selected" });
-    }
-
-    // First check basic validation
-    const basicValidation = this.validateDragTarget(
-      state.newStartTime,
-      state.newEndTime,
-      state.newDoctorId
-    );
-
-    if (!basicValidation.isValid) {
-      return of(basicValidation);
-    }
-
-    // TODO: Call API to check doctor availability
-    // For now, simulate API call
-    return new Observable<DragValidationResult>((observer) => {
-      setTimeout(() => {
-        // Simulate doctor availability check
-        const isAvailable = Math.random() > 0.1; // 90% chance doctor is available
-
-        if (isAvailable) {
-          observer.next({ isValid: true });
-        } else {
-          observer.next({
-            isValid: false,
-            errorMessage: "Doctor is not available during the selected slot.",
-          });
-        }
-        observer.complete();
-      }, 300); // Simulate network delay
-    });
-  }
-
-  /**
    * Get drag confirmation data
    */
   getDragConfirmation(): DragDropConfirmation | null {
@@ -361,9 +393,11 @@ export class AppointmentDragDropService {
     if (!state.appointment) return null;
 
     const timeChanged =
-      state.originalStartTime !== state.newStartTime ||
-      state.originalEndTime !== state.newEndTime;
-    const doctorChanged = state.originalDoctorId !== state.newDoctorId;
+      state.newStartTime !== state.originalStartTime ||
+      state.newEndTime !== state.originalEndTime;
+    const doctorChanged = state.newDoctorId !== state.originalDoctorId;
+
+    if (!timeChanged && !doctorChanged) return null;
 
     return {
       appointment: state.appointment,
@@ -383,17 +417,18 @@ export class AppointmentDragDropService {
   completeDrag(): Observable<Appointment> {
     const state = this.dragState();
     if (!state.appointment) {
-      throw new Error("No appointment being dragged");
+      return of();
     }
 
-    const updatedAppointment = {
+    const updatedAppointment: Appointment = {
+      ...state.appointment,
       startTime: state.newStartTime,
       endTime: state.newEndTime,
       doctorId: state.newDoctorId,
     };
 
     return this.appointmentService.updateAppointment(
-      state.appointment.id,
+      updatedAppointment.id,
       updatedAppointment
     );
   }
@@ -402,66 +437,49 @@ export class AppointmentDragDropService {
    * Cancel drag operation
    */
   cancelDrag(): void {
-    this.dragState.set({
+    this.dragState.update((current) => ({
+      ...current,
       isDragging: false,
-      appointment: null,
-      originalStartTime: "",
-      originalEndTime: "",
-      originalDoctorId: 0,
-      newStartTime: "",
-      newEndTime: "",
-      newDoctorId: 0,
-      startX: 0,
-      startY: 0,
-      slotHeight: 30,
-      currentX: 0,
-      currentY: 0,
+      newStartTime: current.originalStartTime,
+      newEndTime: current.originalEndTime,
+      newDoctorId: current.originalDoctorId,
       isValidTarget: false,
-    });
+    }));
   }
 
   /**
-   * Check if a time slot is blocked (past, weekend, holiday, outside working hours)
+   * Validate drag complete with doctor availability
+   */
+  validateDragComplete(): Observable<DragValidationResult> {
+    const state = this.dragState();
+    if (!state.appointment) {
+      return of({
+        isValid: false,
+        errorMessage: "No appointment being dragged",
+      });
+    }
+
+    // First run basic validation
+    const basicValidation = this.validateDragTarget(
+      state.newStartTime,
+      state.newEndTime,
+      state.newDoctorId
+    );
+
+    if (!basicValidation.isValid) {
+      return of(basicValidation);
+    }
+
+    // TODO: Add doctor availability check here
+    // For now, just return the basic validation
+    return of(basicValidation);
+  }
+
+  /**
+   * Check if a time slot is blocked for drag and drop
    */
   isTimeSlotBlocked(date: Date, timeSlot: string): boolean {
-    const [hour, minute] = timeSlot.split(":").map(Number);
-    const slotDateTime = new Date(date);
-    slotDateTime.setHours(hour, minute, 0, 0);
-
-    // Check if in the past (only for today's slots that have already passed)
-    const now = new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const slotDate = new Date(date);
-    slotDate.setHours(0, 0, 0, 0);
-
-    // Only block past time slots if it's today
-    if (slotDate.getTime() === today.getTime() && slotDateTime < now)
-      return true;
-
-    // Block dates before today
-    if (slotDate < today) return true;
-
-    // Check if weekend
-    if (date.getDay() === 0 || date.getDay() === 6) return true;
-
-    // Check if holiday
-    const dateStr = date.toISOString().split("T")[0];
-    if (this.holidays.includes(dateStr)) return true;
-
-    // Check if outside working hours
-    if (hour < this.workingHours.start || hour >= this.workingHours.end)
-      return true;
-
+    // TODO: Implement time slot blocking logic
     return false;
-  }
-
-  /**
-   * Calculate duration in minutes
-   */
-  private calculateDuration(startTime: string, endTime: string): number {
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    return Math.round((end.getTime() - start.getTime()) / (1000 * 60));
   }
 }

@@ -19,10 +19,12 @@
     <app-month-view
       [currentDate]="currentDate()"
       [appointments]="appointments()"
+      [doctors]="doctors()"
       (appointmentSelect)="onAppointmentSelect($event)"
       (appointmentClick)="onAppointmentClick($event)"
       (moreAppointmentsClick)="onMoreAppointmentsClick($event)"
       (dateSelect)="onDateChange($event)"
+      (appointmentUpdate)="onAppointmentUpdate($event)"
     >
     </app-month-view>
     } @case ('week') {
@@ -69,3 +71,6 @@
   (close)="closePopover()"
 >
 </app-appointment-popover>
+
+<!-- Confirmation Dialog -->
+<app-confirmation-dialog></app-confirmation-dialog>

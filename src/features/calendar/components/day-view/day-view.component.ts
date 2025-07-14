@@ -6,6 +6,8 @@ import {
   signal,
   ViewChild,
   ElementRef,
+  OnInit,
+  OnDestroy,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Appointment } from "../../../../shared/models/appointment.model";
@@ -34,7 +36,7 @@ import { ToasterService } from "../../../../shared/services/toaster.service";
   templateUrl: "./day-view.component.html",
   styleUrl: "./day-view.component.scss",
 })
-export class DayViewComponent {
+export class DayViewComponent implements OnInit, OnDestroy {
   private calendarService = inject(CalendarService);
   private resizeService = inject(AppointmentResizeService);
   private dragDropService = inject(AppointmentDragDropService);
@@ -57,6 +59,13 @@ export class DayViewComponent {
   public resizeAppointment = signal<Appointment | null>(null);
   public newEndTime = signal<string>("");
 
+  // Track recent resize to prevent unwanted clicks
+  private recentResizeAppointmentId: number | null = null;
+
+  // Current time tracking (same as week view)
+  public currentTimeSignal = signal<Date>(new Date());
+  private timeUpdateInterval?: number;
+
   // Drag and drop confirmation modal state
   public showDragDropModal = signal<boolean>(false);
   public dragDropConfirmation = signal<DragDropConfirmation | null>(null);
@@ -69,6 +78,52 @@ export class DayViewComponent {
       slots.push(`${hour.toString().padStart(2, "0")}:30`);
     }
     return slots;
+  }
+
+  /**
+   * Get current time as Date object
+   */
+  get currentTime(): Date {
+    return this.currentTimeSignal();
+  }
+
+  /**
+   * Check if current time should be visible (within clinic hours)
+   */
+  get isCurrentTimeVisible(): boolean {
+    const now = this.currentTime;
+    const hour = now.getHours();
+    return hour >= 8 && hour < 18 && this.isToday(this.currentDate());
+  }
+
+  /**
+   * Calculate the top position for current time indicator in day view
+   */
+  getCurrentTimePosition(): number {
+    const now = this.currentTime;
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+
+    // Calculate position relative to 8 AM start
+    const hoursFromStart = hour - 8;
+    const minuteProgress = minute / 60;
+    const totalHoursProgress = hoursFromStart + minuteProgress;
+
+    // Each slot is approximately 64px (40px min-height + 24px padding)
+    // Each hour has 2 slots, so 128px per hour
+    return totalHoursProgress * 128;
+  }
+
+  /**
+   * Check if a date is today
+   */
+  isToday(date: Date): boolean {
+    const today = new Date();
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
   }
 
   get dayAppointments(): Appointment[] {
@@ -193,6 +248,12 @@ export class DayViewComponent {
   }
 
   onAppointmentClick(appointment: Appointment): void {
+    // Prevent click if this appointment just completed a resize
+    if (this.recentResizeAppointmentId === appointment.id) {
+      this.recentResizeAppointmentId = null; // Clear the flag
+      return;
+    }
+
     this.appointmentSelect.emit(appointment);
   }
 
@@ -270,26 +331,15 @@ export class DayViewComponent {
     appointment: Appointment;
     newEndTime: string;
   }): void {
-    // Automatically save resize without showing modal
-    const resizeOperation = this.resizeService.completeResize();
-    if (resizeOperation) {
-      resizeOperation.subscribe({
-        next: (updatedAppointment) => {
-          this.appointmentUpdate.emit(updatedAppointment);
-          this.toasterService.showSuccess(
-            "Appointment Resized",
-            "The appointment duration has been updated successfully."
-          );
-        },
-        error: (error) => {
-          console.error("Failed to resize appointment:", error);
-          this.toasterService.showError(
-            "Resize Failed",
-            "Failed to update appointment. Please try again."
-          );
-        },
-      });
-    }
+    // Set flag to prevent click event on this appointment
+    this.recentResizeAppointmentId = event.appointment.id;
+
+    // Set the modal data before showing it
+    this.resizeAppointment.set(event.appointment);
+    this.newEndTime.set(event.newEndTime);
+
+    // Show confirmation modal instead of auto-saving
+    this.showResizeModal.set(true);
   }
 
   /**
@@ -336,6 +386,8 @@ export class DayViewComponent {
     this.showResizeModal.set(false);
     this.resizeAppointment.set(null);
     this.newEndTime.set("");
+    // Clear the resize flag when modal closes
+    this.recentResizeAppointmentId = null;
   }
 
   // Drag and Drop Methods
@@ -348,7 +400,13 @@ export class DayViewComponent {
     startX: number;
     startY: number;
   }): void {
-    console.log("Drag started:", event);
+    console.log("Day view drag started:", event);
+    this.dragDropService.startDrag(
+      event.appointment,
+      event.startX,
+      event.startY,
+      65 // Day view slot height - must match the slotHeight passed to appointment cards
+    );
   }
 
   /**
@@ -361,8 +419,9 @@ export class DayViewComponent {
     newDoctorId: number;
     isValidTarget: boolean;
   }): void {
-    // Update visual feedback if needed
-    console.log("Drag update:", event);
+    console.log("Day view drag update:", event);
+    // The appointment card component handles the drag calculation internally
+    // and passes the results to us
   }
 
   /**
@@ -487,5 +546,26 @@ export class DayViewComponent {
     slotDateTime.setHours(hour, minute, 0, 0);
 
     return this.dragDropService.isTimeSlotBlocked(this.currentDate(), timeSlot);
+  }
+
+  ngOnInit() {
+    // Component initialization logic
+    console.log("DayViewComponent initialized");
+
+    // Update current time signal every minute
+    this.timeUpdateInterval = window.setInterval(() => {
+      this.currentTimeSignal.set(new Date());
+    }, 60 * 1000);
+  }
+
+  ngOnDestroy() {
+    // Cleanup logic before the component is destroyed
+    console.log("DayViewComponent destroyed");
+
+    // Clear the interval on component destroy
+    if (this.timeUpdateInterval) {
+      clearInterval(this.timeUpdateInterval);
+      this.timeUpdateInterval = undefined;
+    }
   }
 }

@@ -20,10 +20,46 @@
     </div>
 
     <!-- Time slots -->
-    <div class="space-y-px" #gridContainer>
-      @for (timeSlot of timeSlots; track timeSlot) {
+    <div class="space-y-px relative" #gridContainer>
+      <!-- Current time indicator -->
+      @if (isCurrentTimeVisible) {
       <div
-        class="grid grid-cols-8 gap-px bg-gray-100 dark:bg-gray-700 min-h-[75px]"
+        class="absolute left-0 right-0 z-50 pointer-events-none current-time-indicator"
+        [style.top.px]="getCurrentTimePosition()"
+      >
+        <!-- Time label column -->
+        <div class="absolute left-0 w-[12.5%] flex justify-end pr-2">
+          <div
+            class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg time-label"
+          >
+            {{
+              currentTime.toLocaleTimeString("en-US", {
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit"
+              })
+            }}
+          </div>
+        </div>
+
+        <!-- Current time line across all day columns -->
+        @for (day of weekDays; track day.toISOString(); let i = $index) { @if
+        (isToday(day)) {
+        <div
+          class="absolute h-0.5 bg-blue-500 shadow-lg time-line"
+          [style.left]="12.5 + i * 12.5 + '%'"
+          [style.width]="'12.5%'"
+        >
+          <!-- Circular indicator at the start -->
+          <div
+            class="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 rounded-full shadow-lg time-dot"
+          ></div>
+        </div>
+        } }
+      </div>
+      } @for (timeSlot of timeSlots; track timeSlot) {
+      <div
+        class="grid grid-cols-8 gap-px bg-gray-100 dark:bg-gray-700 min-h-[75px] border-b border-gray-200 dark:border-gray-600"
       >
         <!-- Time label -->
         <div

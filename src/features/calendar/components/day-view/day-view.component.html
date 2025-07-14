@@ -20,8 +20,40 @@
   </div>
 
   <!-- Time slots -->
-  <div class="space-y-px" #gridContainer>
-    @for (timeSlot of timeSlots; track timeSlot) {
+  <div class="space-y-px relative" #gridContainer>
+    <!-- Current time indicator -->
+    @if (isCurrentTimeVisible) {
+    <div
+      class="absolute left-0 right-0 z-50 pointer-events-none current-time-indicator"
+      [style.top.px]="getCurrentTimePosition()"
+    >
+      <!-- Time label -->
+      <div class="absolute left-0 w-20 flex justify-end pr-4">
+        <div
+          class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg time-label"
+        >
+          {{
+            currentTime.toLocaleTimeString("en-US", {
+              hour12: false,
+              hour: "2-digit",
+              minute: "2-digit"
+            })
+          }}
+        </div>
+      </div>
+
+      <!-- Current time line -->
+      <div
+        class="absolute h-0.5 bg-blue-500 shadow-lg time-line"
+        style="left: 5rem; right: 0"
+      >
+        <!-- Circular indicator at the start -->
+        <div
+          class="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 rounded-full shadow-lg time-dot"
+        ></div>
+      </div>
+    </div>
+    } @for (timeSlot of timeSlots; track timeSlot) {
     <div
       [class]="
         'flex items-start border-b border-gray-200 dark:border-gray-700 py-3 time-slot ' +
@@ -164,19 +196,6 @@
     </div>
     }
   </div>
-
-  <!-- Empty state -->
-  @if (dayAppointments.length === 0) {
-  <div class="text-center py-12">
-    <i class="ri-calendar-line text-6xl text-gray-400 mb-4"></i>
-    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-      No appointments scheduled
-    </h3>
-    <p class="text-sm text-gray-500 dark:text-gray-400">
-      This day is free for new appointments.
-    </p>
-  </div>
-  }
 </div>
 
 <!-- Resize Confirmation Modal -->

@@ -63,33 +63,39 @@
   ],
   "appointments": [
     {
-      "id": 1,
-      "patientId": 1,
-      "doctorId": 1,
-      "startTime": "2025-07-16T12:00:00.000Z",
-      "endTime": "2025-07-16T12:30:00.000Z",
-      "title": "Regular Checkup",
-      "description": "Annual physical examination",
-      "status": "scheduled"
-    },
-    {
       "id": 2,
       "patientId": 2,
       "doctorId": 2,
-      "startTime": "2025-07-14T09:30:00.000Z",
-      "endTime": "2025-07-14T10:30:00.000Z",
+      "startTime": "2025-07-15T09:30:00.000Z",
+      "endTime": "2025-07-15T10:30:00.000Z",
       "title": "Skin Consultation",
       "description": "Dermatology consultation",
-      "status": "scheduled"
+      "status": "scheduled",
+      "patient": {
+        "id": 2,
+        "name": "Bob Wilson",
+        "email": "bob@example.com",
+        "phone": "+1234567893",
+        "dateOfBirth": "1985-08-22",
+        "address": "456 Oak Ave, City, State 12345"
+      },
+      "doctor": {
+        "id": 2,
+        "name": "Dr. Sarah Johnson",
+        "specialty": "Dermatology",
+        "email": "sarah@clinic.com",
+        "phone": "+1234567891",
+        "color": "#ef4444"
+      }
     },
     {
-      "id": 1752347305774,
-      "title": "sdf",
-      "description": "sfs",
+      "id": 1752405398717,
+      "title": "awa",
+      "description": "Claude Code has introduced hooks that now automate your development workflow in a way similar to using triggers.\n\nI have just tested it with my custom script, and it's mind-blowing how it integrates into your coding process, automatically executing your preferred commands.\n\nClaude Code hooks are user-defined shell commands that execute at various points in Claude Code's lifecycle.",
       "patientId": 1,
-      "doctorId": 1,
-      "startTime": "2025-07-16T02:30:00.000Z",
-      "endTime": "2025-07-16T03:30:00.000Z",
+      "doctorId": 2,
+      "startTime": "2025-07-15T04:30:00.000Z",
+      "endTime": "2025-07-15T06:00:00.000Z",
       "status": "scheduled",
       "patient": {
         "id": 1,
@@ -100,43 +106,13 @@
         "address": "123 Main St, City, State 12345"
       },
       "doctor": {
-        "id": 1,
-        "name": "Dr. John Smith",
-        "specialty": "Cardiology",
-        "email": "john@clinic.com",
-        "phone": "+1234567890",
-        "color": "#3b82f6"
+        "id": 2,
+        "name": "Dr. Sarah Johnson",
+        "specialty": "Dermatology",
+        "email": "sarah@clinic.com",
+        "phone": "+1234567891",
+        "color": "#ef4444"
       }
-    },
-    {
-      "id": 1752376490610,
-      "title": "ttt",
-      "description": "ttt",
-      "patientId": 1,
-      "doctorId": 1,
-      "startTime": "2025-07-14T07:00:00.000Z",
-      "endTime": "2025-07-14T08:00:00.000Z",
-      "status": "scheduled"
-    },
-    {
-      "id": 1752377208829,
-      "title": "asdf",
-      "description": "asdf",
-      "patientId": 2,
-      "doctorId": 1,
-      "startTime": "2025-07-14T06:00:00.000Z",
-      "endTime": "2025-07-14T06:30:00.000Z",
-      "status": "scheduled"
-    },
-    {
-      "id": 1752405398717,
-      "title": "awa",
-      "description": "dada",
-      "patientId": 1,
-      "doctorId": 2,
-      "startTime": "2025-07-14T03:30:00.000Z",
-      "endTime": "2025-07-14T04:30:00.000Z",
-      "status": "scheduled"
     }
   ],
   "settings": {
