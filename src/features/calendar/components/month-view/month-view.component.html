@@ -15,12 +15,21 @@
     @for (day of monthDays; track day.toISOString()) {
     <div
       [class]="
-        'bg-white dark:bg-gray-800 min-h-[120px] p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ' +
-        (isPastDate(day) ? 'opacity-50' : '') +
+        'bg-white dark:bg-gray-800 min-h-[120px] p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative ' +
+        (isPastDate(day) ? 'past-day' : '') +
         ' ' +
-        (!isCurrentMonth(day) ? 'bg-gray-50 dark:bg-gray-700' : '')
+        (!isCurrentMonth(day) ? 'bg-gray-50 dark:bg-gray-700' : '') +
+        ' ' +
+        (isRestrictedDay(day) ? 'restricted-day' : '') +
+        ' ' +
+        (isWeekend(day) && !isPastDate(day) ? 'weekend-day' : '') +
+        ' ' +
+        (isHoliday(day) && !isPastDate(day) && !isWeekend(day)
+          ? 'holiday-day'
+          : '')
       "
-      (click)="onDateClick(day)"
+      [style.cursor]="isRestrictedDay(day) ? 'not-allowed' : 'pointer'"
+      (click)="!isRestrictedDay(day) ? onDateClick(day) : null"
     >
       <!-- Day number -->
       <div class="flex items-center justify-between mb-1">
@@ -52,6 +61,7 @@
           [doctors]="doctors()"
           [gridContainer]="monthGrid"
           [monthDays]="monthDays"
+          [viewType]="'month'"
           (click)="onAppointmentClick(appointment, $event)"
           (dragStart)="onDragStart($event)"
           (dragUpdate)="onDragUpdate($event)"

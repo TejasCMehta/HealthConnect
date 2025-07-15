@@ -179,3 +179,65 @@
     }
   }
 }
+
+// Restricted time slots (weekends/holidays/past)
+.restricted-time-slot {
+  background-color: #f8f9fa !important; // Very light gray background
+  cursor: not-allowed !important;
+  opacity: 0.7;
+
+  &:hover {
+    background-color: #f8f9fa !important; // Keep light gray on hover
+  }
+
+  // Remove the diagonal stripes for day view as they're too overwhelming
+  // Instead use a subtle left border to indicate restriction
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: #dc2626; // Red left border
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// Weekend days styling
+.weekend-day {
+  background-color: #f8f9fa !important; // Very light gray for weekend days
+  opacity: 0.8;
+
+  &:hover {
+    background-color: #f1f3f4 !important; // Slightly darker gray on hover
+  }
+}
+
+// Holiday days styling
+.holiday-day {
+  background-color: #fffbeb !important; // Very light orange for holidays
+  opacity: 0.8;
+}
+
+// Enhanced styling for time slot elements within restricted days
+.time-slot.restricted-time-slot,
+.time-slot.weekend-day,
+.time-slot.holiday-day {
+  // Make the time labels more subtle
+  .text-gray-500 {
+    color: #9ca3af !important; // More muted gray
+  }
+
+  // Style the clickable areas differently
+  .border-dashed {
+    border-color: #d1d5db !important; // More muted border
+    opacity: 0.5;
+
+    &:hover {
+      border-color: #d1d5db !important; // Keep muted on hover
+      background-color: transparent !important; // Disable hover background
+    }
+  }
+}

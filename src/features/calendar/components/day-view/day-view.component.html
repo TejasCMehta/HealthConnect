@@ -57,11 +57,11 @@
     <div
       [class]="
         'flex items-start border-b border-gray-200 dark:border-gray-700 py-3 time-slot ' +
-        (isPastTimeSlot(timeSlot) ? 'opacity-50 past' : '') +
-        (isTimeSlotBlocked(timeSlot) ? ' blocked' : '') +
-        (currentDate().getDay() === 0 || currentDate().getDay() === 6
-          ? ' weekend'
-          : '')
+        (isRestrictedTimeSlot(timeSlot) ? 'restricted-time-slot' : '') +
+        (isWeekend() ? 'weekend-day' : '') +
+        (isHoliday() ? 'holiday-day' : '') +
+        (isPastTimeSlot(timeSlot) ? ' opacity-50 past' : '') +
+        (isTimeSlotBlocked(timeSlot) ? ' blocked' : '')
       "
     >
       <!-- Time label -->
@@ -104,18 +104,26 @@
         } @else {
         <!-- Empty time slot - clickable -->
         <div
-          (click)="onTimeSlotClick(timeSlot)"
+          (click)="
+            !isRestrictedTimeSlot(timeSlot) ? onTimeSlotClick(timeSlot) : null
+          "
           [class]="
             'w-full h-10 border border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-colors flex items-center justify-center ' +
-            (isPastTimeSlot(timeSlot) ? 'cursor-not-allowed opacity-50' : '')
+            (isRestrictedTimeSlot(timeSlot)
+              ? 'cursor-not-allowed opacity-50'
+              : '')
           "
           [title]="
-            isPastTimeSlot(timeSlot)
-              ? 'Cannot create appointments in the past'
+            isRestrictedTimeSlot(timeSlot)
+              ? isWeekend()
+                ? 'Clinic closed on weekends'
+                : isHoliday()
+                ? 'Clinic closed on holidays'
+                : 'Cannot create appointments in the past'
               : 'Click to create new appointment'
           "
         >
-          @if (!isPastTimeSlot(timeSlot)) {
+          @if (!isRestrictedTimeSlot(timeSlot)) {
           <i class="ri-add-line text-gray-400 hover:text-blue-500"></i>
           }
         </div>
@@ -150,6 +158,7 @@
                 [slotHeight]="65"
                 [doctors]="doctors()"
                 [gridContainer]="gridContainer"
+                [viewType]="'day'"
                 (click)="
                   onAppointmentClick(appointmentData.appointment);
                   debugAppointment(appointmentData.appointment)

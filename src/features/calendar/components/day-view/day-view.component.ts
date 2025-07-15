@@ -247,6 +247,33 @@ export class DayViewComponent implements OnInit, OnDestroy {
     return slotTime < now;
   }
 
+  isWeekend(date: Date = this.currentDate()): boolean {
+    const day = date.getDay();
+    return day === 0 || day === 6; // Sunday or Saturday
+  }
+
+  isHoliday(date: Date = this.currentDate()): boolean {
+    // Example holidays - in a real app, this would come from a service
+    const holidays = [
+      "2025-01-01", // New Year's Day
+      "2025-07-04", // Independence Day
+      "2025-12-25", // Christmas
+      // Add more holidays as needed
+    ];
+
+    const dateString = date.toISOString().split("T")[0];
+    return holidays.includes(dateString);
+  }
+
+  isRestrictedTimeSlot(timeSlot: string): boolean {
+    const date = this.currentDate();
+    return (
+      this.isPastTimeSlot(timeSlot) ||
+      this.isWeekend(date) ||
+      this.isHoliday(date)
+    );
+  }
+
   onAppointmentClick(appointment: Appointment): void {
     // Prevent click if this appointment just completed a resize
     if (this.recentResizeAppointmentId === appointment.id) {
@@ -258,8 +285,8 @@ export class DayViewComponent implements OnInit, OnDestroy {
   }
 
   onTimeSlotClick(timeSlot: string): void {
-    // Don't allow clicking on past time slots
-    if (this.isPastTimeSlot(timeSlot)) {
+    // Don't allow clicking on restricted time slots (past, weekends, holidays)
+    if (this.isRestrictedTimeSlot(timeSlot)) {
       return;
     }
 

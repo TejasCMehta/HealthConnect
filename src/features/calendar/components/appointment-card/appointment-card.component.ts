@@ -12,11 +12,15 @@ import { Appointment } from "../../../../shared/models/appointment.model";
 import { Doctor } from "../../../../shared/models/doctor.model";
 import { AppointmentResizeService } from "../../services/appointment-resize.service";
 import { AppointmentDragDropService } from "../../services/appointment-drag-drop.service";
+import {
+  FloatingDragPreviewComponent,
+  FloatingDragData,
+} from "../floating-drag-preview/floating-drag-preview.component";
 
 @Component({
   selector: "app-appointment-card",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FloatingDragPreviewComponent],
   templateUrl: "./appointment-card.component.html",
   styleUrl: "./appointment-card.component.scss",
 })
@@ -34,6 +38,7 @@ export class AppointmentCardComponent implements OnDestroy {
   public gridContainer = input<HTMLElement | null>(null); // Grid container for drag calculations
   public weekDays = input<Date[]>([]); // Week days array for cross-day dragging in week view
   public monthDays = input<Date[]>([]); // Month days array for cross-day dragging in month view
+  public viewType = input<"week" | "day" | "month">("day"); // Current view type
 
   @HostBinding("class.compact") get isCompact() {
     return this.compact();
@@ -84,6 +89,7 @@ export class AppointmentCardComponent implements OnDestroy {
     newDoctorId: number;
     isValidTarget: boolean;
   } | null>(null);
+  public floatingDragData = signal<FloatingDragData | null>(null);
 
   private resizeStartY = 0;
   private resizeListeners: (() => void)[] = [];
@@ -411,8 +417,12 @@ export class AppointmentCardComponent implements OnDestroy {
       this.appointment(),
       this.dragStartX,
       this.dragStartY,
-      this.slotHeight()
+      this.slotHeight(),
+      this.viewType()
     );
+
+    // Initialize floating drag preview
+    this.updateFloatingPreview(event.clientX, event.clientY);
 
     // Emit drag start event
     this.dragStart.emit({
@@ -467,6 +477,9 @@ export class AppointmentCardComponent implements OnDestroy {
         newDoctorId: this.appointment().doctorId,
         isValidTarget: false,
       });
+
+      // Update floating preview for invalid position
+      this.updateFloatingPreview(event.clientX, event.clientY);
       return;
     }
 
@@ -490,6 +503,9 @@ export class AppointmentCardComponent implements OnDestroy {
       newDoctorId: result.newDoctorId,
       isValidTarget: result.isValidTarget,
     });
+
+    // Update floating preview
+    this.updateFloatingPreview(event.clientX, event.clientY);
   };
 
   /**
@@ -535,6 +551,9 @@ export class AppointmentCardComponent implements OnDestroy {
 
     // Always reset preview after handling
     this.dragPreview.set(null);
+
+    // Clear floating preview
+    this.floatingDragData.set(null);
   };
 
   /**
@@ -575,5 +594,21 @@ export class AppointmentCardComponent implements OnDestroy {
   private cleanupDragListeners(): void {
     this.dragListeners.forEach((cleanup) => cleanup());
     this.dragListeners = [];
+  }
+
+  /**
+   * Update floating drag preview
+   */
+  private updateFloatingPreview(mouseX: number, mouseY: number): void {
+    if (!this.isDragging()) {
+      this.floatingDragData.set(null);
+      return;
+    }
+
+    const previewData = this.dragDropService.getFloatingDragData(
+      mouseX,
+      mouseY
+    );
+    this.floatingDragData.set(previewData);
   }
 }

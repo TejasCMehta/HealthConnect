@@ -533,12 +533,25 @@
     transition: opacity 0.3s ease;
     z-index: 300; // Higher than resize pseudo-element
     position: absolute; // Ensure proper positioning
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
 
     .drag-icon {
       animation: dragIconPulse 2s ease-in-out infinite;
       background: rgba(59, 130, 246, 0.9);
       backdrop-filter: blur(4px);
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     &:hover .drag-icon {
@@ -555,6 +568,14 @@
 
     // Ensure the drag handle appears above content
     z-index: 100;
+  }
+
+  // Make drag handle visible on focus as well
+  &:focus-within {
+    .drag-handle-center {
+      opacity: 1;
+      z-index: 300;
+    }
   }
 
   // Override any resize cursor in the center area where drag handle is

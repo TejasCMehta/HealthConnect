@@ -74,22 +74,34 @@
         @for (day of weekDays; track day.toISOString()) {
         <div
           class="bg-white dark:bg-gray-800 relative overflow-visible min-h-[75px] group"
-          [class.past-time]="isPastTimeSlot(day, timeSlot)"
+          [class.restricted-time-slot]="isRestrictedTimeSlot(day, timeSlot)"
+          [class.weekend-day]="isWeekend(day) && !isPastTimeSlot(day, timeSlot)"
+          [class.holiday-day]="
+            isHoliday(day) && !isPastTimeSlot(day, timeSlot) && !isWeekend(day)
+          "
         >
           <!-- Empty time slot click area -->
           @if (getAppointmentsForDateAndTime(day, timeSlot).length === 0) {
           <div
-            (click)="onTimeSlotClick(day, timeSlot)"
+            (click)="
+              !isRestrictedTimeSlot(day, timeSlot)
+                ? onTimeSlotClick(day, timeSlot)
+                : null
+            "
             class="absolute inset-0 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center justify-center"
-            [class.cursor-not-allowed]="isPastTimeSlot(day, timeSlot)"
-            [class.opacity-50]="isPastTimeSlot(day, timeSlot)"
+            [class.cursor-not-allowed]="isRestrictedTimeSlot(day, timeSlot)"
+            [class.opacity-50]="isRestrictedTimeSlot(day, timeSlot)"
             [title]="
-              isPastTimeSlot(day, timeSlot)
-                ? 'Cannot create appointments in the past'
+              isRestrictedTimeSlot(day, timeSlot)
+                ? isWeekend(day)
+                  ? 'Clinic closed on weekends'
+                  : isHoliday(day)
+                  ? 'Clinic closed on holidays'
+                  : 'Cannot create appointments in the past'
                 : 'Click to create new appointment'
             "
           >
-            @if (!isPastTimeSlot(day, timeSlot)) {
+            @if (!isRestrictedTimeSlot(day, timeSlot)) {
             <i
               class="ri-add-line text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
             ></i>
@@ -121,6 +133,7 @@
               [doctors]="doctors()"
               [gridContainer]="gridContainer"
               [weekDays]="weekDays"
+              [viewType]="'week'"
               (click)="onAppointmentClick(appointmentData.appointment, $event)"
               (resizeStart)="onResizeStart($event)"
               (resizeUpdate)="onResizeUpdate($event)"
