@@ -125,8 +125,11 @@ export class AppointmentResizeService {
     }
 
     // Check if new time is during clinic hours (8 AM - 6 PM)
+    // Allow appointments to end exactly at 6:00 PM (18:00)
     const hour = newEndTime.getHours();
-    if (hour < 8 || hour >= 18) {
+    const minute = newEndTime.getMinutes();
+
+    if (hour < 8 || hour > 18 || (hour === 18 && minute > 0)) {
       return {
         isValid: false,
         errorMessage: "Appointment must be within clinic hours (8 AM - 6 PM)",
@@ -221,13 +224,31 @@ export class AppointmentResizeService {
 
   /**
    * Check if time is during clinic hours
+   * For end times, allows exactly 6:00 PM (18:00)
+   * For start times, must be before 6:00 PM
    */
-  isWithinClinicHours(timeStr: string): boolean {
+  isWithinClinicHours(timeStr: string, isEndTime: boolean = false): boolean {
     const time = new Date(timeStr);
     const hour = time.getHours();
+    const minute = time.getMinutes();
     const day = time.getDay();
 
-    // Check if it's within 8 AM - 6 PM and not weekend
-    return hour >= 8 && hour < 18 && day !== 0 && day !== 6;
+    // Check if it's a weekend
+    if (day === 0 || day === 6) {
+      return false;
+    }
+
+    // Check if it's within 8 AM - 6 PM
+    if (hour < 8) {
+      return false;
+    }
+
+    if (isEndTime) {
+      // For end times, allow exactly 6:00 PM but not after
+      return hour < 18 || (hour === 18 && minute === 0);
+    } else {
+      // For start times, must be before 6:00 PM
+      return hour < 18;
+    }
   }
 }

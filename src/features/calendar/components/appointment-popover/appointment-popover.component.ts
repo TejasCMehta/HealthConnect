@@ -271,6 +271,36 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
     return `${dateStr}, ${startTime} - ${endTime}`;
   }
 
+  formatDate(): string {
+    const startDate = new Date(this.appointment().startTime);
+
+    return startDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  formatTimeRange(): string {
+    const startDate = new Date(this.appointment().startTime);
+    const endDate = new Date(this.appointment().endTime);
+
+    const startTime = startDate.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    const endTime = endDate.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${startTime} - ${endTime}`;
+  }
+
   getPatientName(): string {
     return (
       this.appointment().patient?.name ||

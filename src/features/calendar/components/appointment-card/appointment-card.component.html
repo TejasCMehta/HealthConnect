@@ -38,6 +38,7 @@
 
   <div class="flex items-start justify-between flex-1">
     <div class="flex-1 min-w-0">
+      <!-- Patient Name as Primary Title -->
       <h4
         [class]="
           'font-medium truncate transition-all duration-200 ' +
@@ -47,9 +48,9 @@
           (isResizing() ? ' font-bold text-blue-700 dark:text-blue-300' : '') +
           (isDragging() ? ' font-bold text-green-700 dark:text-green-300' : '')
         "
-        [title]="appointment().title"
+        [title]="appointment().patient?.name || appointment().title"
       >
-        {{ appointment().title }}
+        {{ appointment().patient?.name || appointment().title }}
         @if (isResizing()) {
         <span class="ml-1 text-xs font-normal text-blue-500 animate-pulse">
           (resizing...)
@@ -70,22 +71,31 @@
       </h4>
 
       @if (!compact()) {
+      <!-- Non-compact mode: Show time, duration, and doctor if space allows -->
       <div
         class="mt-1 flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400"
       >
-        <span>{{ startTime }} - {{ endTime }}</span>
+        <span class="font-medium">{{ startTime }} - {{ endTime }}</span>
         <span>•</span>
         <span>{{ duration }} min</span>
+        @if (appointment().doctor?.name) {
+        <span>•</span>
+        <span class="truncate">Dr. {{ appointment().doctor?.name }}</span>
+        }
       </div>
 
-      @if (appointment().description) {
-      <p class="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
-        {{ appointment().description }}
-      </p>
-      } } @else {
-      <!-- Compact mode: show essential info only -->
-      <div class="mt-1 text-xs text-blue-600 dark:text-blue-300 truncate">
-        {{ startTime }}
+      } @else {
+      <!-- Compact mode: Show start time prominently -->
+      <div class="mt-1 flex items-center space-x-1 text-xs">
+        <span class="font-medium text-blue-600 dark:text-blue-300">{{
+          startTime
+        }}</span>
+        @if (appointment().doctor?.name && slotHeight() >= 40) {
+        <span class="text-gray-500 dark:text-gray-400">•</span>
+        <span class="text-gray-500 dark:text-gray-400 truncate"
+          >Dr. {{ appointment().doctor?.name }}</span
+        >
+        }
       </div>
       }
     </div>
