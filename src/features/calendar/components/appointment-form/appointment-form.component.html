@@ -21,51 +21,6 @@
     <!-- Form Content -->
     <div class="flex-1 overflow-y-auto p-4">
       <form (ngSubmit)="onSubmit()" class="space-y-4">
-        <!-- Title -->
-        <div>
-          <label
-            for="title"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            Title *
-          </label>
-          <input
-            id="title"
-            type="text"
-            required
-            [value]="form().title"
-            (input)="updateForm('title', $any($event.target).value)"
-            [class]="
-              'w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white' +
-              (validationService.getFieldError('title')
-                ? ' border-red-300 dark:border-red-600'
-                : ' border-gray-300 dark:border-gray-600')
-            "
-            placeholder="Enter appointment title"
-          />
-          <app-field-error
-            [errorMessage]="validationService.getFieldError('title')"
-          ></app-field-error>
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label
-            for="description"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            Description
-          </label>
-          <textarea
-            id="description"
-            rows="3"
-            [value]="form().description"
-            (input)="updateForm('description', $any($event.target).value)"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            placeholder="Enter appointment description"
-          ></textarea>
-        </div>
-
         <!-- Patient Selection -->
         <div>
           <label
@@ -136,7 +91,7 @@
               for="appointmentDate"
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
-              Appointment Date *
+              Date *
             </label>
             <input
               id="appointmentDate"
@@ -230,6 +185,24 @@
               }
             </div>
           </div>
+        </div>
+
+        <!-- Notes (Description) -->
+        <div>
+          <label
+            for="description"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Notes
+          </label>
+          <textarea
+            id="description"
+            rows="3"
+            [value]="form().description"
+            (input)="updateForm('description', $any($event.target).value)"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            placeholder="Enter appointment notes"
+          ></textarea>
         </div>
 
         <!-- Status -->

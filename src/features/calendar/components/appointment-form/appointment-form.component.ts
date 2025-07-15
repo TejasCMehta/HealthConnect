@@ -48,7 +48,6 @@ export class AppointmentFormComponent implements OnInit {
   public error = signal("");
 
   public form = signal({
-    title: "",
     description: "",
     patientId: "0",
     doctorId: "0",
@@ -129,7 +128,6 @@ export class AppointmentFormComponent implements OnInit {
       const endTime = endDateTime.toTimeString().slice(0, 5); // HH:MM format
 
       this.form.set({
-        title: apt.title,
         description: apt.description || "",
         patientId: apt.patientId.toString(),
         doctorId: apt.doctorId.toString(),
@@ -179,7 +177,6 @@ export class AppointmentFormComponent implements OnInit {
         .padStart(2, "0")}`;
 
       this.form.set({
-        title: "",
         description: "",
         patientId: "0",
         doctorId: "0",
@@ -536,7 +533,7 @@ export class AppointmentFormComponent implements OnInit {
     );
 
     const appointmentData = {
-      title: formData.title,
+      title: this.generateAppointmentTitle(),
       description: formData.description,
       patientId: parseInt(formData.patientId),
       doctorId: parseInt(formData.doctorId),
@@ -578,10 +575,6 @@ export class AppointmentFormComponent implements OnInit {
     let isValid = true;
 
     // Validate required fields
-    if (!this.validationService.validateRequired(form.title.trim(), "title")) {
-      isValid = false;
-    }
-
     if (!this.validationService.validateSelection(form.patientId, "patient")) {
       isValid = false;
     }
@@ -831,5 +824,20 @@ export class AppointmentFormComponent implements OnInit {
       // Regenerate time slots for the new date
       this.generateTimeSlots();
     }
+  }
+
+  /**
+   * Generate appointment title based on patient and doctor names
+   */
+  private generateAppointmentTitle(): string {
+    const form = this.form();
+    const patientName =
+      this.patients().find((p) => p.id.toString() === form.patientId)?.name ||
+      "Unknown Patient";
+    const doctorName =
+      this.doctors().find((d) => d.id.toString() === form.doctorId)?.name ||
+      "Unknown Doctor";
+
+    return `${patientName} - Dr. ${doctorName}`;
   }
 }
