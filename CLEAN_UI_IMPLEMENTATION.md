@@ -123,6 +123,50 @@ Successfully implemented a clean, minimalist calendar UI design inspired by mode
 - Navigation remains functional and clean on mobile devices
 - Grid lines and borders scale appropriately
 
+## Drag and Drop UX Improvements
+
+### Cursor Styling
+
+- **Move Cursor**: Added `cursor: move` styling for all drag handles
+- **Drag Handle Classes**:
+  - `.drag-handle`
+  - `.appointment-drag-handle`
+  - `.drag-handle-center`
+- **Smart Detection**: Uses CSS `:has()` selector to automatically show move cursor on cards containing drag handles
+- **Hover States**: Enhanced feedback on hover for better UX
+- **Draggable State**: Cards show move cursor when in draggable state
+
+### Implementation Details
+
+```scss
+// Direct drag handle styling
+.drag-handle,
+.appointment-drag-handle,
+.drag-handle-center {
+  cursor: move;
+  
+  &:hover {
+    cursor: move;
+  }
+}
+
+// Card-level cursor when draggable
+&.draggable {
+  cursor: move;
+  
+  &:hover {
+    cursor: move;
+  }
+}
+
+// Automatic cursor detection for cards with drag handles
+&:has(.drag-handle),
+&:has(.appointment-drag-handle),
+&:has(.drag-handle-center) {
+  cursor: move;
+}
+```
+
 ## Result
 
 The calendar now matches the clean, minimalist aesthetic shown in the attached images:
