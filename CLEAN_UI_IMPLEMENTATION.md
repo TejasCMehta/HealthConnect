@@ -144,7 +144,7 @@ Successfully implemented a clean, minimalist calendar UI design inspired by mode
 .appointment-drag-handle,
 .drag-handle-center {
   cursor: move;
-  
+
   &:hover {
     cursor: move;
   }
@@ -153,7 +153,7 @@ Successfully implemented a clean, minimalist calendar UI design inspired by mode
 // Card-level cursor when draggable
 &.draggable {
   cursor: move;
-  
+
   &:hover {
     cursor: move;
   }

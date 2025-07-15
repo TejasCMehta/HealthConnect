@@ -1,6 +1,10 @@
 <div
   [class]="
-    'appointment-card transition-colors border-l-4 border-blue-500 flex flex-col relative ' +
+    'appointment-card transition-colors border-l-4 flex flex-col relative ' +
+    (appointment().status === 'scheduled' ? 'border-blue-500 ' : '') +
+    (appointment().status === 'completed' ? 'border-green-500 ' : '') +
+    (appointment().status === 'cancelled' ? 'border-red-500 ' : '') +
+    (!appointment().status ? 'border-gray-400 ' : '') +
     (compact()
       ? 'p-1 bg-blue-50 dark:bg-blue-900/20 rounded-md' +
         (disableHover() ? '' : ' hover:bg-blue-100 dark:hover:bg-blue-900/40')
@@ -43,14 +47,21 @@
         [class]="
           'font-medium truncate transition-all duration-200 ' +
           (compact()
-            ? 'text-xs text-blue-800 dark:text-blue-200'
+            ? 'text-xs text-blue-800 dark:text-blue-200 max-w-[120px]'
             : 'text-sm text-gray-900 dark:text-white') +
           (isResizing() ? ' font-bold text-blue-700 dark:text-blue-300' : '') +
           (isDragging() ? ' font-bold text-green-700 dark:text-green-300' : '')
         "
         [title]="appointment().patient?.name || appointment().title"
+        style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
       >
-        {{ appointment().patient?.name || appointment().title }}
+        @if (compact()) {
+          <!-- In compact mode, show appointment title or fallback -->
+          {{ appointment().title || 'Appointment' }}
+        } @else {
+          <!-- In non-compact mode, show patient name -->
+          {{ appointment().patient?.name || appointment().title }}
+        }
         @if (isResizing()) {
         <span class="ml-1 text-xs font-normal text-blue-500 animate-pulse">
           (resizing...)
@@ -85,50 +96,26 @@
       </div>
 
       } @else {
-      <!-- Compact mode: Show start time prominently -->
-      <div class="mt-1 flex items-center space-x-1 text-xs">
-        <span class="font-medium text-blue-600 dark:text-blue-300">{{
+      <!-- Compact mode: Show start time and patient name in one line -->
+      @if (slotHeight() >= 30) {
+      <div class="mt-1 flex items-center space-x-1 text-xs compact-time">
+        <span class="font-medium text-blue-600 dark:text-blue-300 flex-shrink-0">{{
           startTime
         }}</span>
-        @if (appointment().doctor?.name && slotHeight() >= 40) {
-        <span class="text-gray-500 dark:text-gray-400">•</span>
-        <span class="text-gray-500 dark:text-gray-400 truncate"
-          >Dr. {{ appointment().doctor?.name }}</span
-        >
-        }
+        <span class="text-gray-500 dark:text-gray-400 truncate max-w-[80px]">{{
+          appointment().patient?.name || appointment().title
+        }}</span>
       </div>
+      } @else {
+        <!-- Very compact: just patient name -->
+        <div class="mt-0.5 text-xs">
+          <span class="text-gray-700 dark:text-gray-300 truncate max-w-[100px] block">{{
+            appointment().patient?.name || appointment().title
+          }}</span>
+        </div>
+      }
       }
     </div>
-
-    @if (!compact()) {
-    <div class="flex-shrink-0 ml-2">
-      <span
-        [class]="
-          'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ' +
-          statusColor
-        "
-      >
-        {{ appointment().status }}
-      </span>
-    </div>
-    } @else {
-    <!-- Compact mode: show status as a small dot -->
-    <div class="flex-shrink-0 ml-1">
-      <div
-        [class]="
-          'w-2 h-2 rounded-full ' +
-          (appointment().status === 'scheduled'
-            ? 'bg-blue-500'
-            : appointment().status === 'completed'
-            ? 'bg-green-500'
-            : appointment().status === 'cancelled'
-            ? 'bg-red-500'
-            : 'bg-gray-500')
-        "
-        [title]="appointment().status"
-      ></div>
-    </div>
-    }
   </div>
 
   <!-- Resize Handle (if resize is enabled, show in both compact and non-compact modes) -->

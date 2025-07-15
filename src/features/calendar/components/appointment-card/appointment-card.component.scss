@@ -88,21 +88,72 @@
     }
   }
 
-  // Show move cursor on card when draggable
-  &.draggable {
-    cursor: move;
+  // Hand cursor for card area (clickable but not draggable)
+  &.month-view-appointment {
+    cursor: pointer;
+  }
 
-    &:hover {
-      cursor: move;
+  // Grab cursor for day/week view appointments
+  &.day-week-view-appointment {
+    cursor: pointer;
+  }
+}
+
+// Drag handle center styling
+.drag-handle-center {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  cursor: move;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+
+  :host-context(.dark) & {
+    background-color: rgba(55, 65, 81, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .drag-icon {
+    width: 10px;
+    height: 10px;
+    color: #6b7280;
+    transition: color 0.15s ease;
+
+    :host-context(.dark) & {
+      color: #9ca3af;
     }
   }
 
-  // Override pointer cursor when drag handle is present
-  &:has(.drag-handle),
-  &:has(.appointment-drag-handle),
-  &:has(.drag-handle-center) {
-    cursor: move;
+  &:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 1);
+
+    :host-context(.dark) & {
+      background-color: rgba(55, 65, 81, 1);
+    }
+
+    .drag-icon {
+      color: #374151;
+
+      :host-context(.dark) & {
+        color: #d1d5db;
+      }
+    }
   }
+}
+
+// Show drag handle on card hover
+.appointment-card:hover .drag-handle-center {
+  opacity: 0.7;
 }
 
 // Drag state - minimal highlight
@@ -147,37 +198,42 @@
   }
 }
 
-// Status indicators - subtle colored borders
-.appointment-card {
-  &.status-confirmed {
-    border-left: 3px solid #10b981;
-  }
+// Status indicators - now handled via dynamic border classes in HTML template
+// Removed individual status classes to avoid duplication
 
-  &.status-pending {
-    border-left: 3px solid #f59e0b;
-  }
-
-  &.status-cancelled {
-    border-left: 3px solid #ef4444;
-    opacity: 0.7;
-  }
-}
-
-// Compact view for smaller time slots
+// Compact view optimizations
 .appointment-card.compact {
-  padding: 4px 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  position: relative;
 
+  // Optimized spacing and typography
   .appointment-title {
-    font-size: 0.75rem;
-    margin-bottom: 1px;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    margin-bottom: 0;
   }
 
   .appointment-time {
     font-size: 0.625rem;
   }
 
+  // Hide patient name in very compact view to avoid duplication
   .appointment-patient {
-    display: none; // Hide patient name in compact view
+    display: none;
+  }
+
+  // Smaller drag handle for compact view
+  .drag-handle-center {
+    width: 14px;
+    height: 14px;
+    top: 1px;
+    right: 1px;
+
+    .drag-icon {
+      width: 8px;
+      height: 8px;
+    }
   }
 }
 

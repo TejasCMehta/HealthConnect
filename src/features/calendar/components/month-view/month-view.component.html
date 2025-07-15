@@ -72,10 +72,7 @@
 
         <!-- Show more indicator -->
         @if (getAppointmentsForDate(day).length > 3) {
-        <div
-          class="text-xs text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 px-1 py-0.5 rounded"
-          (click)="onMoreClick(day, $event)"
-        >
+        <div class="show-more-button" (click)="onMoreClick(day, $event)">
           +{{ getAppointmentsForDate(day).length - 3 }} more
         </div>
         }
