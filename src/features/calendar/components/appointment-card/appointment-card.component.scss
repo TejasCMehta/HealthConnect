@@ -12,7 +12,6 @@
   border-radius: 6px;
   padding: 8px;
   margin: 1px;
-  height: calc(100% - 2px);
   box-sizing: border-box;
   position: relative;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -323,7 +322,7 @@
 
 // Non-compact view (Week and Day views) - allow dynamic heights
 .appointment-card:not(.compact) {
-  // Allow normal height behavior based on duration and slots
+  // Allow dynamic heights based on inline styles
   min-height: 30px; // Minimum height for readability
 
   // Normal drag handle for week/day views

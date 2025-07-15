@@ -13,9 +13,7 @@
     (!appointment().status
       ? 'border-gray-400 bg-gray-50 dark:bg-gray-900/10 '
       : '') +
-    (compact()
-      ? 'p-1 rounded-md min-h-[20px] h-[20px]'
-      : 'p-3 shadow-sm rounded-r-md') +
+    (compact() ? 'compact p-1 rounded-md' : 'p-3 shadow-sm rounded-r-md') +
     (disableHover() ? '' : ' hover:bg-opacity-80') +
     (isResizing() ? ' resizing' : '') +
     (isDragging() ? ' dragging cursor-grabbing' : '') +
@@ -27,8 +25,8 @@
       : '') +
     (enableResize() ? ' day-week-view-appointment cursor-grab' : '')
   "
-  [style.height.px]="dynamicHeight"
-  [style.min-height.px]="slotHeight()"
+  [style.height.px]="compact() ? null : dynamicHeight || slotHeight()"
+  [style.min-height.px]="compact() ? null : slotHeight()"
 >
   <!-- Central Drag Handle for All Views -->
   @if (enableDrag() && !isDragging()) {
