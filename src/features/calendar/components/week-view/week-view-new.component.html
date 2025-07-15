@@ -1,30 +1,29 @@
-<div class="overflow-x-auto w-full">
-  <div class="min-w-full">
-    <!-- Week header -->
-    <div class="grid grid-cols-8 border-b border-gray-200 dark:border-gray-700">
-      <div
-        class="bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center border-r border-gray-200 dark:border-gray-700"
-      >
-        <span class="text-sm font-medium text-gray-500 dark:text-gray-400"
-          >Time</span
-        >
+<div class="h-full flex flex-col">
+  <!-- Week header with enhanced styling -->
+  <div class="grid grid-cols-8 gap-0 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-t-lg overflow-hidden">
+    <div class="bg-white dark:bg-gray-900 px-3 py-4 text-center border-r border-gray-200 dark:border-gray-700">
+      <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Time</span>
+    </div>
+    @for (day of weekDays; track day.toISOString()) {
+    <div class="bg-white dark:bg-gray-900 px-3 py-4 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0">
+      <div class="text-sm font-semibold text-gray-900 dark:text-white">
+        {{ day.toLocaleDateString("en-US", { weekday: "short" }) }}
       </div>
-      @for (day of weekDays; track day.toISOString()) {
-      <div
-        class="bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0"
-      >
-        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-          {{ day.toLocaleDateString("en-US", { weekday: "short" }) }}
-        </div>
-        <div class="text-xs text-gray-400 dark:text-gray-500">
-          {{ day.getDate() }}
-        </div>
+      <div class="text-lg font-bold text-gray-600 dark:text-gray-400 mt-1" 
+           [class.text-blue-600]="isToday(day)"
+           [class.dark:text-blue-400]="isToday(day)">
+        {{ day.getDate() }}
       </div>
+      @if (isToday(day)) {
+      <div class="w-2 h-2 bg-blue-500 rounded-full mx-auto mt-1"></div>
       }
     </div>
+    }
+  </div>
 
-    <!-- Time slots -->
-    <div class="space-y-px relative" #gridContainer>
+  <!-- Time slots with enhanced styling -->
+  <div class="flex-1 overflow-auto bg-white dark:bg-gray-900 rounded-b-lg">
+    <div class="space-y-0 relative" #gridContainer>
       <!-- Current time indicator -->
       @if (isCurrentTimeVisible) {
       <div
@@ -47,8 +46,8 @@
         </div>
 
         <!-- Current time line across all day columns -->
-        @for (day of weekDays; track day.toISOString(); let i = $index) { @if
-        (isToday(day)) {
+        @for (day of weekDays; track day.toISOString(); let i = $index) { 
+        @if (isToday(day)) {
         <div
           class="absolute h-0.5 bg-blue-500 shadow-lg time-line"
           [style.left]="12.5 + i * 12.5 + '%'"
@@ -61,28 +60,24 @@
         </div>
         } }
       </div>
-      } @for (timeSlot of timeSlots; track timeSlot) {
-      <div
-        class="grid grid-cols-8 min-h-[75px] border-b border-gray-200 dark:border-gray-700"
-      >
+      } 
+      
+      @for (timeSlot of timeSlots; track timeSlot) {
+      <div class="grid grid-cols-8 gap-0 bg-gray-50 dark:bg-gray-800 min-h-[75px] border-b border-gray-200 dark:border-gray-700 last:border-b-0">
         <!-- Time label -->
-        <div
-          class="bg-gray-50 dark:bg-gray-800 px-2 py-3 flex items-center justify-center border-r border-gray-200 dark:border-gray-700"
-        >
-          <span class="text-sm text-gray-500 dark:text-gray-400">{{
-            timeSlot
-          }}</span>
+        <div class="bg-gray-50 dark:bg-gray-800 px-3 py-3 flex items-center justify-center border-r border-gray-200 dark:border-gray-700">
+          <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ timeSlot }}</span>
         </div>
 
         <!-- Day columns -->
         @for (day of weekDays; track day.toISOString()) {
         <div
-          class="bg-white dark:bg-gray-900 relative overflow-visible min-h-[75px] group border-r border-gray-200 dark:border-gray-700 last:border-r-0"
-          [class.restricted-time-slot]="isRestrictedTimeSlot(day, timeSlot)"
-          [class.weekend-day]="isWeekend(day) && !isPastTimeSlot(day, timeSlot)"
-          [class.holiday-day]="
-            isHoliday(day) && !isPastTimeSlot(day, timeSlot) && !isWeekend(day)
-          "
+          class="bg-white dark:bg-gray-900 relative overflow-visible min-h-[75px] group border-r border-gray-200 dark:border-gray-700 last:border-r-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          [class.opacity-30]="isRestrictedTimeSlot(day, timeSlot)"
+          [class.bg-red-50]="isWeekend(day) && !isPastTimeSlot(day, timeSlot)"
+          [class.dark:bg-red-900/10]="isWeekend(day) && !isPastTimeSlot(day, timeSlot)"
+          [class.bg-yellow-50]="isHoliday(day) && !isPastTimeSlot(day, timeSlot) && !isWeekend(day)"
+          [class.dark:bg-yellow-900/10]="isHoliday(day) && !isPastTimeSlot(day, timeSlot) && !isWeekend(day)"
         >
           <!-- Empty time slot click area -->
           @if (getAppointmentsForDateAndTime(day, timeSlot).length === 0) {
@@ -127,6 +122,7 @@
               getAppointmentTopOffset(appointmentData.appointment, timeSlot)
             "
             class="absolute overflow-visible"
+            [class.opacity-50]="selectedDoctorId() && appointmentData.appointment.doctor?.id?.toString() !== selectedDoctorId()"
           >
             <app-appointment-card
               [appointment]="appointmentData.appointment"

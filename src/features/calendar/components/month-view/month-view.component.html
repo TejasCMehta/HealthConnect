@@ -1,82 +1,147 @@
-<div class="p-4">
-  <!-- Month header -->
-  <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 mb-2">
+<div class="h-full w-full">
+  <!-- Calendar Header with Days of Week -->
+  <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
     @for (day of weekDays; track day) {
-    <div class="bg-white dark:bg-gray-800 px-2 py-3 text-center">
-      <span class="text-sm font-medium text-gray-900 dark:text-white">{{
-        day
-      }}</span>
+    <div
+      class="px-4 py-3 bg-gray-50 dark:bg-gray-800 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0"
+    >
+      <span
+        class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+      >
+        {{ day }}
+      </span>
     </div>
     }
   </div>
 
-  <!-- Month grid -->
-  <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700" #monthGrid>
+  <!-- Calendar Grid -->
+  <div
+    class="grid grid-cols-7 border-r border-gray-200 dark:border-gray-700"
+    #monthGrid
+  >
     @for (day of monthDays; track day.toISOString()) {
     <div
       [class]="
-        'bg-white dark:bg-gray-800 min-h-[120px] p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative ' +
-        (isPastDate(day) ? 'past-day' : '') +
+        'min-h-[140px] border-b border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-3 relative transition-colors ' +
+        (isPastDate(day)
+          ? 'bg-gray-50/50 dark:bg-gray-800/50'
+          : 'bg-white dark:bg-gray-800') +
         ' ' +
-        (!isCurrentMonth(day) ? 'bg-gray-50 dark:bg-gray-700' : '') +
+        (!isCurrentMonth(day) ? 'bg-gray-50 dark:bg-gray-750' : '') +
         ' ' +
-        (isRestrictedDay(day) ? 'restricted-day' : '') +
+        (isRestrictedDay(day)
+          ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
+          : 'hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer') +
         ' ' +
-        (isWeekend(day) && !isPastDate(day) ? 'weekend-day' : '') +
+        (isWeekend(day) && !isPastDate(day)
+          ? 'bg-gray-50/80 dark:bg-gray-800/80'
+          : '') +
         ' ' +
         (isHoliday(day) && !isPastDate(day) && !isWeekend(day)
-          ? 'holiday-day'
+          ? 'bg-red-50/30 dark:bg-red-900/20'
           : '')
       "
-      [style.cursor]="isRestrictedDay(day) ? 'not-allowed' : 'pointer'"
       (click)="!isRestrictedDay(day) ? onDateClick(day) : null"
+      [attr.data-date]="day.toISOString()"
+      [id]="'day-' + formatDateForId(day)"
     >
-      <!-- Day number -->
-      <div class="flex items-center justify-between mb-1">
+      <!-- Day Number -->
+      <div class="flex items-center justify-between mb-2">
         <span
           [class]="
-            'text-sm font-medium ' +
+            'text-sm font-medium leading-none ' +
             (isToday(day)
-              ? 'bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center'
+              ? 'bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs'
               : isCurrentMonth(day)
               ? 'text-gray-900 dark:text-white'
-              : 'text-gray-400 dark:text-gray-500')
+              : 'text-gray-400 dark:text-gray-500') +
+            ' ' +
+            (isWeekend(day) && isCurrentMonth(day)
+              ? 'text-gray-600 dark:text-gray-400'
+              : '') +
+            ' ' +
+            (isHoliday(day) && isCurrentMonth(day)
+              ? 'text-red-600 dark:text-red-400'
+              : '')
           "
         >
           {{ day.getDate() }}
         </span>
-      </div>
 
-      <!-- Appointments -->
-      <div class="space-y-1">
-        @for (appointment of getAppointmentsForDate(day); track appointment.id;
-        let i = $index) { @if (i < 3) {
-        <app-appointment-card
-          [appointment]="appointment"
-          [compact]="true"
-          [enableResize]="false"
-          [enableDrag]="true"
-          [disableHover]="true"
-          [slotHeight]="20"
-          [doctors]="doctors()"
-          [gridContainer]="monthGrid"
-          [monthDays]="monthDays"
-          [viewType]="'month'"
-          (click)="onAppointmentClick(appointment, $event)"
-          (dragStart)="onDragStart($event)"
-          (dragUpdate)="onDragUpdate($event)"
-          (dragComplete)="onDragComplete($event)"
-        >
-        </app-appointment-card>
-        } }
-
-        <!-- Show more indicator -->
-        @if (getAppointmentsForDate(day).length > 3) {
-        <div class="show-more-button" (click)="onMoreClick(day, $event)">
-          +{{ getAppointmentsForDate(day).length - 3 }} more
-        </div>
+        <!-- Holiday indicator -->
+        @if (isHoliday(day) && isCurrentMonth(day)) {
+        <div class="w-2 h-2 bg-red-400 rounded-full"></div>
         }
       </div>
+
+      <!-- Appointments Container -->
+      <div class="space-y-1 overflow-hidden">
+        @for (appointment of getVisibleAppointments(day); track appointment.id;
+        let i = $index) {
+        <div
+          class="appointment-item"
+          [class.opacity-50]="
+            selectedDoctorId() &&
+            appointment.doctor?.id?.toString() !== selectedDoctorId()
+          "
+        >
+          <app-appointment-card
+            [appointment]="appointment"
+            [compact]="true"
+            [enableDrag]="
+              !isRestrictedDay(day) && !isPastAppointment(appointment)
+            "
+            [enableResize]="false"
+            [gridContainer]="monthGrid"
+            [viewType]="'month'"
+            [monthDays]="monthDays"
+            [doctors]="doctors()"
+            [disableHover]="
+              isRestrictedDay(day) || isPastAppointment(appointment)
+            "
+            (click)="onAppointmentClick(appointment, $event)"
+            (dragStart)="onDragStart($event)"
+            (dragUpdate)="onDragUpdate($event)"
+            (dragComplete)="onDragComplete($event)"
+            [class.pointer-events-none]="
+              isRestrictedDay(day) || isPastAppointment(appointment)
+            "
+          >
+          </app-appointment-card>
+        </div>
+        }
+
+        <!-- Show more indicator -->
+        @if (getHiddenAppointmentsCount(day) > 0) {
+        <button
+          class="w-full text-left text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium py-1 px-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+          (click)="onMoreClick(day, $event)"
+        >
+          +{{ getHiddenAppointmentsCount(day) }} more
+        </button>
+        }
+      </div>
+
+      <!-- Drop zone overlay (only shown during drag) -->
+      @if (isDragActive() && !isRestrictedDay(day)) {
+      <div
+        class="absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-50/30 dark:bg-blue-900/20 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none"
+        [class.opacity-100]="isDragOverDay(day)"
+      >
+        <span class="text-sm font-medium text-blue-600 dark:text-blue-400">
+          Drop here
+        </span>
+      </div>
+      }
+
+      <!-- Restricted day overlay -->
+      @if (isRestrictedDay(day)) {
+      <div
+        class="absolute inset-0 bg-gray-300/20 dark:bg-gray-600/20 rounded-lg flex items-center justify-center"
+      >
+        <i class="ri-forbid-line text-gray-400 text-lg"></i>
+      </div>
+      }
     </div>
     }
   </div>

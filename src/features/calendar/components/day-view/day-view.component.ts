@@ -49,6 +49,7 @@ export class DayViewComponent implements OnInit, OnDestroy {
   public currentDate = input<Date>(new Date());
   public appointments = input<Appointment[]>([]);
   public doctors = input<Doctor[]>([]);
+  public selectedDoctorId = input<string>("");
 
   public appointmentSelect = output<Appointment>();
   public timeSlotSelect = output<{ date: Date; time: string }>();

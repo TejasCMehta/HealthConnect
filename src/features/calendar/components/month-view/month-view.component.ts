@@ -43,20 +43,29 @@ export class MonthViewComponent {
   public currentDate = input<Date>(new Date());
   public appointments = input<Appointment[]>([]);
   public doctors = input<Doctor[]>([]);
+  public selectedDoctorId = input<string>("");
 
   public appointmentSelect = output<Appointment>();
   public appointmentClick = output<{
     appointment: Appointment;
     clickEvent: MouseEvent;
   }>();
-  public moreAppointmentsClick = output<Date>();
+  public moreAppointmentsClick = output<{
+    date: Date;
+    clickEvent: MouseEvent;
+  }>();
   public dateSelect = output<Date>();
   public appointmentUpdate = output<Appointment>();
 
-  // Drag and drop confirmation modal state
-  public showDragDropModal = signal<boolean>(false);
+  // Drag and drop state
+  public isDragActive = signal(false);
+  public dragOverDay = signal<Date | null>(null);
+  public showDragDropModal = signal(false);
   public dragDropConfirmation = signal<DragDropConfirmation | null>(null);
-  public isDragDropLoading = signal<boolean>(false);
+  public isDragDropLoading = signal(false);
+
+  // Constants
+  public readonly MAX_VISIBLE_APPOINTMENTS = 3;
 
   get monthDays(): Date[] {
     const date = this.currentDate();
@@ -88,6 +97,30 @@ export class MonthViewComponent {
 
   get weekDays(): string[] {
     return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  }
+
+  // Utility methods for date formatting and validation
+  formatDateForId(date: Date): string {
+    return `${date.getFullYear()}-${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+  }
+
+  // Appointment filtering and display methods
+  getVisibleAppointments(date: Date): Appointment[] {
+    const appointments = this.getAppointmentsForDate(date);
+    return appointments.slice(0, this.MAX_VISIBLE_APPOINTMENTS);
+  }
+
+  getHiddenAppointmentsCount(date: Date): number {
+    const appointments = this.getAppointmentsForDate(date);
+    return Math.max(0, appointments.length - this.MAX_VISIBLE_APPOINTMENTS);
+  }
+
+  isPastAppointment(appointment: Appointment): boolean {
+    const now = new Date();
+    const appointmentDate = new Date(appointment.startTime);
+    return appointmentDate < now;
   }
 
   getAppointmentsForDate(date: Date): Appointment[] {
@@ -144,11 +177,6 @@ export class MonthViewComponent {
   onAppointmentClick(appointment: Appointment, event: MouseEvent): void {
     event.stopPropagation();
     this.appointmentClick.emit({ appointment, clickEvent: event });
-  }
-
-  onMoreClick(date: Date, event: MouseEvent): void {
-    event.stopPropagation();
-    this.moreAppointmentsClick.emit(date);
   }
 
   // Drag and Drop Methods
@@ -299,5 +327,21 @@ export class MonthViewComponent {
     this.isDragDropLoading.set(false);
     this.showDragDropModal.set(false);
     this.dragDropConfirmation.set(null);
+  }
+
+  // Drag and drop methods
+  isDragOverDay(date: Date): boolean {
+    const dragOverDate = this.dragOverDay();
+    return dragOverDate ? this.isSameDay(dragOverDate, date) : false;
+  }
+
+  // Helper method for date comparison
+  isSameDay(date1: Date, date2: Date): boolean {
+    return date1.toDateString() === date2.toDateString();
+  }
+
+  onMoreClick(date: Date, event: MouseEvent): void {
+    event.stopPropagation();
+    this.moreAppointmentsClick.emit({ date, clickEvent: event });
   }
 }

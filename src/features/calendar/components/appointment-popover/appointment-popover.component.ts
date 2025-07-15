@@ -336,4 +336,21 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
     this.startCloseAnimation();
     setTimeout(() => this.close.emit(), 300);
   }
+
+  getStatusColor(): string {
+    const status = this.appointment().status.toLowerCase();
+    switch (status) {
+      case "scheduled":
+      case "schedule":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      case "completed":
+      case "complete":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "cancelled":
+      case "canceled":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+    }
+  }
 }

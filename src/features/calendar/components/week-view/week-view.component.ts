@@ -48,6 +48,7 @@ export class WeekViewComponent implements OnInit, OnDestroy {
 
   public currentDate = input<Date>(new Date());
   public appointments = input<Appointment[]>([]);
+  public selectedDoctorId = input<string>("");
   public doctors = input<Doctor[]>([]);
 
   public appointmentSelect = output<Appointment>();

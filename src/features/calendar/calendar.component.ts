@@ -9,8 +9,8 @@ import {
   OnDestroy,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
-import { CalendarNavigationComponent } from "./components/calendar-navigation/calendar-navigation.component";
 import { MonthViewComponent } from "./components/month-view/month-view.component";
 import { WeekViewComponent } from "./components/week-view/week-view.component";
 import { DayViewComponent } from "./components/day-view/day-view.component";
@@ -34,7 +34,7 @@ export type CalendarView = "month" | "week" | "day";
   standalone: true,
   imports: [
     CommonModule,
-    CalendarNavigationComponent,
+    FormsModule,
     MonthViewComponent,
     WeekViewComponent,
     DayViewComponent,
@@ -76,6 +76,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
   public popoverAppointment = signal<Appointment | null>(null);
   public popoverPosition = signal<PopoverPosition>({ x: 0, y: 0 });
 
+  // Doctor filter
+  public selectedDoctorId = signal<string>("");
+
   // Scroll position preservation
   private scrollContainer: HTMLElement | null = null;
   private savedScrollPosition = 0;
@@ -115,6 +118,119 @@ export class CalendarComponent implements OnInit, OnDestroy {
         console.error("Error loading doctors:", error);
       },
     });
+  }
+
+  // New methods for redesigned calendar interface
+  getSubheadingText(): string {
+    const date = this.currentDate();
+    const view = this.currentView();
+
+    switch (view) {
+      case "month":
+        return date.toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric",
+        });
+      case "week":
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(date.getDate() - date.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        return `Week of ${startOfWeek.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+        })}, ${startOfWeek.getFullYear()}`;
+      case "day":
+        return date.toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+      default:
+        return "";
+    }
+  }
+
+  getCurrentPeriodDisplay(): string {
+    const date = this.currentDate();
+    const view = this.currentView();
+
+    switch (view) {
+      case "month":
+        return date.toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric",
+        });
+      case "week":
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(date.getDate() - date.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        const startMonth = startOfWeek.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        const endMonth = endOfWeek.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        return `${startMonth} - ${endMonth}, ${startOfWeek.getFullYear()}`;
+      case "day":
+        return date.toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+      default:
+        return "";
+    }
+  }
+
+  getPreviousPeriod(): Date {
+    const date = new Date(this.currentDate());
+    const view = this.currentView();
+
+    switch (view) {
+      case "month":
+        date.setMonth(date.getMonth() - 1);
+        break;
+      case "week":
+        date.setDate(date.getDate() - 7);
+        break;
+      case "day":
+        date.setDate(date.getDate() - 1);
+        break;
+    }
+    return date;
+  }
+
+  getNextPeriod(): Date {
+    const date = new Date(this.currentDate());
+    const view = this.currentView();
+
+    switch (view) {
+      case "month":
+        date.setMonth(date.getMonth() + 1);
+        break;
+      case "week":
+        date.setDate(date.getDate() + 7);
+        break;
+      case "day":
+        date.setDate(date.getDate() + 1);
+        break;
+    }
+    return date;
+  }
+
+  onDoctorFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedDoctorId.set(select.value);
+  }
+
+  onTodayClick(): void {
+    this.onDateChange(new Date());
   }
 
   onViewChange(view: CalendarView): void {

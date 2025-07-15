@@ -1,52 +1,174 @@
-<div class="space-y-6" #calendarContainer>
-  <!-- Calendar Navigation -->
-  <app-calendar-navigation
-    [currentView]="currentView()"
-    [currentDate]="currentDate()"
-    (viewChange)="onViewChange($event)"
-    (dateChange)="onDateChange($event)"
-    (newAppointment)="onNewAppointment()"
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900" #calendarContainer>
+  <!-- Header Section -->
+  <div
+    class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700"
   >
-  </app-calendar-navigation>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0"
+      >
+        <!-- Left side - Title and Subheading -->
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            Appointments
+          </h1>
+          <p class="mt-1 text-lg text-gray-600 dark:text-gray-400">
+            {{ getSubheadingText() }}
+          </p>
+        </div>
 
-  <!-- Calendar Views -->
-  <div class="calendar-container">
-    @if (isLoading()) {
-    <div class="flex items-center justify-center h-96">
-      <i class="ri-loader-4-line animate-spin text-4xl text-gray-400"></i>
+        <!-- Right side - Controls -->
+        <div
+          class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4"
+        >
+          <!-- View Switch -->
+          <div
+            class="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1"
+          >
+            <button
+              (click)="onViewChange('month')"
+              [class]="
+                'px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none ' +
+                (currentView() === 'month'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm border-b-2 border-blue-500'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600')
+              "
+            >
+              Month
+            </button>
+            <button
+              (click)="onViewChange('week')"
+              [class]="
+                'px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none ' +
+                (currentView() === 'week'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm border-b-2 border-blue-500'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600')
+              "
+            >
+              Week
+            </button>
+            <button
+              (click)="onViewChange('day')"
+              [class]="
+                'px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none ' +
+                (currentView() === 'day'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm border-b-2 border-blue-500'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600')
+              "
+            >
+              Day
+            </button>
+          </div>
+
+          <!-- Doctor Dropdown -->
+          <select
+            class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            [(ngModel)]="selectedDoctorId"
+            (change)="onDoctorFilterChange($event)"
+          >
+            <option value="">All Doctors</option>
+            @for (doctor of doctors(); track doctor.id) {
+            <option [value]="doctor.id">Dr. {{ doctor.name }}</option>
+            }
+          </select>
+
+          <!-- New Appointment Button -->
+          <button
+            (click)="onNewAppointment()"
+            class="inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none"
+          >
+            <i class="ri-add-line mr-2 text-lg"></i>
+            New Appointment
+          </button>
+        </div>
+      </div>
     </div>
-    } @else { @switch (currentView()) { @case ('month') {
-    <app-month-view
-      [currentDate]="currentDate()"
-      [appointments]="appointments()"
-      [doctors]="doctors()"
-      (appointmentSelect)="onAppointmentSelect($event)"
-      (appointmentClick)="onAppointmentClick($event)"
-      (moreAppointmentsClick)="onMoreAppointmentsClick($event)"
-      (dateSelect)="onDateChange($event)"
-      (appointmentUpdate)="onAppointmentUpdate($event)"
+  </div>
+
+  <!-- Calendar Container -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
     >
-    </app-month-view>
-    } @case ('week') {
-    <app-week-view
-      [currentDate]="currentDate()"
-      [appointments]="appointments()"
-      (appointmentSelect)="onAppointmentSelect($event)"
-      (appointmentClick)="onAppointmentClick($event)"
-      (timeSlotSelect)="onTimeSlotSelect($event)"
-      (appointmentUpdate)="onAppointmentUpdate($event)"
-    >
-    </app-week-view>
-    } @case ('day') {
-    <app-day-view
-      [currentDate]="currentDate()"
-      [appointments]="appointments()"
-      (appointmentSelect)="onAppointmentSelect($event)"
-      (timeSlotSelect)="onTimeSlotSelect($event)"
-      (appointmentUpdate)="onAppointmentUpdate($event)"
-    >
-    </app-day-view>
-    } } }
+      <!-- Internal Navigation Bar -->
+      <div
+        class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700"
+      >
+        <div class="flex items-center justify-between">
+          <!-- Left side - Navigation Controls -->
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <button
+                (click)="onDateChange(getPreviousPeriod())"
+                class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none"
+              >
+                <i class="ri-arrow-left-s-line text-xl"></i>
+              </button>
+              <button
+                (click)="onDateChange(getNextPeriod())"
+                class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none"
+              >
+                <i class="ri-arrow-right-s-line text-xl"></i>
+              </button>
+            </div>
+
+            <!-- Current Period Display -->
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+              {{ getCurrentPeriodDisplay() }}
+            </h2>
+          </div>
+
+          <!-- Right side - Today Button -->
+          <button
+            (click)="onTodayClick()"
+            class="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors focus:outline-none"
+          >
+            Today
+          </button>
+        </div>
+      </div>
+
+      <!-- Calendar Content -->
+      <div class="calendar-container">
+        @if (isLoading()) {
+        <div class="flex items-center justify-center h-96">
+          <i class="ri-loader-4-line animate-spin text-4xl text-gray-400"></i>
+        </div>
+        } @else { @switch (currentView()) { @case ('month') {
+        <app-month-view
+          [currentDate]="currentDate()"
+          [appointments]="appointments()"
+          [doctors]="doctors()"
+          [selectedDoctorId]="selectedDoctorId()"
+          (appointmentSelect)="onAppointmentSelect($event)"
+          (appointmentClick)="onAppointmentClick($event)"
+          (moreAppointmentsClick)="onMoreAppointmentsClick($event.date)"
+          (dateSelect)="onDateChange($event)"
+          (appointmentUpdate)="onAppointmentUpdate($event)"
+        >
+        </app-month-view>
+        } @case ('week') {
+        <app-week-view
+          [currentDate]="currentDate()"
+          [appointments]="appointments()"
+          (appointmentSelect)="onAppointmentSelect($event)"
+          (appointmentClick)="onAppointmentClick($event)"
+          (timeSlotSelect)="onTimeSlotSelect($event)"
+          (appointmentUpdate)="onAppointmentUpdate($event)"
+        >
+        </app-week-view>
+        } @case ('day') {
+        <app-day-view
+          [currentDate]="currentDate()"
+          [appointments]="appointments()"
+          (appointmentSelect)="onAppointmentSelect($event)"
+          (timeSlotSelect)="onTimeSlotSelect($event)"
+          (appointmentUpdate)="onAppointmentUpdate($event)"
+        >
+        </app-day-view>
+        } } }
+      </div>
+    </div>
   </div>
 
   <!-- Appointment Form Sidebar -->
