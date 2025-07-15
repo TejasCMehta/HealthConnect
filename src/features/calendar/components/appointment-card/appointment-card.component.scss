@@ -75,6 +75,34 @@
       color: #9ca3af;
     }
   }
+
+  // Drag handle styling
+  .drag-handle,
+  .appointment-drag-handle,
+  .drag-handle-center {
+    cursor: move;
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  // Show move cursor on card when draggable
+  &.draggable {
+    cursor: move;
+
+    &:hover {
+      cursor: move;
+    }
+  }
+
+  // Override pointer cursor when drag handle is present
+  &:has(.drag-handle),
+  &:has(.appointment-drag-handle),
+  &:has(.drag-handle-center) {
+    cursor: move;
+  }
 }
 
 // Drag state - minimal highlight
