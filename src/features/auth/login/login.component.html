@@ -15,33 +15,38 @@
           Sign in to your account
         </p>
       </div>
-      
+
       <form class="mt-8 space-y-6" (ngSubmit)="onSubmit()">
         @if (sessionExpiredMessage()) {
-          <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
-            <div class="flex">
-              <i class="ri-time-line text-yellow-400 mr-2"></i>
-              <div class="text-sm text-yellow-700 dark:text-yellow-400">
-                {{ sessionExpiredMessage() }}
-              </div>
+        <div
+          class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4"
+        >
+          <div class="flex">
+            <i class="ri-time-line text-yellow-400 mr-2"></i>
+            <div class="text-sm text-yellow-700 dark:text-yellow-400">
+              {{ sessionExpiredMessage() }}
             </div>
           </div>
-        }
-        
-        @if (error()) {
-          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
-            <div class="flex">
-              <i class="ri-error-warning-line text-red-400 mr-2"></i>
-              <div class="text-sm text-red-700 dark:text-red-400">
-                {{ error() }}
-              </div>
+        </div>
+        } @if (error()) {
+        <div
+          class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4"
+        >
+          <div class="flex">
+            <i class="ri-error-warning-line text-red-400 mr-2"></i>
+            <div class="text-sm text-red-700 dark:text-red-400">
+              {{ error() }}
             </div>
           </div>
+        </div>
         }
-        
+
         <div class="space-y-4">
           <div>
-            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              for="username"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Username
             </label>
             <input
@@ -52,11 +57,15 @@
               [value]="username()"
               (input)="username.set($any($event.target).value)"
               class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-              placeholder="Enter your username">
+              placeholder="Enter your username"
+            />
           </div>
-          
+
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Password
             </label>
             <input
@@ -67,25 +76,25 @@
               [value]="password()"
               (input)="password.set($any($event.target).value)"
               class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-              placeholder="Enter your password">
+              placeholder="Enter your password"
+            />
           </div>
         </div>
-        
+
         <div>
           <button
             type="submit"
             [disabled]="isLoading()"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             @if (isLoading()) {
-              <i class="ri-loader-4-line animate-spin mr-2"></i>
-              Signing in...
-            } @else {
-              <i class="ri-login-circle-line mr-2"></i>
-              Sign in
-            }
+            <i class="ri-loader-4-line animate-spin mr-2"></i>
+            Signing in... } @else {
+            <i class="ri-login-circle-line mr-2"></i>
+            Sign in }
           </button>
         </div>
-        
+
         <div class="text-center">
           <div class="text-sm text-gray-600 dark:text-gray-400">
             <p class="mb-2">Demo Credentials:</p>
@@ -98,17 +107,17 @@
       </form>
     </div>
   </div>
-  
+
   <!-- Right side - Hero Section -->
-  <div class="hidden lg:flex flex-1 items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700">
+  <div
+    class="hidden lg:flex flex-1 items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700"
+  >
     <div class="max-w-md text-center text-white">
       <i class="ri-calendar-check-line text-8xl mb-6"></i>
-      <h2 class="text-3xl font-bold mb-4">
-        Streamline Your Practice
-      </h2>
+      <h2 class="text-3xl font-bold mb-4">Streamline Your Practice</h2>
       <p class="text-xl opacity-90">
-        Manage appointments, patients, and schedules all in one place. 
-        Built for modern healthcare professionals.
+        Manage appointments, patients, and schedules all in one place. Built for
+        modern healthcare professionals.
       </p>
       <div class="mt-8 grid grid-cols-1 gap-4">
         <div class="flex items-center">

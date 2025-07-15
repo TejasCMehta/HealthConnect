@@ -50,16 +50,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               // Refresh failed, logout user
               console.error("Token refresh failed:", refreshError);
               authService.logout();
-              
+
               // Show user-friendly message
               toaster.showWarning(
-                "Session Expired", 
+                "Session Expired",
                 "Your session has expired. Please log in again."
               );
 
               if (!router.url.includes("/login")) {
                 router.navigate(["/login"], {
-                  queryParams: { returnUrl: router.url, sessionExpired: "true" },
+                  queryParams: {
+                    returnUrl: router.url,
+                    sessionExpired: "true",
+                  },
                 });
               }
 
@@ -70,10 +73,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           // No refresh token available, logout immediately
           console.log("No refresh token available, logging out");
           authService.logout();
-          
+
           // Show user-friendly message
           toaster.showWarning(
-            "Session Expired", 
+            "Session Expired",
             "Your session has expired. Please log in again."
           );
 
