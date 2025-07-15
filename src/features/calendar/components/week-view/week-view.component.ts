@@ -107,12 +107,21 @@ export class WeekViewComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if current time should be visible (within clinic hours)
+   * Check if current time should be visible (within clinic hours and current week contains today)
    */
   get isCurrentTimeVisible(): boolean {
     const now = this.currentTime;
     const hour = now.getHours();
-    return hour >= 8 && hour < 18;
+
+    // Check if current time is within clinic hours
+    if (hour < 8 || hour >= 18) {
+      return false;
+    }
+
+    // Check if current week contains today
+    const today = new Date();
+    const weekDays = this.weekDays;
+    return weekDays.some((day) => this.isToday(day));
   }
 
   /**
@@ -123,13 +132,45 @@ export class WeekViewComponent implements OnInit, OnDestroy {
     const hour = now.getHours();
     const minute = now.getMinutes();
 
-    // Calculate position relative to 8 AM start
-    const hoursFromStart = hour - 8;
-    const minuteProgress = minute / 60;
-    const totalHoursProgress = hoursFromStart + minuteProgress;
+    // Calculate which 30-minute slot we're in
+    const totalMinutesFromStart = (hour - 8) * 60 + minute;
+    const slotIndex = Math.floor(totalMinutesFromStart / 30);
+    const minutesIntoSlot = totalMinutesFromStart % 30;
 
-    // Each hour has 2 slots (75px each), so 150px per hour
-    return totalHoursProgress * 150;
+    // Each time slot in week view:
+    // - min-h-[75px] per slot
+    // - gap-px between slots (1px)
+    // - border-b (1px)
+    // Total per slot: 75px + 1px + 1px = 77px
+    const slotHeight = 77;
+
+    // Position at the start of the target slot
+    const basePosition = slotIndex * slotHeight;
+
+    // Calculate precise position within the slot
+    // Week view doesn't have padding like day view, so position within the full 75px height
+    const contentHeight = 75;
+    const progressWithinSlot = minutesIntoSlot / 30; // 0 to 1
+    const positionWithinContent = progressWithinSlot * contentHeight;
+
+    const finalPosition = basePosition + positionWithinContent;
+
+    // Debug logging
+    console.log("Week view precise current time position calculation:", {
+      currentTime: now.toLocaleTimeString(),
+      hour,
+      minute,
+      totalMinutesFromStart,
+      slotIndex,
+      minutesIntoSlot,
+      progressWithinSlot: progressWithinSlot.toFixed(3),
+      basePosition,
+      positionWithinContent: positionWithinContent.toFixed(1),
+      finalPosition: finalPosition.toFixed(1) + "px",
+      slotHeight,
+    });
+
+    return finalPosition;
   }
 
   getAppointmentsForDateAndTime(date: Date, timeSlot: string): Appointment[] {
@@ -257,7 +298,12 @@ export class WeekViewComponent implements OnInit, OnDestroy {
     const slotTime = new Date(date);
     slotTime.setHours(hour, minute, 0, 0);
 
-    return slotTime < now;
+    // Add 5 minutes tolerance - allow booking for current time slot even if a few minutes have passed
+    const toleranceMinutes = 5;
+    const toleranceMs = toleranceMinutes * 60 * 1000;
+    const slotTimeWithTolerance = new Date(slotTime.getTime() + toleranceMs);
+
+    return slotTimeWithTolerance < now;
   }
 
   isWeekend(date: Date): boolean {

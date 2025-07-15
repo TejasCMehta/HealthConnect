@@ -189,42 +189,58 @@
 
 // Restricted time slots (weekends/holidays/past)
 .restricted-time-slot {
-  background-color: #f5f5f5 !important; // Light gray background
+  // Light mode: darker background
+  background-color: #f3f4f6 !important;
   cursor: not-allowed !important;
 
   &:hover {
-    background-color: #f5f5f5 !important; // Keep light gray on hover
+    background-color: #f3f4f6 !important;
   }
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 2px,
-      rgba(156, 163, 175, 0.2) 2px,
-      rgba(156, 163, 175, 0.2) 4px
-    );
-    pointer-events: none;
-    z-index: 1;
+  // Remove the striped pattern - just use solid dimmed background
+}
+
+// Dark mode styling for restricted time slots
+:host-context(.dark) .restricted-time-slot {
+  background-color: #374151 !important; // gray-700 equivalent
+
+  &:hover {
+    background-color: #374151 !important;
   }
 }
 
 // Weekend days styling
 .weekend-day {
-  background-color: #f5f5f5 !important; // Light gray for weekend days
+  background-color: #f9fafb !important; // Very light gray for weekend days
 
   &:hover {
-    background-color: #e5e5e5 !important; // Slightly darker gray on hover
+    background-color: #f3f4f6 !important; // Slightly darker gray on hover
+  }
+}
+
+// Dark mode styling for weekend days
+:host-context(.dark) .weekend-day {
+  background-color: #1f2937 !important; // gray-800 equivalent
+
+  &:hover {
+    background-color: #374151 !important; // gray-700 equivalent
   }
 }
 
 // Holiday days styling
 .holiday-day {
-  background-color: #fff7ed !important; // Light orange for holidays
+  background-color: #fef3c7 !important; // Light amber for holidays
+
+  &:hover {
+    background-color: #fde68a !important; // Slightly darker amber on hover
+  }
+}
+
+// Dark mode styling for holiday days
+:host-context(.dark) .holiday-day {
+  background-color: #451a03 !important; // amber-900 equivalent
+
+  &:hover {
+    background-color: #78350f !important; // amber-800 equivalent
+  }
 }

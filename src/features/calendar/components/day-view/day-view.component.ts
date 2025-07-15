@@ -104,14 +104,49 @@ export class DayViewComponent implements OnInit, OnDestroy {
     const hour = now.getHours();
     const minute = now.getMinutes();
 
-    // Calculate position relative to 8 AM start
-    const hoursFromStart = hour - 8;
-    const minuteProgress = minute / 60;
-    const totalHoursProgress = hoursFromStart + minuteProgress;
+    // Calculate which 30-minute slot we're in
+    const totalMinutesFromStart = (hour - 8) * 60 + minute;
+    const slotIndex = Math.floor(totalMinutesFromStart / 30);
+    const minutesIntoSlot = totalMinutesFromStart % 30;
 
-    // Each slot is approximately 64px (40px min-height + 24px padding)
-    // Each hour has 2 slots, so 128px per hour
-    return totalHoursProgress * 128;
+    // Each time slot structure:
+    // - py-3 (padding: 12px top + 12px bottom = 24px)
+    // - min-h-[40px] content area
+    // - border-b (1px)
+    // - space-y-px adds 1px gap between slots
+    // Total per slot: 24px + 40px + 1px + 1px = 66px
+    const slotHeight = 66;
+
+    // Position at the start of the target slot
+    const basePosition = slotIndex * slotHeight;
+
+    // Calculate precise position within the slot
+    // Add 12px to get past the top padding (py-3 = 12px top)
+    // Then add proportional position within the 40px content area based on minutes
+    const paddingTop = 12;
+    const contentHeight = 40;
+    const progressWithinSlot = minutesIntoSlot / 30; // 0 to 1
+    const positionWithinContent = progressWithinSlot * contentHeight;
+
+    const finalPosition = basePosition + paddingTop + positionWithinContent;
+
+    // Debug logging
+    console.log("Precise current time position calculation:", {
+      currentTime: now.toLocaleTimeString(),
+      hour,
+      minute,
+      totalMinutesFromStart,
+      slotIndex,
+      minutesIntoSlot,
+      progressWithinSlot: progressWithinSlot.toFixed(3),
+      basePosition,
+      paddingTop,
+      positionWithinContent: positionWithinContent.toFixed(1),
+      finalPosition: finalPosition.toFixed(1) + "px",
+      slotHeight,
+    });
+
+    return finalPosition;
   }
 
   /**
@@ -244,7 +279,12 @@ export class DayViewComponent implements OnInit, OnDestroy {
     const slotTime = new Date(date);
     slotTime.setHours(hour, minute, 0, 0);
 
-    return slotTime < now;
+    // Add 5 minutes tolerance - allow booking for current time slot even if a few minutes have passed
+    const toleranceMinutes = 5;
+    const toleranceMs = toleranceMinutes * 60 * 1000;
+    const slotTimeWithTolerance = new Date(slotTime.getTime() + toleranceMs);
+
+    return slotTimeWithTolerance < now;
   }
 
   isWeekend(date: Date = this.currentDate()): boolean {

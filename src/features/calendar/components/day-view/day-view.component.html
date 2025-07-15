@@ -57,16 +57,17 @@
     <div
       [class]="
         'flex items-start border-b border-gray-200 dark:border-gray-700 py-3 time-slot ' +
-        (isRestrictedTimeSlot(timeSlot) ? 'restricted-time-slot' : '') +
-        (isWeekend() ? 'weekend-day' : '') +
-        (isHoliday() ? 'holiday-day' : '') +
-        (isPastTimeSlot(timeSlot) ? ' opacity-50 past' : '') +
         (isTimeSlotBlocked(timeSlot) ? ' blocked' : '')
       "
     >
       <!-- Time label -->
       <div
-        class="w-20 flex-shrink-0 text-sm text-gray-500 dark:text-gray-400 text-right pr-4"
+        [class]="
+          'w-20 flex-shrink-0 text-sm text-right pr-4 ' +
+          (isRestrictedTimeSlot(timeSlot) || isPastTimeSlot(timeSlot)
+            ? 'text-gray-400 dark:text-gray-500'
+            : 'text-gray-500 dark:text-gray-400')
+        "
       >
         {{ timeSlot }}
       </div>
@@ -76,43 +77,66 @@
         @if (getAppointmentsForTimeSlot(timeSlot).length === 0) {
         <!-- Check if time slot is occupied by a spanning appointment -->
         @if (isTimeSlotOccupied(timeSlot)) {
-        <!-- Time slot is occupied by a spanning appointment - show as blocked but keep clickable area -->
+        <!-- Time slot is occupied by a spanning appointment -->
         <div class="flex">
           <div
-            class="flex-1 h-10 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md opacity-50 mr-2"
-          ></div>
-          <!-- Clickable area for new appointments (25% of the width) -->
-          <div
-            (click)="onTimeSlotClick(timeSlot)"
             [class]="
-              'w-1/4 h-10 border border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-colors flex items-center justify-center ' +
-              (isPastTimeSlot(timeSlot) ? 'cursor-not-allowed opacity-50' : '')
+              'flex-1 h-10 rounded-md mr-2 ' +
+              (isPastTimeSlot(timeSlot)
+                ? ''
+                : 'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 opacity-50')
             "
+          ></div>
+          <!-- Clickable area for new appointments (25% of the width) - only show if not past time slot -->
+          @if (!isPastTimeSlot(timeSlot)) {
+          <div
+            (click)="
+              !isRestrictedTimeSlot(timeSlot) ? onTimeSlotClick(timeSlot) : null
+            "
+            [ngClass]="{
+              'w-1/4 h-10 border border-dashed rounded-md transition-colors flex items-center justify-center': true,
+              'restricted-clickable-area': isRestrictedTimeSlot(timeSlot),
+              'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600':
+                !isRestrictedTimeSlot(timeSlot),
+              'weekend-time-slot': isWeekend(),
+              'holiday-time-slot': isHoliday()
+            }"
             [title]="
-              isPastTimeSlot(timeSlot)
-                ? 'Cannot create appointments in the past'
+              isRestrictedTimeSlot(timeSlot)
+                ? isWeekend()
+                  ? 'Clinic closed on weekends'
+                  : isHoliday()
+                  ? 'Clinic closed on holidays'
+                  : 'Cannot create appointments in the past'
                 : 'Click to create new appointment'
             "
           >
-            @if (!isPastTimeSlot(timeSlot)) {
+            @if (!isRestrictedTimeSlot(timeSlot)) {
             <i
               class="ri-add-line text-gray-400 hover:text-blue-500 text-sm"
             ></i>
             }
           </div>
+          } @else {
+          <!-- Past time slot - no clickable area -->
+          <div class="w-1/4"></div>
+          }
         </div>
         } @else {
-        <!-- Empty time slot - clickable -->
+        <!-- Empty time slot - show clickable area only if not past time -->
+        @if (!isPastTimeSlot(timeSlot)) {
         <div
           (click)="
             !isRestrictedTimeSlot(timeSlot) ? onTimeSlotClick(timeSlot) : null
           "
-          [class]="
-            'w-full h-10 border border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-colors flex items-center justify-center ' +
-            (isRestrictedTimeSlot(timeSlot)
-              ? 'cursor-not-allowed opacity-50'
-              : '')
-          "
+          [ngClass]="{
+            'w-full h-10 border border-dashed rounded-md transition-colors flex items-center justify-center': true,
+            'restricted-clickable-area': isRestrictedTimeSlot(timeSlot),
+            'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600':
+              !isRestrictedTimeSlot(timeSlot),
+            'weekend-time-slot': isWeekend(),
+            'holiday-time-slot': isHoliday()
+          }"
           [title]="
             isRestrictedTimeSlot(timeSlot)
               ? isWeekend()
@@ -127,7 +151,10 @@
           <i class="ri-add-line text-gray-400 hover:text-blue-500"></i>
           }
         </div>
-        } } @else {
+        } @else {
+        <!-- Past time slot - just show empty space -->
+        <div class="w-full h-10"></div>
+        } } } @else {
         <!-- Appointments starting at this time slot -->
         <div class="flex">
           <!-- Appointments container (75% width) -->
@@ -180,25 +207,40 @@
             }
           </div>
 
-          <!-- Clickable area for new appointments (25% of the width) -->
+          <!-- Clickable area for new appointments (25% of the width) - only show if not past time slot -->
+          @if (!isPastTimeSlot(timeSlot)) {
           <div
-            (click)="onTimeSlotClick(timeSlot)"
-            [class]="
-              'w-1/4 h-10 border border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-colors flex items-center justify-center ' +
-              (isPastTimeSlot(timeSlot) ? 'cursor-not-allowed opacity-50' : '')
+            (click)="
+              !isRestrictedTimeSlot(timeSlot) ? onTimeSlotClick(timeSlot) : null
             "
+            [ngClass]="{
+              'w-1/4 h-10 border border-dashed rounded-md transition-colors flex items-center justify-center': true,
+              'restricted-clickable-area': isRestrictedTimeSlot(timeSlot),
+              'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600':
+                !isRestrictedTimeSlot(timeSlot),
+              'weekend-time-slot': isWeekend(),
+              'holiday-time-slot': isHoliday()
+            }"
             [title]="
-              isPastTimeSlot(timeSlot)
-                ? 'Cannot create appointments in the past'
+              isRestrictedTimeSlot(timeSlot)
+                ? isWeekend()
+                  ? 'Clinic closed on weekends'
+                  : isHoliday()
+                  ? 'Clinic closed on holidays'
+                  : 'Cannot create appointments in the past'
                 : 'Click to create new appointment'
             "
           >
-            @if (!isPastTimeSlot(timeSlot)) {
+            @if (!isRestrictedTimeSlot(timeSlot)) {
             <i
               class="ri-add-line text-gray-400 hover:text-blue-500 text-sm"
             ></i>
             }
           </div>
+          } @else {
+          <!-- Past time slot - no clickable area, let appointments take full width -->
+          <div class="w-1/4"></div>
+          }
         </div>
         }
       </div>

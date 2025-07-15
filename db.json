@@ -120,8 +120,8 @@
       "description": "Meeting",
       "patientId": 2,
       "doctorId": 2,
-      "startTime": "2025-07-15T05:00:00.000Z",
-      "endTime": "2025-07-15T06:00:00.000Z",
+      "startTime": "2025-07-15T04:00:00.000Z",
+      "endTime": "2025-07-15T05:00:00.000Z",
       "status": "scheduled",
       "patient": {
         "id": 2,

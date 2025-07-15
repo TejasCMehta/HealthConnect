@@ -178,66 +178,175 @@
       }
     }
   }
-}
 
-// Restricted time slots (weekends/holidays/past)
-.restricted-time-slot {
-  background-color: #f8f9fa !important; // Very light gray background
-  cursor: not-allowed !important;
-  opacity: 0.7;
-
-  &:hover {
-    background-color: #f8f9fa !important; // Keep light gray on hover
-  }
-
-  // Remove the diagonal stripes for day view as they're too overwhelming
-  // Instead use a subtle left border to indicate restriction
-  &::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: #dc2626; // Red left border
-    pointer-events: none;
-    z-index: 1;
+  // Enhanced dark mode styling for restricted time slot clickable areas
+  // Better contrast for restricted areas in dark mode
+  .bg-gray-50 {
+    background-color: rgba(55, 65, 81, 0.6) !important; // Slightly more visible
+    border-color: rgba(75, 85, 99, 0.8) !important; // darker border
   }
 }
 
-// Weekend days styling
-.weekend-day {
-  background-color: #f8f9fa !important; // Very light gray for weekend days
-  opacity: 0.8;
+// Ensure appointment cards are never affected by any global restrictions
+.appointment-card-wrapper {
+  // Override any inherited restrictions
+  opacity: 1 !important;
 
-  &:hover {
-    background-color: #f1f3f4 !important; // Slightly darker gray on hover
-  }
-}
+  app-appointment-card {
+    opacity: 1 !important;
 
-// Holiday days styling
-.holiday-day {
-  background-color: #fffbeb !important; // Very light orange for holidays
-  opacity: 0.8;
-}
-
-// Enhanced styling for time slot elements within restricted days
-.time-slot.restricted-time-slot,
-.time-slot.weekend-day,
-.time-slot.holiday-day {
-  // Make the time labels more subtle
-  .text-gray-500 {
-    color: #9ca3af !important; // More muted gray
-  }
-
-  // Style the clickable areas differently
-  .border-dashed {
-    border-color: #d1d5db !important; // More muted border
-    opacity: 0.5;
-
-    &:hover {
-      border-color: #d1d5db !important; // Keep muted on hover
-      background-color: transparent !important; // Disable hover background
+    // Ensure appointment cards maintain full visibility
+    > div {
+      opacity: 1 !important;
     }
+  }
+}
+
+// Remove global restricted time slot styling since we handle it per element now
+// This ensures only the clickable areas are grayed out, not the entire time slot or appointments
+
+// Individual element styling for restricted states is now handled inline in the HTML
+
+// Restricted time slots styling (exactly matching week view)
+.restricted-time-slot {
+  background-color: #f3f4f6 !important; // Light mode: same as week view
+  cursor: not-allowed !important;
+
+  &:hover {
+    background-color: #f3f4f6 !important;
+  }
+}
+
+// Dark mode styling for restricted time slots
+:host-context(.dark) .restricted-time-slot {
+  background-color: #374151 !important; // gray-700 equivalent - same as week view
+
+  &:hover {
+    background-color: #374151 !important;
+  }
+}
+
+// Weekend time slots styling (exactly matching week view)
+.weekend-time-slot {
+  background-color: #f9fafb !important; // Very light gray - same as week view
+
+  &:hover {
+    background-color: #f3f4f6 !important; // Slightly darker gray on hover
+  }
+}
+
+// Dark mode styling for weekend time slots
+:host-context(.dark) .weekend-time-slot {
+  background-color: #1f2937 !important; // gray-800 equivalent - same as week view
+
+  &:hover {
+    background-color: #374151 !important; // gray-700 equivalent
+  }
+}
+
+// Holiday time slots styling (exactly matching week view)
+.holiday-time-slot {
+  background-color: #fef3c7 !important; // Light amber for holidays - same as week view
+
+  &:hover {
+    background-color: #fde68a !important; // Slightly darker amber on hover
+  }
+}
+
+// Dark mode styling for holiday time slots
+:host-context(.dark) .holiday-time-slot {
+  background-color: #451a03 !important; // amber-900 equivalent - same as week view
+
+  &:hover {
+    background-color: #78350f !important; // amber-800 equivalent
+  }
+}
+
+// Past time slots styling
+.past-time-slot {
+  background-color: #f3f4f6 !important; // Same as restricted
+  cursor: not-allowed !important;
+
+  &:hover {
+    background-color: #f3f4f6 !important;
+  }
+}
+
+// Dark mode styling for past time slots
+:host-context(.dark) .past-time-slot {
+  background-color: #374151 !important; // gray-700 equivalent
+
+  &:hover {
+    background-color: #374151 !important;
+  }
+}
+
+// Restricted clickable area styling (for the clickable zones)
+.restricted-clickable-area {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+  background-color: #f3f4f6 !important;
+  border-color: #d1d5db !important; // gray-300
+
+  &:hover {
+    background-color: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+  }
+}
+
+// Dark mode styling for restricted clickable areas
+:host-context(.dark) .restricted-clickable-area {
+  background-color: #374151 !important; // gray-700
+  border-color: #4b5563 !important; // gray-600
+
+  &:hover {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+  }
+}
+.holiday-time-slot {
+  background-color: #fef3c7 !important; // Light amber for holidays
+
+  &:hover {
+    background-color: #fde68a !important; // Slightly darker amber on hover
+  }
+}
+
+// Dark mode styling for holiday time slots
+:host-context(.dark) .holiday-time-slot {
+  background-color: #451a03 !important; // amber-900 equivalent
+
+  &:hover {
+    background-color: #78350f !important; // amber-800 equivalent
+  }
+}
+
+// Past time slot styling (clean dimming)
+.past-time-slot {
+  opacity: 0.6 !important;
+  pointer-events: none;
+}
+
+// Clean styling for restricted clickable areas
+.restricted-clickable-area {
+  background-color: #f3f4f6 !important;
+  border-color: #d1d5db !important;
+  cursor: not-allowed !important;
+  opacity: 0.7 !important;
+
+  &:hover {
+    background-color: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+  }
+}
+
+// Dark mode for restricted clickable areas
+:host-context(.dark) .restricted-clickable-area {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+
+  &:hover {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
   }
 }

@@ -312,18 +312,18 @@ export class AppointmentDragDropService {
     newDoctorId: number
   ): DragValidationResult {
     const startTime = new Date(newStartTime);
-    const endTime = new Date(newEndTime);
+    const endTime = new Date(newEndTime); // Check if start time is in the past (check both date and time)
+    const now = new Date();
 
-    // Check if start time is in the past (only check date, not time)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset to start of day
-    const appointmentDate = new Date(startTime);
-    appointmentDate.setHours(0, 0, 0, 0); // Reset to start of day
+    // Add 5 minutes tolerance - allow moving appointments to current time slot even if a few minutes have passed
+    const toleranceMinutes = 5;
+    const toleranceMs = toleranceMinutes * 60 * 1000;
+    const startTimeWithTolerance = new Date(startTime.getTime() + toleranceMs);
 
-    if (appointmentDate < today) {
+    if (startTimeWithTolerance < now) {
       return {
         isValid: false,
-        errorMessage: "Cannot schedule appointment in the past",
+        errorMessage: "Cannot move appointment to past time",
       };
     }
 
