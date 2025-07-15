@@ -2,6 +2,19 @@
   display: block;
 }
 
+// Clean calendar container with minimal styling
+.calendar-container {
+  background: #ffffff;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  :host-context(.dark) & {
+    background: #1f2937;
+    border-color: rgba(75, 85, 99, 0.3);
+  }
+}
+
 // When popover is open, ensure appointment cards stay stable and below popover
 :host.popover-open {
   // Target all appointment cards in all views (month, week, day)
@@ -9,12 +22,12 @@
   app-week-view app-appointment-card,
   app-day-view app-appointment-card {
     // Force stable state, override any hover effects
-    background-color: rgb(239 246 255) !important; // bg-blue-50
+    background-color: transparent !important;
     z-index: 1 !important; // Keep below popover (z-index 50)
     position: relative;
 
     &:hover {
-      background-color: rgb(239 246 255) !important; // Keep same color
+      background-color: rgba(59, 130, 246, 0.02) !important;
       transform: none !important;
       z-index: 1 !important; // Prevent cards from going above popover
     }
@@ -60,10 +73,10 @@
     app-month-view app-appointment-card,
     app-week-view app-appointment-card,
     app-day-view app-appointment-card {
-      background-color: rgb(30 58 138 / 0.2) !important; // dark:bg-blue-900/20
+      background-color: transparent !important;
 
       &:hover {
-        background-color: rgb(30 58 138 / 0.2) !important; // Keep same color
+        background-color: rgba(59, 130, 246, 0.05) !important;
       }
     }
   }

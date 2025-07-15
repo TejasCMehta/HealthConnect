@@ -55,7 +55,13 @@ body {
   margin: 0;
   font-family: inherit;
   line-height: inherit;
-  @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white;
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.dark body {
+  background-color: #111827;
+  color: #f9fafb;
 }
 
 /* Focus styles */

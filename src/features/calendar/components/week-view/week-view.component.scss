@@ -2,79 +2,106 @@
   display: block;
 }
 
-// Current time indicator styles
+// Clean week view container
+.week-container {
+  background: #ffffff;
+
+  :host-context(.dark) & {
+    background: #1f2937;
+  }
+}
+
+// Time slots with subtle grid lines
+.time-slot {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+  border-right: 1px solid rgba(229, 231, 235, 0.2);
+
+  &:hover {
+    background-color: rgba(59, 130, 246, 0.01);
+  }
+
+  :host-context(.dark) & {
+    background: #1f2937;
+    border-bottom-color: rgba(75, 85, 99, 0.2);
+    border-right-color: rgba(75, 85, 99, 0.15);
+
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.02);
+    }
+  }
+}
+
+// Time labels with clean typography
+.time-label {
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  :host-context(.dark) & {
+    color: #9ca3af;
+  }
+}
+
+// Day headers with minimal styling
+.day-header {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.4);
+  color: #374151;
+  font-weight: 600;
+
+  :host-context(.dark) & {
+    background: #1f2937;
+    border-bottom-color: rgba(75, 85, 99, 0.3);
+    color: #d1d5db;
+  }
+}
+
+// Current day header accent
+.current-day-header {
+  .day-number {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Current time indicator - clean line
 .current-time-indicator {
   z-index: 50;
   pointer-events: none;
 
   .time-label {
-    animation: currentTimePulse 2s ease-in-out infinite;
+    background-color: #3b82f6;
+    color: #ffffff;
+    font-size: 0.625rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
   }
 
   .time-line {
-    position: relative;
-
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        rgba(59, 130, 246, 0.8),
-        rgba(59, 130, 246, 0.6),
-        rgba(59, 130, 246, 0.8)
-      );
-      animation: currentTimeGlow 3s ease-in-out infinite;
-    }
+    height: 2px;
+    background-color: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
   }
 
   .time-dot {
-    animation: currentTimeDot 2s ease-in-out infinite;
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+    width: 8px;
+    height: 8px;
+    background-color: #3b82f6;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
   }
 }
 
-@keyframes currentTimePulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-}
-
-@keyframes currentTimeGlow {
-  0%,
-  100% {
-    opacity: 0.6;
-    filter: blur(0px);
-  }
-  50% {
-    opacity: 0.8;
-    filter: blur(1px);
-  }
-}
-
-@keyframes currentTimeDot {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
-  }
-  50% {
-    transform: scale(1.2);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
-  }
-}
-
+// Appointment positioning
 .day-slot {
   position: relative;
   overflow: visible;
@@ -85,162 +112,55 @@
   top: 0;
   left: 0;
   overflow: visible;
-  z-index: 1;
-  margin: 0;
-  padding: 0;
-
-  // Ensure lower z-index than forms/modals (which typically use z-index: 50+)
-  z-index: 20 !important;
-
-  app-appointment-card {
-    display: block;
-    height: 100%;
-    width: 100%;
-
-    // Ensure the inner card content aligns with borders
-    > div {
-      height: 100%;
-      box-sizing: border-box;
-    }
-  }
+  z-index: 10;
+  margin: 1px;
 }
 
-// Overlapping appointments styles for week view
-.appointments-container {
-  .appointment-column {
-    position: absolute;
-
-    &.column-0 {
-      z-index: 20;
-    }
-
-    &.column-1 {
-      z-index: 19;
-      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1),
-        0 1px 2px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    &.column-2 {
-      z-index: 18;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15),
-        0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    }
-  }
-}
-
-// Add button styling for week view
+// Clean add appointment area
 .add-appointment-area {
-  transition: all 0.2s ease-in-out;
+  border: 1px dashed rgba(203, 213, 225, 0.6);
+  border-radius: 4px;
+  background: transparent;
+  transition: all 0.15s ease;
 
   &:hover {
-    transform: scale(1.02); // Smaller scale for week view
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.02);
+
+    .add-icon {
+      color: #3b82f6;
+    }
   }
 
-  .ri-add-line {
-    transition: all 0.2s ease-in-out;
+  .add-icon {
+    color: #cbd5e1;
+    transition: color 0.15s ease;
   }
-}
 
-// Week view specific adjustments
-.week-time-slot {
-  &:hover {
-    .add-appointment-area {
-      border-color: theme("colors.blue.400");
-      background-color: theme("colors.blue.50");
+  :host-context(.dark) & {
+    border-color: rgba(107, 114, 128, 0.4);
 
-      .ri-add-line {
-        color: theme("colors.blue.500");
+    .add-icon {
+      color: #6b7280;
+    }
+
+    &:hover {
+      border-color: #60a5fa;
+      background-color: rgba(59, 130, 246, 0.05);
+
+      .add-icon {
+        color: #60a5fa;
       }
     }
   }
 }
 
-// Dark mode adjustments for week view
-.dark {
-  .week-time-slot:hover {
-    .add-appointment-area {
-      border-color: theme("colors.blue.600");
-      background-color: theme("colors.blue.900/40");
-
-      .ri-add-line {
-        color: theme("colors.blue.400");
-      }
-    }
-  }
-}
-
-// Compact appointments in week view
-.week-appointment {
-  .appointment-card {
-    padding: 2px 4px;
-    font-size: 10px;
-
-    .appointment-title {
-      font-weight: 500;
-      line-height: 1.2;
-    }
-
-    .appointment-time {
-      font-size: 9px;
-      opacity: 0.8;
-    }
-  }
-}
-
-// Restricted time slots (weekends/holidays/past)
+// Restricted time slots - minimal indication
 .restricted-time-slot {
-  // Light mode: darker background
-  background-color: #f3f4f6 !important;
-  cursor: not-allowed !important;
+  background-color: rgba(243, 244, 246, 0.2);
+  opacity: 0.6;
 
-  &:hover {
-    background-color: #f3f4f6 !important;
-  }
-
-  // Remove the striped pattern - just use solid dimmed background
-}
-
-// Dark mode styling for restricted time slots
-:host-context(.dark) .restricted-time-slot {
-  background-color: #374151 !important; // gray-700 equivalent
-
-  &:hover {
-    background-color: #374151 !important;
-  }
-}
-
-// Weekend days styling
-.weekend-day {
-  background-color: #f9fafb !important; // Very light gray for weekend days
-
-  &:hover {
-    background-color: #f3f4f6 !important; // Slightly darker gray on hover
-  }
-}
-
-// Dark mode styling for weekend days
-:host-context(.dark) .weekend-day {
-  background-color: #1f2937 !important; // gray-800 equivalent
-
-  &:hover {
-    background-color: #374151 !important; // gray-700 equivalent
-  }
-}
-
-// Holiday days styling
-.holiday-day {
-  background-color: #fef3c7 !important; // Light amber for holidays
-
-  &:hover {
-    background-color: #fde68a !important; // Slightly darker amber on hover
-  }
-}
-
-// Dark mode styling for holiday days
-:host-context(.dark) .holiday-day {
-  background-color: #451a03 !important; // amber-900 equivalent
-
-  &:hover {
-    background-color: #78350f !important; // amber-800 equivalent
+  :host-context(.dark) & {
+    background-color: rgba(55, 65, 81, 0.2);
   }
 }

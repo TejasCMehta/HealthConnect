@@ -2,80 +2,120 @@
   display: block;
 }
 
-// Restricted day styling
-.restricted-day {
-  position: relative;
-  background-color: #f3f4f6 !important; // Light gray background
-  cursor: not-allowed !important;
+// Clean month view styling - remove heavy backgrounds and use subtle borders
+.month-grid {
+  background: #ffffff;
 
-  &:hover {
-    background-color: #f3f4f6 !important; // Keep light gray on hover
-  }
-
-  // Remove the striped pattern - just use solid dimmed background
-}
-
-// Dark mode styling for restricted days
-:host-context(.dark) .restricted-day {
-  background-color: #374151 !important; // gray-700 equivalent
-
-  &:hover {
-    background-color: #374151 !important;
+  :host-context(.dark) & {
+    background: #1f2937;
   }
 }
 
-// Weekend styling
+.month-day {
+  background: #ffffff;
+  border: 1px solid rgba(229, 231, 235, 0.3);
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: rgba(59, 130, 246, 0.01);
+  }
+
+  :host-context(.dark) & {
+    background: #1f2937;
+    border-color: rgba(75, 85, 99, 0.2);
+
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.02);
+    }
+  }
+}
+
+// Clean day number styling
+.day-number {
+  color: #374151;
+  font-weight: 500;
+
+  :host-context(.dark) & {
+    color: #d1d5db;
+  }
+}
+
+// Current day highlight - minimal accent
+.current-day .day-number {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+// Weekend styling - very subtle
 .weekend-day {
-  background-color: #f9fafb !important; // Very light gray instead of red
+  background-color: rgba(249, 250, 251, 0.5);
 
-  &:hover {
-    background-color: #f3f4f6 !important; // Slightly darker gray on hover
+  :host-context(.dark) & {
+    background-color: rgba(31, 41, 55, 0.7);
   }
 }
 
-// Dark mode styling for weekend days
-:host-context(.dark) .weekend-day {
-  background-color: #1f2937 !important; // gray-800 equivalent
+// Restricted day styling - minimal indication
+.restricted-day {
+  background-color: rgba(243, 244, 246, 0.3);
+  opacity: 0.6;
 
-  &:hover {
-    background-color: #374151 !important; // gray-700 equivalent
+  .day-number {
+    color: #9ca3af;
+  }
+
+  :host-context(.dark) & {
+    background-color: rgba(55, 65, 81, 0.3);
+
+    .day-number {
+      color: #6b7280;
+    }
   }
 }
 
-// Holiday styling
+// Holiday styling - minimal accent
 .holiday-day {
-  background-color: #fef3c7 !important; // Light amber for holidays
-
   &::after {
-    content: "🎉";
+    content: "";
     position: absolute;
     top: 4px;
     right: 4px;
-    font-size: 12px;
-    opacity: 0.7;
-  }
-
-  &:hover {
-    background-color: #fde68a !important; // Slightly darker amber on hover
-  }
-}
-
-// Dark mode styling for holiday days
-:host-context(.dark) .holiday-day {
-  background-color: #451a03 !important; // amber-900 equivalent
-
-  &:hover {
-    background-color: #78350f !important; // amber-800 equivalent
+    width: 4px;
+    height: 4px;
+    background-color: #f59e0b;
+    border-radius: 50%;
   }
 }
 
 // Past date styling
 .past-day {
-  opacity: 0.5;
-  cursor: not-allowed !important;
-  background-color: #f5f5f5 !important; // Light gray for past dates
+  opacity: 0.4;
 
-  &:hover {
-    background-color: #f5f5f5 !important; // Keep same color on hover
+  .day-number {
+    color: #9ca3af;
+  }
+
+  :host-context(.dark) & .day-number {
+    color: #6b7280;
+  }
+}
+
+// Other month dates
+.other-month {
+  opacity: 0.3;
+
+  .day-number {
+    color: #d1d5db;
+  }
+
+  :host-context(.dark) & .day-number {
+    color: #4b5563;
   }
 }

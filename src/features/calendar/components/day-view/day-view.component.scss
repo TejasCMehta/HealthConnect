@@ -2,79 +2,79 @@
   display: block;
 }
 
-// Current time indicator styles (same as week view)
+// Clean day view container
+.day-container {
+  background: #ffffff;
+
+  :host-context(.dark) & {
+    background: #1f2937;
+  }
+}
+
+// Time slots with subtle grid lines
+.time-slot {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+
+  &:hover {
+    background-color: rgba(59, 130, 246, 0.01);
+  }
+
+  :host-context(.dark) & {
+    background: #1f2937;
+    border-bottom-color: rgba(75, 85, 99, 0.2);
+
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.02);
+    }
+  }
+}
+
+// Time labels with clean typography
+.time-label {
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: right;
+  padding-right: 12px;
+
+  :host-context(.dark) & {
+    color: #9ca3af;
+  }
+}
+
+// Current time indicator - clean line
 .current-time-indicator {
   z-index: 50;
   pointer-events: none;
 
   .time-label {
-    animation: currentTimePulse 2s ease-in-out infinite;
+    background-color: #3b82f6;
+    color: #ffffff;
+    font-size: 0.625rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-align: center;
   }
 
   .time-line {
-    position: relative;
-
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        rgba(59, 130, 246, 0.8),
-        rgba(59, 130, 246, 0.6),
-        rgba(59, 130, 246, 0.8)
-      );
-      animation: currentTimeGlow 3s ease-in-out infinite;
-    }
+    height: 2px;
+    background-color: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
   }
 
   .time-dot {
-    animation: currentTimeDot 2s ease-in-out infinite;
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+    width: 8px;
+    height: 8px;
+    background-color: #3b82f6;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
   }
 }
 
-@keyframes currentTimePulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-}
-
-@keyframes currentTimeGlow {
-  0%,
-  100% {
-    opacity: 0.6;
-    filter: blur(0px);
-  }
-  50% {
-    opacity: 0.8;
-    filter: blur(1px);
-  }
-}
-
-@keyframes currentTimeDot {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
-  }
-  50% {
-    transform: scale(1.2);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
-  }
-}
-
+// Appointment positioning
 .time-slot-container {
   position: relative;
   overflow: visible;
@@ -85,249 +85,59 @@
   top: 0;
   left: 0;
   overflow: visible;
-  z-index: 1;
+  z-index: 10;
+  margin: 1px;
 }
 
-.appointment-wrapper app-appointment-card {
-  display: block;
-  height: 100%;
-}
-
-// Overlapping appointments styles
-.appointments-container {
-  .appointment-column {
-    position: absolute;
-
-    &.column-0 {
-      z-index: 30;
-    }
-
-    &.column-1 {
-      z-index: 29;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    &.column-2 {
-      z-index: 28;
-      box-shadow: 0 8px 10px -2px rgba(0, 0, 0, 0.15),
-        0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-  }
-}
-
-// Ensure appointments align with time slot borders
-.appointment-card-wrapper {
-  // Remove any margin or padding that could misalign appointments
-  margin: 0;
-  padding: 0;
-
-  // Ensure lower z-index than forms/modals (which typically use z-index: 50+)
-  z-index: 30 !important;
-
-  // Ensure the appointment card fills the allocated space precisely
-  app-appointment-card {
-    display: block;
-    height: 100%;
-    width: 100%;
-
-    // Ensure the inner card content aligns with borders
-    > div {
-      height: 100%;
-      box-sizing: border-box;
-    }
-  }
-}
-
-// Add button styling
+// Clean add appointment area
 .add-appointment-area {
-  transition: all 0.2s ease-in-out;
+  border: 1px dashed rgba(203, 213, 225, 0.6);
+  border-radius: 4px;
+  background: transparent;
+  transition: all 0.15s ease;
 
   &:hover {
-    transform: scale(1.05);
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.02);
+
+    .add-icon {
+      color: #3b82f6;
+    }
   }
 
-  .ri-add-line {
-    transition: all 0.2s ease-in-out;
+  .add-icon {
+    color: #cbd5e1;
+    transition: color 0.15s ease;
   }
-}
 
-// Time slot hover effect
-.time-slot-row {
-  &:hover {
-    .add-appointment-area {
-      border-color: theme("colors.blue.400");
-      background-color: theme("colors.blue.50");
+  :host-context(.dark) & {
+    border-color: rgba(107, 114, 128, 0.4);
 
-      .ri-add-line {
-        color: theme("colors.blue.500");
+    .add-icon {
+      color: #6b7280;
+    }
+
+    &:hover {
+      border-color: #60a5fa;
+      background-color: rgba(59, 130, 246, 0.05);
+
+      .add-icon {
+        color: #60a5fa;
       }
     }
   }
 }
 
-// Dark mode adjustments
-.dark {
-  .time-slot-row:hover {
-    .add-appointment-area {
-      border-color: theme("colors.blue.600");
-      background-color: theme("colors.blue.900/40");
-
-      .ri-add-line {
-        color: theme("colors.blue.400");
-      }
-    }
-  }
-
-  // Enhanced dark mode styling for restricted time slot clickable areas
-  // Better contrast for restricted areas in dark mode
-  .bg-gray-50 {
-    background-color: rgba(55, 65, 81, 0.6) !important; // Slightly more visible
-    border-color: rgba(75, 85, 99, 0.8) !important; // darker border
-  }
-}
-
-// Ensure appointment cards are never affected by any global restrictions
-.appointment-card-wrapper {
-  // Override any inherited restrictions
-  opacity: 1 !important;
-
-  app-appointment-card {
-    opacity: 1 !important;
-
-    // Ensure appointment cards maintain full visibility
-    > div {
-      opacity: 1 !important;
-    }
-  }
-}
-
-// Remove global restricted time slot styling since we handle it per element now
-// This ensures only the clickable areas are grayed out, not the entire time slot or appointments
-
-// Individual element styling for restricted states is now handled inline in the HTML
-
-// Restricted time slots styling (exactly matching week view)
+// Restricted time slots - minimal indication
 .restricted-time-slot {
-  background-color: #f3f4f6 !important; // Light mode: same as week view
-  cursor: not-allowed !important;
+  background-color: rgba(243, 244, 246, 0.2);
+  opacity: 0.6;
 
-  &:hover {
-    background-color: #f3f4f6 !important;
+  :host-context(.dark) & {
+    background-color: rgba(55, 65, 81, 0.2);
   }
 }
 
-// Dark mode styling for restricted time slots
-:host-context(.dark) .restricted-time-slot {
-  background-color: #374151 !important; // gray-700 equivalent - same as week view
-
-  &:hover {
-    background-color: #374151 !important;
-  }
-}
-
-// Weekend time slots styling (exactly matching week view)
-.weekend-time-slot {
-  background-color: #f9fafb !important; // Very light gray - same as week view
-
-  &:hover {
-    background-color: #f3f4f6 !important; // Slightly darker gray on hover
-  }
-}
-
-// Dark mode styling for weekend time slots
-:host-context(.dark) .weekend-time-slot {
-  background-color: #1f2937 !important; // gray-800 equivalent - same as week view
-
-  &:hover {
-    background-color: #374151 !important; // gray-700 equivalent
-  }
-}
-
-// Holiday time slots styling (exactly matching week view)
-.holiday-time-slot {
-  background-color: #fef3c7 !important; // Light amber for holidays - same as week view
-
-  &:hover {
-    background-color: #fde68a !important; // Slightly darker amber on hover
-  }
-}
-
-// Dark mode styling for holiday time slots
-:host-context(.dark) .holiday-time-slot {
-  background-color: #451a03 !important; // amber-900 equivalent - same as week view
-
-  &:hover {
-    background-color: #78350f !important; // amber-800 equivalent
-  }
-}
-
-// Past time slots styling
-.past-time-slot {
-  background-color: #f3f4f6 !important; // Same as restricted
-  cursor: not-allowed !important;
-
-  &:hover {
-    background-color: #f3f4f6 !important;
-  }
-}
-
-// Dark mode styling for past time slots
-:host-context(.dark) .past-time-slot {
-  background-color: #374151 !important; // gray-700 equivalent
-
-  &:hover {
-    background-color: #374151 !important;
-  }
-}
-
-// Restricted clickable area styling (for the clickable zones)
-.restricted-clickable-area {
-  cursor: not-allowed !important;
-  opacity: 0.5 !important;
-  background-color: #f3f4f6 !important;
-  border-color: #d1d5db !important; // gray-300
-
-  &:hover {
-    background-color: #f3f4f6 !important;
-    border-color: #d1d5db !important;
-  }
-}
-
-// Dark mode styling for restricted clickable areas
-:host-context(.dark) .restricted-clickable-area {
-  background-color: #374151 !important; // gray-700
-  border-color: #4b5563 !important; // gray-600
-
-  &:hover {
-    background-color: #374151 !important;
-    border-color: #4b5563 !important;
-  }
-}
-.holiday-time-slot {
-  background-color: #fef3c7 !important; // Light amber for holidays
-
-  &:hover {
-    background-color: #fde68a !important; // Slightly darker amber on hover
-  }
-}
-
-// Dark mode styling for holiday time slots
-:host-context(.dark) .holiday-time-slot {
-  background-color: #451a03 !important; // amber-900 equivalent
-
-  &:hover {
-    background-color: #78350f !important; // amber-800 equivalent
-  }
-}
-
-// Past time slot styling (clean dimming)
-.past-time-slot {
-  opacity: 0.6 !important;
-  pointer-events: none;
-}
-
-// Clean styling for restricted clickable areas
 .restricted-clickable-area {
   background-color: #f3f4f6 !important;
   border-color: #d1d5db !important;
