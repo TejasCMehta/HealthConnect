@@ -90,13 +90,13 @@
     },
     {
       "id": 1752405398717,
-      "title": "awa",
+      "title": "Alice Johnson1 - Dr. Dr. Sarah Johnson",
       "description": "Claude Code has introduced hooks that now automate your development workflow in a way similar to using triggers.\n\nI have just tested it with my custom script, and it's mind-blowing how it integrates into your coding process, automatically executing your preferred commands.\n\nClaude Code hooks are user-defined shell commands that execute at various points in Claude Code's lifecycle.",
       "patientId": 1,
       "doctorId": 2,
       "startTime": "2025-07-16T05:00:00.000Z",
       "endTime": "2025-07-16T06:00:00.000Z",
-      "status": "scheduled",
+      "status": "cancelled",
       "patient": {
         "id": 1,
         "name": "Alice Johnson1",
@@ -194,12 +194,12 @@
     },
     {
       "id": 1752582615666,
-      "title": "Bob Wilson - Dr. Dr. Sarah Johnson",
+      "title": "Alice Johnson1 - Dr. Dr. Sarah Johnson",
       "description": "Testttt",
-      "patientId": 2,
+      "patientId": 1,
       "doctorId": 2,
       "startTime": "2025-07-16T08:30:00.000Z",
-      "endTime": "2025-07-16T09:30:00.000Z",
+      "endTime": "2025-07-16T09:00:00.000Z",
       "status": "scheduled"
     },
     {
@@ -276,7 +276,23 @@
       "doctorId": 1,
       "startTime": "2025-07-17T09:30:00.000Z",
       "endTime": "2025-07-17T10:30:00.000Z",
-      "status": "scheduled"
+      "status": "scheduled",
+      "patient": {
+        "id": 1,
+        "name": "Alice Johnson1",
+        "email": "alice@example.com",
+        "phone": "+1234567892",
+        "dateOfBirth": "1990-05-15",
+        "address": "123 Main St, City, State 12345"
+      },
+      "doctor": {
+        "id": 1,
+        "name": "Dr. John Smith",
+        "specialty": "Cardiology",
+        "email": "john@clinic.com",
+        "phone": "+1234567890",
+        "color": "#3b82f6"
+      }
     }
   ],
   "settings": {

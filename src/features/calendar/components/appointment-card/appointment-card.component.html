@@ -1,15 +1,22 @@
 <div
   [class]="
     'appointment-card transition-colors border-l-4 flex flex-col relative ' +
-    (appointment().status === 'scheduled' ? 'border-blue-500 ' : '') +
-    (appointment().status === 'completed' ? 'border-green-500 ' : '') +
-    (appointment().status === 'cancelled' ? 'border-red-500 ' : '') +
-    (!appointment().status ? 'border-gray-400 ' : '') +
+    (appointment().status === 'scheduled'
+      ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10 '
+      : '') +
+    (appointment().status === 'completed'
+      ? 'border-green-400 bg-green-50 dark:bg-green-900/10 '
+      : '') +
+    (appointment().status === 'cancelled'
+      ? 'border-red-400 bg-red-50 dark:bg-red-900/10 '
+      : '') +
+    (!appointment().status
+      ? 'border-gray-400 bg-gray-50 dark:bg-gray-900/10 '
+      : '') +
     (compact()
-      ? 'p-1 bg-blue-50 dark:bg-blue-900/20 rounded-md' +
-        (disableHover() ? '' : ' hover:bg-blue-100 dark:hover:bg-blue-900/40')
-      : 'p-3 bg-white dark:bg-gray-800 shadow-sm rounded-r-md' +
-        (disableHover() ? '' : ' hover:bg-gray-50 dark:hover:bg-gray-700')) +
+      ? 'p-1 rounded-md min-h-[20px] h-[20px]'
+      : 'p-3 shadow-sm rounded-r-md') +
+    (disableHover() ? '' : ' hover:bg-opacity-80') +
     (isResizing() ? ' resizing' : '') +
     (isDragging() ? ' dragging cursor-grabbing' : '') +
     (isDragging() && dragPreview() && !dragPreview()!.isValidTarget
@@ -42,26 +49,25 @@
 
   <div class="flex items-start justify-between flex-1">
     <div class="flex-1 min-w-0">
-      <!-- Patient Name as Primary Title -->
-      <h4
-        [class]="
-          'font-medium truncate transition-all duration-200 ' +
-          (compact()
-            ? 'text-xs text-blue-800 dark:text-blue-200 max-w-[120px]'
-            : 'text-sm text-gray-900 dark:text-white') +
-          (isResizing() ? ' font-bold text-blue-700 dark:text-blue-300' : '') +
-          (isDragging() ? ' font-bold text-green-700 dark:text-green-300' : '')
-        "
-        [title]="appointment().patient?.name || appointment().title"
-        style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-      >
-        @if (compact()) {
-          <!-- In compact mode, show appointment title or fallback -->
-          {{ appointment().title || 'Appointment' }}
-        } @else {
-          <!-- In non-compact mode, show patient name -->
-          {{ appointment().patient?.name || appointment().title }}
-        }
+      @if (!compact()) {
+      <!-- Non-compact mode: Start time - Patient name -->
+      <div class="flex items-start space-x-2">
+        <span
+          class="font-medium text-sm text-gray-900 dark:text-white flex-shrink-0"
+          [class.text-blue-700]="isResizing()"
+          [class.text-green-700]="isDragging()"
+        >
+          {{ startTime }}
+        </span>
+        <span class="text-gray-600 dark:text-gray-400 text-sm">-</span>
+        <span
+          class="font-medium text-sm text-gray-900 dark:text-white truncate"
+          [class.text-blue-700]="isResizing()"
+          [class.text-green-700]="isDragging()"
+          [title]="appointment().patient?.name || 'Unknown Patient'"
+        >
+          {{ appointment().patient?.name || "Unknown Patient" }}
+        </span>
         @if (isResizing()) {
         <span class="ml-1 text-xs font-normal text-blue-500 animate-pulse">
           (resizing...)
@@ -79,41 +85,47 @@
           @else { (invalid position) }
         </span>
         }
-      </h4>
+      </div>
 
-      @if (!compact()) {
-      <!-- Non-compact mode: Show time, duration, and doctor if space allows -->
+      <!-- Show doctor and duration if appointment > 30 mins -->
+      @if (duration > 30) {
       <div
         class="mt-1 flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400"
       >
-        <span class="font-medium">{{ startTime }} - {{ endTime }}</span>
-        <span>•</span>
         <span>{{ duration }} min</span>
         @if (appointment().doctor?.name) {
         <span>•</span>
         <span class="truncate">Dr. {{ appointment().doctor?.name }}</span>
         }
       </div>
-
-      } @else {
-      <!-- Compact mode: Show start time and patient name in one line -->
-      @if (slotHeight() >= 30) {
-      <div class="mt-1 flex items-center space-x-1 text-xs compact-time">
-        <span class="font-medium text-blue-600 dark:text-blue-300 flex-shrink-0">{{
-          startTime
-        }}</span>
-        <span class="text-gray-500 dark:text-gray-400 truncate max-w-[80px]">{{
-          appointment().patient?.name || appointment().title
-        }}</span>
+      } } @else {
+      <!-- Compact mode: Start time - Patient name in one line (fixed height) -->
+      <div class="flex items-center space-x-1 text-xs leading-none h-full">
+        <span
+          class="font-medium flex-shrink-0 text-gray-700 dark:text-gray-300"
+          [class.text-blue-700]="isResizing()"
+          [class.text-green-600]="isDragging()"
+          style="line-height: 1; font-size: 11px"
+        >
+          {{ startTime }}
+        </span>
+        <span
+          class="truncate text-gray-600 dark:text-gray-400"
+          [class.text-blue-700]="isResizing()"
+          [class.text-green-700]="isDragging()"
+          [title]="appointment().patient?.name || 'Unknown Patient'"
+          style="
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1;
+            font-size: 11px;
+          "
+        >
+          {{ appointment().patient?.name || "Unknown Patient" }}
+        </span>
       </div>
-      } @else {
-        <!-- Very compact: just patient name -->
-        <div class="mt-0.5 text-xs">
-          <span class="text-gray-700 dark:text-gray-300 truncate max-w-[100px] block">{{
-            appointment().patient?.name || appointment().title
-          }}</span>
-        </div>
-      }
       }
     </div>
   </div>
