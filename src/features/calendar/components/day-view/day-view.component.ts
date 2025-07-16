@@ -52,6 +52,10 @@ export class DayViewComponent implements OnInit, OnDestroy {
   public selectedDoctorId = input<string>("");
 
   public appointmentSelect = output<Appointment>();
+  public appointmentClick = output<{
+    appointment: Appointment;
+    clickEvent: MouseEvent;
+  }>();
   public timeSlotSelect = output<{ date: Date; time: string }>();
   public appointmentUpdate = output<Appointment>();
 
@@ -327,14 +331,18 @@ export class DayViewComponent implements OnInit, OnDestroy {
     );
   }
 
-  onAppointmentClick(appointment: Appointment): void {
+  onAppointmentClick(appointment: Appointment, event?: MouseEvent): void {
     // Prevent click if this appointment just completed a resize
     if (this.recentResizeAppointmentId === appointment.id) {
       this.recentResizeAppointmentId = null; // Clear the flag
       return;
     }
 
-    this.appointmentSelect.emit(appointment);
+    if (event) {
+      this.appointmentClick.emit({ appointment, clickEvent: event });
+    } else {
+      this.appointmentSelect.emit(appointment);
+    }
   }
 
   onTimeSlotClick(timeSlot: string): void {

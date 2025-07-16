@@ -175,7 +175,7 @@
                   [gridContainer]="gridContainer"
                   [viewType]="'day'"
                   (click)="
-                    onAppointmentClick(appointmentData.appointment);
+                    onAppointmentClick(appointmentData.appointment, $event);
                     debugAppointment(appointmentData.appointment)
                   "
                   (resizeStart)="onResizeStart($event)"

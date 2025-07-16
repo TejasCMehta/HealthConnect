@@ -271,12 +271,22 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   private showPopover(appointment: Appointment, clickEvent: MouseEvent): void {
-    const targetElement = clickEvent.target as HTMLElement;
-    const rect = targetElement.getBoundingClientRect();
+    // Use currentTarget to get the appointment element, not the clicked child element
+    const targetElement = (clickEvent.currentTarget ||
+      clickEvent.target) as HTMLElement;
 
-    // Calculate initial position
+    // Find the actual appointment card element if we clicked on a child
+    let appointmentElement = targetElement;
+    if (!appointmentElement.classList.contains("appointment-card")) {
+      appointmentElement =
+        targetElement.closest(".appointment-card") || targetElement;
+    }
+
+    const rect = appointmentElement.getBoundingClientRect();
+
+    // Calculate initial position with better centering
     let x = rect.left + rect.width / 2;
-    let y = rect.bottom + 8;
+    let y = rect.bottom + 12; // Increased gap for better visual separation
 
     // Viewport width and height
     const viewportWidth = window.innerWidth;
@@ -300,8 +310,8 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
     // Adjust vertical position with better spacing
     if (y + popoverHeight > viewportHeight - 16) {
-      // Position above the element
-      y = rect.top - popoverHeight - 8;
+      // Position above the element with more gap
+      y = rect.top - popoverHeight - 12;
       placement = "bottom"; // Popover above trigger, pointer points down
 
       // If still doesn't fit, check horizontal placement
@@ -322,9 +332,23 @@ export class CalendarComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Add additional offset to bring popover closer based on placement
+    if (placement === "bottom") {
+      // Popover is above the appointment, bring it closer by moving down
+      y = y + 10;
+    } else if (placement === "right") {
+      // Popover is to the left of the appointment, bring it closer by moving right
+      x = x + 50;
+    }
+
     // Ensure y is not negative
     if (y < 16) {
       y = 16;
+    }
+
+    // Ensure x is not negative
+    if (x < 16) {
+      x = 16;
     }
 
     this.popoverPosition.set({
