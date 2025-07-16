@@ -267,12 +267,12 @@
 
 // Compact view optimizations (Month view only)
 .appointment-card.compact {
-  padding: 2px 4px !important;
+  padding: 3px 6px !important;
   border-radius: 4px;
   position: relative;
-  height: 20px !important;
-  min-height: 20px !important;
-  max-height: 20px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
   overflow: hidden !important;
   display: flex !important;
   align-items: center !important;
@@ -295,7 +295,7 @@
 
   // Tighter spacing in month view
   .appointment-title {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     line-height: 1;
     margin: 0 !important;
   }
@@ -308,14 +308,14 @@
 
   // Smaller drag handle for compact view
   .drag-handle-center {
-    width: 12px;
-    height: 12px;
-    top: 2px;
-    right: 2px;
+    width: 14px;
+    height: 14px;
+    top: 3px;
+    right: 3px;
 
     .drag-icon {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
     }
   }
 }

@@ -28,6 +28,7 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
   public appointment = input.required<Appointment>();
   public isOpen = input<boolean>(false);
   public position = input<PopoverPosition>({ x: 0, y: 0 });
+  public isPastAppointment = input<boolean>(false);
 
   public edit = output<void>();
   public delete = output<void>();

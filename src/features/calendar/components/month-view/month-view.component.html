@@ -22,14 +22,14 @@
     @for (day of monthDays; track day.toISOString()) {
     <div
       [class]="
-        'min-h-[140px] border-b border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-3 relative transition-colors ' +
+        'min-h-[145px] border-b border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-3 relative transition-colors ' +
         (isPastDate(day)
           ? 'bg-gray-50/50 dark:bg-gray-800/50'
           : 'bg-white dark:bg-gray-800') +
         ' ' +
         (!isCurrentMonth(day) ? 'bg-gray-50 dark:bg-gray-750' : '') +
         ' ' +
-        (isRestrictedDay(day)
+        (isRestrictedForNewAppointments(day)
           ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
           : 'hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer') +
         ' ' +
@@ -41,7 +41,7 @@
           ? 'bg-red-50/30 dark:bg-red-900/20'
           : '')
       "
-      (click)="!isRestrictedDay(day) ? onDateClick(day) : null"
+      (click)="!isRestrictedForNewAppointments(day) ? onDateClick(day) : null"
       [attr.data-date]="day.toISOString()"
       [id]="'day-' + formatDateForId(day)"
     >
@@ -89,7 +89,8 @@
             [appointment]="appointment"
             [compact]="true"
             [enableDrag]="
-              !isRestrictedDay(day) && !isPastAppointment(appointment)
+              !isRestrictedForNewAppointments(day) &&
+              !isPastAppointment(appointment)
             "
             [enableResize]="false"
             [gridContainer]="monthGrid"
@@ -97,15 +98,15 @@
             [monthDays]="monthDays"
             [doctors]="doctors()"
             [disableHover]="
-              isRestrictedDay(day) || isPastAppointment(appointment)
+              isRestrictedForNewAppointments(day) ||
+              isPastAppointment(appointment)
             "
             (click)="onAppointmentClick(appointment, $event)"
             (dragStart)="onDragStart($event)"
             (dragUpdate)="onDragUpdate($event)"
             (dragComplete)="onDragComplete($event)"
-            [class.pointer-events-none]="
-              isRestrictedDay(day) || isPastAppointment(appointment)
-            "
+            [class.pointer-events-none]="isRestrictedDay(day)"
+            [class.cursor-pointer]="isPastAppointment(appointment)"
           >
           </app-appointment-card>
         </div>
@@ -123,7 +124,7 @@
       </div>
 
       <!-- Drop zone overlay (only shown during drag) -->
-      @if (isDragActive() && !isRestrictedDay(day)) {
+      @if (isDragActive() && !isRestrictedForNewAppointments(day)) {
       <div
         class="absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-50/30 dark:bg-blue-900/20 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none"
         [class.opacity-100]="isDragOverDay(day)"

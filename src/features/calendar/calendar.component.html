@@ -176,9 +176,11 @@
   <app-appointment-form
     [appointment]="selectedAppointment()"
     [selectedTimeSlot]="selectedTimeSlot()"
+    [readOnly]="isSelectedAppointmentPast()"
     (close)="onFormClose()"
     (save)="onAppointmentSave()"
   >
+    >
   </app-appointment-form>
   }
 </div>
@@ -188,6 +190,7 @@
   [appointment]="popoverAppointment()!"
   [isOpen]="isPopoverOpen()"
   [position]="popoverPosition()"
+  [isPastAppointment]="isPopoverAppointmentPast()"
   (edit)="onPopoverEdit()"
   (delete)="onPopoverDelete()"
   (close)="closePopover()"

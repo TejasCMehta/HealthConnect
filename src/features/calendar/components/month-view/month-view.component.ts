@@ -165,6 +165,10 @@ export class MonthViewComponent {
   }
 
   isRestrictedDay(date: Date): boolean {
+    return this.isWeekend(date) || this.isHoliday(date);
+  }
+
+  isRestrictedForNewAppointments(date: Date): boolean {
     return (
       this.isPastDate(date) || this.isWeekend(date) || this.isHoliday(date)
     );

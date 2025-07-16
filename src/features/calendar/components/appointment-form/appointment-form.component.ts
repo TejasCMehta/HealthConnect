@@ -41,6 +41,7 @@ export class AppointmentFormComponent implements OnInit {
 
   public appointment = input<Appointment | null>(null);
   public selectedTimeSlot = input<{ date: Date; time: string } | null>(null);
+  public readOnly = input<boolean>(false);
   public close = output<void>();
   public save = output<void>();
 

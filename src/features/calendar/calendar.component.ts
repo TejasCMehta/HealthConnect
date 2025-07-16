@@ -391,6 +391,26 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.popoverAppointment.set(null);
   }
 
+  isPopoverAppointmentPast(): boolean {
+    const appointment = this.popoverAppointment();
+    if (!appointment) {
+      return false;
+    }
+    const now = new Date();
+    const appointmentDate = new Date(appointment.startTime);
+    return appointmentDate < now;
+  }
+
+  isSelectedAppointmentPast(): boolean {
+    const appointment = this.selectedAppointment();
+    if (!appointment) {
+      return false;
+    }
+    const now = new Date();
+    const appointmentDate = new Date(appointment.startTime);
+    return appointmentDate < now;
+  }
+
   onTimeSlotSelect(timeSlot: { date: Date; time: string }): void {
     // Save scroll position when opening appointment form
     this.saveScrollPosition();
