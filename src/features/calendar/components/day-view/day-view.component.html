@@ -166,8 +166,10 @@
                 <app-appointment-card
                   [appointment]="appointmentData.appointment"
                   [compact]="false"
-                  [enableResize]="true"
-                  [enableDrag]="true"
+                  [enableResize]="
+                    !isPastAppointment(appointmentData.appointment)
+                  "
+                  [enableDrag]="!isPastAppointment(appointmentData.appointment)"
                   [slotHeight]="65"
                   [doctors]="doctors()"
                   [gridContainer]="gridContainer"

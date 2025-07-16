@@ -135,6 +135,14 @@ export class MonthViewComponent {
     return date.toDateString() === today.toDateString();
   }
 
+  isTodaysDayOfWeek(dayName: string): boolean {
+    const today = new Date();
+    const todayDayName = today
+      .toLocaleDateString("en-US", { weekday: "short" })
+      .toUpperCase();
+    return dayName.toUpperCase() === todayDayName;
+  }
+
   isCurrentMonth(date: Date): boolean {
     const current = this.currentDate();
     return date.getMonth() === current.getMonth();

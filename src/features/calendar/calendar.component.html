@@ -1,37 +1,74 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900" #calendarContainer>
-  <!-- Header Section -->
-  <div
-    class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700"
-  >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div
-        class="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0"
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="md:flex md:items-center md:justify-between">
+    <div class="flex-1 min-w-0">
+      <h2
+        class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate"
       >
-        <!-- Left side - Title and Subheading -->
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-            Appointments
-          </h1>
-          <p class="mt-1 text-base text-gray-600 dark:text-gray-400">
-            {{ getSubheadingText() }}
-          </p>
+        Appointments
+      </h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        there is the latest update for the last 7 days. check now
+      </p>
+    </div>
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <button
+        (click)="onNewAppointment()"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="ri-add-line mr-2"></i>
+        New Appointment
+      </button>
+    </div>
+  </div>
+
+  <!-- Calendar Container -->
+  <div
+    class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden min-h-[700px]"
+  >
+    <!-- Internal Navigation Bar -->
+    <div
+      class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+    >
+      <div
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0"
+      >
+        <!-- Left side - Navigation Controls and Period Display -->
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
+            <button
+              (click)="onDateChange(getPreviousPeriod())"
+              class="p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none"
+            >
+              <i class="ri-arrow-left-s-line text-xl"></i>
+            </button>
+            <button
+              (click)="onDateChange(getNextPeriod())"
+              class="p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none"
+            >
+              <i class="ri-arrow-right-s-line text-xl"></i>
+            </button>
+          </div>
+
+          <!-- Current Period Display -->
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+            {{ getCurrentPeriodDisplay() }}
+          </h2>
         </div>
 
         <!-- Right side - Controls -->
-        <div
-          class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4"
-        >
+        <div class="flex items-center space-x-3">
           <!-- View Switch -->
           <div
-            class="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1"
+            class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1"
           >
             <button
               (click)="onViewChange('month')"
               [class]="
-                'px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none ' +
+                'px-3 py-2 text-sm font-medium rounded-md transition-colors ' +
                 (currentView() === 'month'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm border-b-2 border-blue-500'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600')
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300')
               "
             >
               Month
@@ -39,10 +76,10 @@
             <button
               (click)="onViewChange('week')"
               [class]="
-                'px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none ' +
+                'px-3 py-2 text-sm font-medium rounded-md transition-colors ' +
                 (currentView() === 'week'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm border-b-2 border-blue-500'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600')
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300')
               "
             >
               Week
@@ -50,19 +87,19 @@
             <button
               (click)="onViewChange('day')"
               [class]="
-                'px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none ' +
+                'px-3 py-2 text-sm font-medium rounded-md transition-colors ' +
                 (currentView() === 'day'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm border-b-2 border-blue-500'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600')
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300')
               "
             >
               Day
             </button>
           </div>
 
-          <!-- Doctor Dropdown -->
+          <!-- Doctor Filter -->
           <select
-            class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[140px]"
             [(ngModel)]="selectedDoctorId"
             (change)="onDoctorFilterChange($event)"
           >
@@ -72,53 +109,7 @@
             }
           </select>
 
-          <!-- New Appointment Button -->
-          <button
-            (click)="onNewAppointment()"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none"
-          >
-            <i class="ri-add-line mr-2 text-base"></i>
-            New Appointment
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Calendar Container -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div
-      class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
-    >
-      <!-- Internal Navigation Bar -->
-      <div
-        class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700"
-      >
-        <div class="flex items-center justify-between">
-          <!-- Left side - Navigation Controls -->
-          <div class="flex items-center space-x-4">
-            <div class="flex items-center space-x-2">
-              <button
-                (click)="onDateChange(getPreviousPeriod())"
-                class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none"
-              >
-                <i class="ri-arrow-left-s-line text-xl"></i>
-              </button>
-              <button
-                (click)="onDateChange(getNextPeriod())"
-                class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none"
-              >
-                <i class="ri-arrow-right-s-line text-xl"></i>
-              </button>
-            </div>
-
-            <!-- Current Period Display -->
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-              {{ getCurrentPeriodDisplay() }}
-            </h2>
-          </div>
-
-          <!-- Right side - Today Button -->
+          <!-- Today Button -->
           <button
             (click)="onTodayClick()"
             class="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors focus:outline-none"
@@ -127,47 +118,47 @@
           </button>
         </div>
       </div>
+    </div>
 
-      <!-- Calendar Content -->
-      <div class="calendar-container">
-        @if (isLoading()) {
-        <div class="flex items-center justify-center h-96">
-          <i class="ri-loader-4-line animate-spin text-4xl text-gray-400"></i>
-        </div>
-        } @else { @switch (currentView()) { @case ('month') {
-        <app-month-view
-          [currentDate]="currentDate()"
-          [appointments]="appointments()"
-          [doctors]="doctors()"
-          [selectedDoctorId]="selectedDoctorId()"
-          (appointmentSelect)="onAppointmentSelect($event)"
-          (appointmentClick)="onAppointmentClick($event)"
-          (moreAppointmentsClick)="onMoreAppointmentsClick($event.date)"
-          (dateSelect)="onDateChange($event)"
-          (appointmentUpdate)="onAppointmentUpdate($event)"
-        >
-        </app-month-view>
-        } @case ('week') {
-        <app-week-view
-          [currentDate]="currentDate()"
-          [appointments]="appointments()"
-          (appointmentSelect)="onAppointmentSelect($event)"
-          (appointmentClick)="onAppointmentClick($event)"
-          (timeSlotSelect)="onTimeSlotSelect($event)"
-          (appointmentUpdate)="onAppointmentUpdate($event)"
-        >
-        </app-week-view>
-        } @case ('day') {
-        <app-day-view
-          [currentDate]="currentDate()"
-          [appointments]="appointments()"
-          (appointmentSelect)="onAppointmentSelect($event)"
-          (timeSlotSelect)="onTimeSlotSelect($event)"
-          (appointmentUpdate)="onAppointmentUpdate($event)"
-        >
-        </app-day-view>
-        } } }
+    <!-- Calendar Content -->
+    <div class="calendar-container">
+      @if (isLoading()) {
+      <div class="flex items-center justify-center h-96">
+        <i class="ri-loader-4-line animate-spin text-4xl text-gray-400"></i>
       </div>
+      } @else { @switch (currentView()) { @case ('month') {
+      <app-month-view
+        [currentDate]="currentDate()"
+        [appointments]="appointments()"
+        [doctors]="doctors()"
+        [selectedDoctorId]="selectedDoctorId()"
+        (appointmentSelect)="onAppointmentSelect($event)"
+        (appointmentClick)="onAppointmentClick($event)"
+        (moreAppointmentsClick)="onMoreAppointmentsClick($event.date)"
+        (dateSelect)="onDateChange($event)"
+        (appointmentUpdate)="onAppointmentUpdate($event)"
+      >
+      </app-month-view>
+      } @case ('week') {
+      <app-week-view
+        [currentDate]="currentDate()"
+        [appointments]="appointments()"
+        (appointmentSelect)="onAppointmentSelect($event)"
+        (appointmentClick)="onAppointmentClick($event)"
+        (timeSlotSelect)="onTimeSlotSelect($event)"
+        (appointmentUpdate)="onAppointmentUpdate($event)"
+      >
+      </app-week-view>
+      } @case ('day') {
+      <app-day-view
+        [currentDate]="currentDate()"
+        [appointments]="appointments()"
+        (appointmentSelect)="onAppointmentSelect($event)"
+        (timeSlotSelect)="onTimeSlotSelect($event)"
+        (appointmentUpdate)="onAppointmentUpdate($event)"
+      >
+      </app-day-view>
+      } } }
     </div>
   </div>
 

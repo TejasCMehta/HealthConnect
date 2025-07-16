@@ -3,10 +3,20 @@
   <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
     @for (day of weekDays; track day) {
     <div
-      class="px-4 py-3 bg-gray-50 dark:bg-gray-800 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0"
+      [class]="
+        'px-4 py-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0 ' +
+        (isTodaysDayOfWeek(day)
+          ? 'bg-blue-100 dark:bg-blue-900/30 border-b-2 border-blue-500 dark:border-blue-400'
+          : 'bg-gray-50 dark:bg-gray-800')
+      "
     >
       <span
-        class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+        [class]="
+          'text-sm font-medium uppercase tracking-wide ' +
+          (isTodaysDayOfWeek(day)
+            ? 'text-blue-700 dark:text-blue-300 font-bold'
+            : 'text-gray-500 dark:text-gray-400')
+        "
       >
         {{ day }}
       </span>
@@ -22,8 +32,10 @@
     @for (day of monthDays; track day.toISOString()) {
     <div
       [class]="
-        'min-h-[145px] border-b border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-3 relative transition-colors ' +
-        (isPastDate(day)
+        'min-h-[160px] border-b border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-3 relative transition-colors ' +
+        (isToday(day)
+          ? 'today-cell-highlight'
+          : isPastDate(day)
           ? 'bg-gray-50/50 dark:bg-gray-800/50'
           : 'bg-white dark:bg-gray-800') +
         ' ' +
@@ -33,11 +45,11 @@
           ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
           : 'hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer') +
         ' ' +
-        (isWeekend(day) && !isPastDate(day)
+        (isWeekend(day) && !isPastDate(day) && !isToday(day)
           ? 'bg-gray-50/80 dark:bg-gray-800/80'
           : '') +
         ' ' +
-        (isHoliday(day) && !isPastDate(day) && !isWeekend(day)
+        (isHoliday(day) && !isPastDate(day) && !isWeekend(day) && !isToday(day)
           ? 'bg-red-50/30 dark:bg-red-900/20'
           : '')
       "
@@ -51,7 +63,7 @@
           [class]="
             'text-sm font-medium leading-none ' +
             (isToday(day)
-              ? 'bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs'
+              ? 'super-today-highlight w-8 h-8 rounded-full flex items-center justify-center text-sm'
               : isCurrentMonth(day)
               ? 'text-gray-900 dark:text-white'
               : 'text-gray-400 dark:text-gray-500') +

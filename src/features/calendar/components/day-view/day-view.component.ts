@@ -162,6 +162,18 @@ export class DayViewComponent implements OnInit, OnDestroy {
     );
   }
 
+  isPastDate(date: Date): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    return checkDate < today;
+  }
+
+  isPastAppointment(appointment: Appointment): boolean {
+    return this.isPastDate(new Date(appointment.startTime));
+  }
+
   get dayAppointments(): Appointment[] {
     const dateStr = this.calendarService.formatDateForFiltering(
       this.currentDate()

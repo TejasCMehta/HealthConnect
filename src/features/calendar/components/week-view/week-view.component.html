@@ -11,12 +11,24 @@
       </div>
       @for (day of weekDays; track day.toISOString()) {
       <div
-        class="bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0"
+        [class]="
+          'bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0 ' +
+          (isToday(day)
+            ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200 dark:ring-blue-800'
+            : '')
+        "
       >
         <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
           {{ day.toLocaleDateString("en-US", { weekday: "short" }) }}
         </div>
-        <div class="text-xs text-gray-400 dark:text-gray-500">
+        <div
+          [class]="
+            'text-xs ' +
+            (isToday(day)
+              ? 'super-today-highlight w-6 h-6 rounded-full flex items-center justify-center mx-auto'
+              : 'text-gray-400 dark:text-gray-500')
+          "
+        >
           {{ day.getDate() }}
         </div>
       </div>
@@ -77,7 +89,10 @@
         <!-- Day columns -->
         @for (day of weekDays; track day.toISOString()) {
         <div
-          class="bg-white dark:bg-gray-900 relative overflow-visible min-h-[75px] group border-r border-gray-200 dark:border-gray-700 last:border-r-0"
+          [class]="
+            'relative overflow-visible min-h-[75px] group border-r border-gray-200 dark:border-gray-700 last:border-r-0 ' +
+            (isToday(day) ? 'today-week-column' : 'bg-white dark:bg-gray-900')
+          "
           [class.restricted-time-slot]="isRestrictedTimeSlot(day, timeSlot)"
           [class.weekend-day]="isWeekend(day) && !isPastTimeSlot(day, timeSlot)"
           [class.holiday-day]="
@@ -131,8 +146,8 @@
             <app-appointment-card
               [appointment]="appointmentData.appointment"
               [compact]="false"
-              [enableResize]="true"
-              [enableDrag]="true"
+              [enableResize]="!isPastAppointment(appointmentData.appointment)"
+              [enableDrag]="!isPastAppointment(appointmentData.appointment)"
               [slotHeight]="75"
               [doctors]="doctors()"
               [gridContainer]="gridContainer"
