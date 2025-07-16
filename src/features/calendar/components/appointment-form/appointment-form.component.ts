@@ -191,6 +191,23 @@ export class AppointmentFormComponent implements OnInit {
       this.generateEndTimeSlots(startTime);
 
       console.log("Form set from time slot:", this.form());
+    } else {
+      // New appointment - initialize with default empty form
+      console.log("Setting form for new appointment");
+      this.form.set({
+        description: "",
+        patientId: "0",
+        doctorId: "0",
+        appointmentDate: "",
+        startTime: "",
+        endTime: "",
+        status: "scheduled",
+      });
+
+      // Clear end time slots since no start time is selected
+      this.availableEndTimeSlots.set([]);
+
+      console.log("Form set for new appointment:", this.form());
     }
   }
 
@@ -203,6 +220,7 @@ export class AppointmentFormComponent implements OnInit {
         console.log("Working hours loaded:", hours);
         this.workingHours.set(hours);
         this.workingHoursLoaded.set(true);
+        this.generateTimeSlots(); // Generate time slots when working hours are loaded
         this.checkIfDataLoadedAndSetForm();
       },
       error: (error) => {
@@ -210,6 +228,7 @@ export class AppointmentFormComponent implements OnInit {
         // Use default working hours
         this.workingHours.set({ start: "08:00", end: "18:00" });
         this.workingHoursLoaded.set(true);
+        this.generateTimeSlots(); // Generate time slots with default hours
         this.checkIfDataLoadedAndSetForm();
       },
     });
@@ -283,6 +302,10 @@ export class AppointmentFormComponent implements OnInit {
       console.log(
         "All data loaded (patients, doctors, working hours, working days), setting form"
       );
+
+      // Generate time slots now that working hours are loaded
+      this.generateTimeSlots();
+
       // Add a small delay to ensure DOM is updated
       setTimeout(() => {
         this.setFormFromAppointment();
@@ -292,6 +315,15 @@ export class AppointmentFormComponent implements OnInit {
 
   private generateTimeSlots(): void {
     const workingHours = this.workingHours();
+
+    // Check if working hours are properly loaded
+    if (!workingHours || !workingHours.start || !workingHours.end) {
+      console.log(
+        "Working hours not yet loaded, skipping time slot generation"
+      );
+      return;
+    }
+
     const slots: string[] = [];
 
     const [startHour, startMinute] = workingHours.start.split(":").map(Number);
@@ -331,6 +363,16 @@ export class AppointmentFormComponent implements OnInit {
     const startTotalMinutes = startHour * 60 + startMinute;
 
     const workingHours = this.workingHours();
+
+    // Check if working hours are properly loaded
+    if (!workingHours || !workingHours.end) {
+      console.log(
+        "Working hours not yet loaded, skipping end time slot generation"
+      );
+      this.availableEndTimeSlots.set([]);
+      return;
+    }
+
     const [endHour, endMinute] = workingHours.end.split(":").map(Number);
     const endTotalMinutes = endHour * 60 + endMinute;
 
@@ -654,30 +696,39 @@ export class AppointmentFormComponent implements OnInit {
 
     // Validate working hours
     const workingHours = this.workingHours();
-    const [workStartHour, workStartMinute] = workingHours.start
-      .split(":")
-      .map(Number);
-    const [workEndHour, workEndMinute] = workingHours.end
-      .split(":")
-      .map(Number);
 
-    const workStartMinutes = workStartHour * 60 + workStartMinute;
-    const workEndMinutes = workEndHour * 60 + workEndMinute;
-
-    if (startTotalMinutes < workStartMinutes) {
-      this.validationService.setFieldError(
-        "startTime",
-        `Start time must be after working hours start (${workingHours.start})`
+    // Check if working hours are properly loaded
+    if (!workingHours || !workingHours.start || !workingHours.end) {
+      console.log(
+        "Working hours not yet loaded, skipping working hours validation"
       );
-      isValid = false;
-    }
+      // Continue with other validations, but skip working hours validation
+    } else {
+      const [workStartHour, workStartMinute] = workingHours.start
+        .split(":")
+        .map(Number);
+      const [workEndHour, workEndMinute] = workingHours.end
+        .split(":")
+        .map(Number);
 
-    if (endTotalMinutes > workEndMinutes) {
-      this.validationService.setFieldError(
-        "endTime",
-        `End time must be before working hours end (${workingHours.end})`
-      );
-      isValid = false;
+      const workStartMinutes = workStartHour * 60 + workStartMinute;
+      const workEndMinutes = workEndHour * 60 + workEndMinute;
+
+      if (startTotalMinutes < workStartMinutes) {
+        this.validationService.setFieldError(
+          "startTime",
+          `Start time must be after working hours start (${workingHours.start})`
+        );
+        isValid = false;
+      }
+
+      if (endTotalMinutes > workEndMinutes) {
+        this.validationService.setFieldError(
+          "endTime",
+          `End time must be before working hours end (${workingHours.end})`
+        );
+        isValid = false;
+      }
     }
 
     // Check for appointment conflicts
@@ -756,6 +807,15 @@ export class AppointmentFormComponent implements OnInit {
 
         // Make sure the new end time doesn't exceed working hours
         const workingHours = this.workingHours();
+
+        // Check if working hours are properly loaded
+        if (!workingHours || !workingHours.end) {
+          console.log(
+            "Working hours not yet loaded, skipping end time validation"
+          );
+          return;
+        }
+
         const [workEndHour] = workingHours.end.split(":").map(Number);
 
         if (
@@ -795,6 +855,15 @@ export class AppointmentFormComponent implements OnInit {
 
     // Make sure the end time doesn't exceed working hours
     const workingHours = this.workingHours();
+
+    // Check if working hours are properly loaded
+    if (!workingHours || !workingHours.end) {
+      console.log(
+        "Working hours not yet loaded, skipping auto-populate end time"
+      );
+      return;
+    }
+
     const [workEndHour] = workingHours.end.split(":").map(Number);
 
     if (endHour <= workEndHour) {

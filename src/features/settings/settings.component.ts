@@ -12,6 +12,7 @@ import {
 } from "./services/settings.service";
 import { ThemeService } from "../../core/services/theme.service";
 import { AuthService } from "../../core/auth/auth.service";
+import { ToasterService } from "../../shared/services/toaster.service";
 
 @Component({
   selector: "app-settings",
@@ -24,6 +25,7 @@ export class SettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);
   public themeService = inject(ThemeService);
   public authService = inject(AuthService);
+  private toasterService = inject(ToasterService);
 
   // Signals
   settings = signal<Settings>({
@@ -78,7 +80,6 @@ export class SettingsComponent implements OnInit {
   isLoading = signal(false);
   isSaving = signal(false);
   error = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
   activeTab = signal("clinic");
 
   // Form models
@@ -618,7 +619,10 @@ export class SettingsComponent implements OnInit {
         // this.settingsService.saveAppointmentSettings(this.appointmentSettingsForm);
 
         this.isSaving.set(false);
-        alert("Appointment settings saved successfully!");
+        this.toasterService.showSuccess(
+          "Settings Saved",
+          "Appointment settings saved successfully!"
+        );
       }, 1000);
     }
   }
@@ -784,7 +788,6 @@ export class SettingsComponent implements OnInit {
   }
 
   private showSuccessMessage(message: string) {
-    this.successMessage.set(message);
-    setTimeout(() => this.successMessage.set(null), 3000);
+    this.toasterService.showSuccess("Settings Updated", message);
   }
 }

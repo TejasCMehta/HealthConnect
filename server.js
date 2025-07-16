@@ -145,7 +145,7 @@ app.get("/api/settings", (req, res) => {
 });
 
 app.get("/api/settings/working-hours", (req, res) => {
-  const workingHours = db.settings?.workingHours || {
+  const workingHours = db.settings?.workingHours?.default || {
     start: "08:00",
     end: "18:00",
   };
