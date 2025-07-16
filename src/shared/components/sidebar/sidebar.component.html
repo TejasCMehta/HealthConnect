@@ -11,11 +11,11 @@
   >
     <div
       [class]="
-        'text-xl font-bold text-gray-800 dark:text-white transition-all duration-300 flex items-center ' +
+        'text-lg font-bold text-gray-800 dark:text-white transition-all duration-300 flex items-center ' +
         (isCollapsed() ? 'lg:justify-center lg:w-full' : 'justify-start')
       "
     >
-      <i class="ri-hospital-line text-2xl text-blue-600 dark:text-blue-400"></i>
+      <i class="ri-hospital-line text-xl text-blue-600 dark:text-blue-400"></i>
       <span
         [class]="
           'ml-2 transition-opacity duration-300 ' +
@@ -48,18 +48,20 @@
           (click)="onMenuItemClick()"
           [class]="
             'flex items-center text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ' +
-            (isCollapsed() ? 'lg:justify-center lg:px-3 lg:py-3' : 'px-4 py-3')
+            (isCollapsed()
+              ? 'lg:justify-center lg:px-3 lg:py-2.5'
+              : 'px-3 py-2.5')
           "
           [title]="isCollapsed() ? item.label : ''"
         >
           <i
             [class]="
-              item.icon + ' text-xl ' + (isCollapsed() ? 'lg:mr-0' : 'mr-3')
+              item.icon + ' text-lg ' + (isCollapsed() ? 'lg:mr-0' : 'mr-3')
             "
           ></i>
           <span
             [class]="
-              'font-medium transition-opacity duration-300 ' +
+              'text-sm font-medium transition-opacity duration-300 ' +
               (isCollapsed() ? 'lg:opacity-0 lg:hidden' : 'opacity-100')
             "
           >
