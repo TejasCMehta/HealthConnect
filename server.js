@@ -197,6 +197,18 @@ app.put("/api/settings/working-days", (req, res) => {
   res.json(db.settings.workingDays);
 });
 
+// General settings update endpoint
+app.put("/api/settings", (req, res) => {
+  if (!db.settings) {
+    db.settings = {};
+  }
+
+  // Merge the incoming settings with existing settings
+  db.settings = { ...db.settings, ...req.body };
+  saveDb();
+  res.json(db.settings);
+});
+
 // Generic CRUD routes
 app.get("/api/:resource", (req, res) => {
   const { resource } = req.params;

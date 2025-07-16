@@ -370,13 +370,64 @@
     }
   ],
   "settings": {
+    "clinic": {
+      "name": "HealthConnect Clinic",
+      "address": "123 Medical Center Drive, Healthcare City, HC 12345",
+      "phone": "+1 (555) 123-4567",
+      "email": "info@healthconnect.com",
+      "logo": "",
+      "website": "www.healthconnect.com"
+    },
     "workingHours": {
-      "start": "08:00",
-      "end": "18:00"
+      "default": {
+        "start": "08:00",
+        "end": "18:00"
+      },
+      "monday": {
+        "start": "08:00",
+        "end": "18:00",
+        "enabled": true
+      },
+      "tuesday": {
+        "start": "08:00",
+        "end": "18:00",
+        "enabled": true
+      },
+      "wednesday": {
+        "start": "08:00",
+        "end": "18:00",
+        "enabled": true
+      },
+      "thursday": {
+        "start": "08:00",
+        "end": "18:00",
+        "enabled": true
+      },
+      "friday": {
+        "start": "08:00",
+        "end": "18:00",
+        "enabled": true
+      },
+      "saturday": {
+        "start": "09:00",
+        "end": "16:00",
+        "enabled": true
+      },
+      "sunday": {
+        "start": "10:00",
+        "end": "14:00",
+        "enabled": false
+      }
     },
     "holidays": [
       "2025-07-04",
-      "2025-12-25"
+      "2025-12-25",
+      {
+        "id": 1752688875629,
+        "title": "Chrismas",
+        "date": "2025-12-31",
+        "recurring": true
+      }
     ],
     "workingDays": {
       "monday": true,
@@ -384,8 +435,26 @@
       "wednesday": true,
       "thursday": true,
       "friday": true,
-      "saturday": false,
+      "saturday": true,
       "sunday": false
+    },
+    "appointments": {
+      "allowOnHolidays": false,
+      "allowCancelledEdit": true,
+      "allowCancelledDelete": true,
+      "allowCompletedDelete": false,
+      "statusColors": {
+        "scheduled": "#3b82f6",
+        "confirmed": "#10b981",
+        "cancelled": "#ef4444",
+        "completed": "#6b7280",
+        "no-show": "#f59e0b"
+      }
+    },
+    "filters": {
+      "doctorFilter": true,
+      "statusFilter": true,
+      "dateRangeFilter": true
     }
   }
 }

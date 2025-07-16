@@ -7,6 +7,12 @@ export interface WorkingHours {
   end: string;
 }
 
+export interface DayWorkingHours {
+  start: string;
+  end: string;
+  enabled: boolean;
+}
+
 export interface WorkingDays {
   monday: boolean;
   tuesday: boolean;
@@ -17,10 +23,59 @@ export interface WorkingDays {
   sunday: boolean;
 }
 
+export interface ClinicInfo {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  logo: string;
+  website: string;
+}
+
+export interface AppointmentSettings {
+  allowOnHolidays: boolean;
+  allowCancelledEdit: boolean;
+  allowCancelledDelete: boolean;
+  allowCompletedDelete: boolean;
+  statusColors: {
+    scheduled: string;
+    confirmed: string;
+    cancelled: string;
+    completed: string;
+    "no-show": string;
+  };
+}
+
+export interface FilterSettings {
+  doctorFilter: boolean;
+  statusFilter: boolean;
+  dateRangeFilter: boolean;
+  showAdvancedFilters?: boolean;
+}
+
+export interface Holiday {
+  id: number;
+  title: string;
+  date: string;
+  recurring: boolean;
+}
+
 export interface Settings {
-  workingHours: WorkingHours;
-  holidays: string[];
+  clinic: ClinicInfo;
+  workingHours: {
+    default: WorkingHours;
+    monday: DayWorkingHours;
+    tuesday: DayWorkingHours;
+    wednesday: DayWorkingHours;
+    thursday: DayWorkingHours;
+    friday: DayWorkingHours;
+    saturday: DayWorkingHours;
+    sunday: DayWorkingHours;
+  };
+  holidays: (string | Holiday)[];
   workingDays: WorkingDays;
+  appointments: AppointmentSettings;
+  filters: FilterSettings;
 }
 
 @Injectable({

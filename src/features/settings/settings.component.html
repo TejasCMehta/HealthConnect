@@ -1,6 +1,8 @@
 <div class="space-y-6">
-  <!-- Header -->
-  <div class="md:flex md:items-center md:justify-between">
+  <!-- Page Header -->
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0"
+  >
     <div class="flex-1 min-w-0">
       <h2
         class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate"
@@ -8,32 +10,45 @@
         Settings
       </h2>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Manage clinic configuration and preferences
+        Manage your clinic configuration and preferences
       </p>
     </div>
-  </div>
-
-  <!-- Error Message -->
-  @if (error()) {
-  <div
-    class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4"
-  >
-    <div class="flex">
-      <i class="ri-error-warning-line text-red-400 mr-2"></i>
-      <div class="text-sm text-red-700 dark:text-red-400">
-        {{ error() }}
-      </div>
+    <div class="flex-shrink-0">
+      <button
+        type="button"
+        (click)="exportSettings()"
+        class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors mr-3"
+      >
+        <i class="ri-download-line mr-2"></i>
+        Export Settings
+      </button>
+      <button
+        type="button"
+        (click)="saveAllSettings()"
+        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+      >
+        <i class="ri-save-line mr-2"></i>
+        Save All Changes
+      </button>
     </div>
   </div>
-  }
 
-  <!-- Success Message -->
-  @if (successMessage()) {
+  <!-- Status Messages -->
+  @if (error()) {
   <div
-    class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-4"
+    class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
   >
     <div class="flex">
-      <i class="ri-check-line text-green-400 mr-2"></i>
+      <i class="ri-error-warning-line text-red-400 mr-2 mt-0.5"></i>
+      <div class="text-sm text-red-700 dark:text-red-400">{{ error() }}</div>
+    </div>
+  </div>
+  } @if (successMessage()) {
+  <div
+    class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+  >
+    <div class="flex">
+      <i class="ri-check-line text-green-400 mr-2 mt-0.5"></i>
       <div class="text-sm text-green-700 dark:text-green-400">
         {{ successMessage() }}
       </div>
@@ -44,329 +59,634 @@
   <!-- Loading State -->
   @if (isLoading()) {
   <div class="flex items-center justify-center h-64">
-    <i class="ri-loader-4-line animate-spin text-4xl text-gray-400"></i>
+    <div class="text-center">
+      <i
+        class="ri-loader-4-line animate-spin text-4xl text-blue-600 dark:text-blue-400 mb-4"
+      ></i>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Loading settings...
+      </p>
+    </div>
   </div>
   } @else {
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Theme Settings -->
-    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-        <i class="ri-palette-line mr-2"></i>
-        Theme Settings
-      </h3>
 
-      <div class="space-y-4">
-        <div>
-          <label
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            Current Theme
-          </label>
-          <div class="flex items-center space-x-4">
-            <button
-              (click)="themeService.setTheme('light')"
-              [class]="
-                'flex items-center px-4 py-2 rounded-md border transition-colors ' +
-                (themeService.currentTheme() === 'light'
-                  ? 'bg-blue-50 border-blue-200 text-blue-700'
-                  : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100')
-              "
-            >
-              <i class="ri-sun-line mr-2"></i>
-              Light
-            </button>
-            <button
-              (click)="themeService.setTheme('dark')"
-              [class]="
-                'flex items-center px-4 py-2 rounded-md border transition-colors ' +
-                (themeService.currentTheme() === 'dark'
-                  ? 'bg-blue-50 border-blue-200 text-blue-700'
-                  : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100')
-              "
-            >
-              <i class="ri-moon-line mr-2"></i>
-              Dark
-            </button>
-            <button
-              (click)="themeService.setTheme('system')"
-              [class]="
-                'flex items-center px-4 py-2 rounded-md border transition-colors ' +
-                (themeService.currentTheme() === 'system'
-                  ? 'bg-blue-50 border-blue-200 text-blue-700'
-                  : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100')
-              "
-            >
-              <i class="ri-computer-line mr-2"></i>
-              System
-            </button>
+  <!-- Settings Navigation Tabs -->
+  <div class="border-b border-gray-200 dark:border-gray-700">
+    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+      @for (tab of settingsTabs; track tab.id) {
+      <button
+        type="button"
+        (click)="activeTab.set(tab.id)"
+        [class]="getTabClasses(tab.id)"
+        class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-150 focus:outline-none"
+      >
+        <i [class]="tab.icon + ' mr-2 text-lg'"></i>
+        {{ tab.label }}
+      </button>
+      }
+    </nav>
+  </div>
+
+  <!-- Settings Content -->
+  <div class="space-y-6">
+    <!-- Clinic Information Tab -->
+    @if (activeTab() === 'clinic') {
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div
+        class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50"
+      >
+        <div class="flex items-center">
+          <i
+            class="ri-hospital-line text-2xl text-blue-600 dark:text-blue-400 mr-3"
+          ></i>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Clinic Information
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Basic information about your clinic
+            </p>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Working Hours -->
-    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-        <i class="ri-time-line mr-2"></i>
-        Working Hours
-      </h3>
-
-      <form (ngSubmit)="onWorkingHoursSubmit()" class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label
-              for="startTime"
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Start Time
-            </label>
-            <select
-              id="startTime"
-              required
-              [value]="workingHoursForm().start"
-              (change)="updateWorkingHours('start', $any($event.target).value)"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              @for (hour of generateHourOptions(); track hour) {
-              <option [value]="hour">{{ formatTime(hour) }}</option>
-              }
-            </select>
+      <form (ngSubmit)="onClinicInfoSubmit()" class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Clinic Name *
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="clinicForm.name"
+                name="clinicName"
+                required
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                placeholder="Enter clinic name"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Phone Number *
+              </label>
+              <input
+                type="tel"
+                [(ngModel)]="clinicForm.phone"
+                name="clinicPhone"
+                required
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Website
+              </label>
+              <input
+                type="url"
+                [(ngModel)]="clinicForm.website"
+                name="clinicWebsite"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                placeholder="https://www.example.com"
+              />
+            </div>
           </div>
-
-          <div>
-            <label
-              for="endTime"
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              End Time
-            </label>
-            <select
-              id="endTime"
-              required
-              [value]="workingHoursForm().end"
-              (change)="updateWorkingHours('end', $any($event.target).value)"
-              [disabled]="!workingHoursForm().start"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              @for (hour of availableEndTimes(); track hour) {
-              <option [value]="hour">{{ formatTime(hour) }}</option>
-              }
-            </select>
-            @if (!workingHoursForm().start) {
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Please select a start time first
-            </p>
-            }
+          <div class="space-y-4">
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Address *
+              </label>
+              <textarea
+                [(ngModel)]="clinicForm.address"
+                name="clinicAddress"
+                required
+                rows="3"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors resize-none"
+                placeholder="Enter clinic address"
+              ></textarea>
+            </div>
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Email Address *
+              </label>
+              <input
+                type="email"
+                [(ngModel)]="clinicForm.email"
+                name="clinicEmail"
+                required
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                placeholder="Enter email address"
+              />
+            </div>
           </div>
         </div>
-
-        <div class="text-sm text-gray-500 dark:text-gray-400">
-          Current: {{ formatTime(settings().workingHours.start) }} -
-          {{ formatTime(settings().workingHours.end) }}
-        </div>
-
-        <button
-          type="submit"
-          [disabled]="isSaving()"
-          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        <div
+          class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end"
         >
-          @if (isSaving()) {
-          <i class="ri-loader-4-line animate-spin mr-2"></i>
-          Saving... } @else {
-          <i class="ri-save-line mr-2"></i>
-          Save Working Hours }
-        </button>
-      </form>
-    </div>
-
-    <!-- Working Days -->
-    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-        <i class="ri-calendar-line mr-2"></i>
-        Working Days
-      </h3>
-
-      <form (ngSubmit)="onWorkingDaysSubmit()" class="space-y-4">
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Monday</label
-            >
-            <input
-              type="checkbox"
-              [checked]="workingDaysForm().monday"
-              (change)="toggleWorkingDay('monday')"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-          </div>
-
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Tuesday</label
-            >
-            <input
-              type="checkbox"
-              [checked]="workingDaysForm().tuesday"
-              (change)="toggleWorkingDay('tuesday')"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-          </div>
-
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Wednesday</label
-            >
-            <input
-              type="checkbox"
-              [checked]="workingDaysForm().wednesday"
-              (change)="toggleWorkingDay('wednesday')"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-          </div>
-
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Thursday</label
-            >
-            <input
-              type="checkbox"
-              [checked]="workingDaysForm().thursday"
-              (change)="toggleWorkingDay('thursday')"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-          </div>
-
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Friday</label
-            >
-            <input
-              type="checkbox"
-              [checked]="workingDaysForm().friday"
-              (change)="toggleWorkingDay('friday')"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-          </div>
-
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Saturday</label
-            >
-            <input
-              type="checkbox"
-              [checked]="workingDaysForm().saturday"
-              (change)="toggleWorkingDay('saturday')"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-          </div>
-
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Sunday</label
-            >
-            <input
-              type="checkbox"
-              [checked]="workingDaysForm().sunday"
-              (change)="toggleWorkingDay('sunday')"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          [disabled]="isSaving()"
-          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          @if (isSaving()) {
-          <i class="ri-loader-4-line animate-spin mr-2"></i>
-          Saving... } @else {
-          <i class="ri-save-line mr-2"></i>
-          Save Working Days }
-        </button>
-      </form>
-    </div>
-
-    <!-- Holidays -->
-    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 lg:col-span-2">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-        <i class="ri-calendar-event-line mr-2"></i>
-        Holidays
-      </h3>
-
-      <!-- Add Holiday Form -->
-      <div class="mb-6">
-        <div class="flex items-end space-x-4">
-          <div class="flex-1">
-            <label
-              for="newHoliday"
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Add Holiday
-            </label>
-            <input
-              id="newHoliday"
-              type="date"
-              [value]="newHolidayDate()"
-              (input)="newHolidayDate.set($any($event.target).value)"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
           <button
-            (click)="onAddHoliday()"
-            [disabled]="isSaving() || !newHolidayDate()"
-            class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            type="submit"
+            class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
           >
-            <i class="ri-add-line mr-2"></i>
-            Add
+            <i class="ri-save-line mr-2"></i>
+            Save Clinic Info
           </button>
         </div>
-      </div>
+      </form>
+    </div>
+    }
 
-      <!-- Holidays List -->
-      @if (sortedHolidays.length > 0) {
-      <div class="space-y-2">
-        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Configured Holidays ({{ sortedHolidays.length }})
-        </h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-          @for (holiday of sortedHolidays; track holiday) {
+    <!-- Working Hours Tab -->
+    @if (activeTab() === 'hours') {
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div
+        class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50"
+      >
+        <div class="flex items-center">
+          <i
+            class="ri-time-line text-2xl text-green-600 dark:text-green-400 mr-3"
+          ></i>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Working Hours
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Configure clinic operating hours for each day
+            </p>
+          </div>
+        </div>
+      </div>
+      <form (ngSubmit)="onWorkingHoursSubmit()" class="p-6">
+        <div class="space-y-6">
+          @for (day of workingDays; track day) {
           <div
-            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+            class="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
           >
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                [id]="'day-' + day"
+                [(ngModel)]="workingHoursForm[day].enabled"
+                [name]="'day-' + day"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
+              />
+              <label
+                [for]="'day-' + day"
+                class="text-sm font-medium text-gray-900 dark:text-white capitalize min-w-[100px]"
+              >
+                {{ day }}
+              </label>
+            </div>
+            @if (workingHoursForm[day].enabled) {
+            <div class="flex items-center space-x-4">
+              <div class="flex items-center space-x-2">
+                <label class="text-sm text-gray-500 dark:text-gray-400"
+                  >From:</label
+                >
+                <select
+                  [(ngModel)]="workingHoursForm[day].start"
+                  [name]="'start-' + day"
+                  class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                >
+                  @for (time of timeOptions; track time) {
+                  <option [value]="time">{{ time }}</option>
+                  }
+                </select>
+              </div>
+              <div class="flex items-center space-x-2">
+                <label class="text-sm text-gray-500 dark:text-gray-400"
+                  >To:</label
+                >
+                <select
+                  [(ngModel)]="workingHoursForm[day].end"
+                  [name]="'end-' + day"
+                  class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                >
+                  @for (time of timeOptions; track time) {
+                  <option [value]="time">{{ time }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            } @else {
+            <span class="text-sm text-gray-400 dark:text-gray-500">Closed</span>
+            }
+          </div>
+          }
+        </div>
+        <div
+          class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end"
+        >
+          <button
+            type="submit"
+            class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
+          >
+            <i class="ri-save-line mr-2"></i>
+            Save Working Hours
+          </button>
+        </div>
+      </form>
+    </div>
+    }
+
+    <!-- Holidays Tab -->
+    @if (activeTab() === 'holidays') {
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div
+        class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <i
+              class="ri-calendar-2-line text-2xl text-purple-600 dark:text-purple-400 mr-3"
+            ></i>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Holidays Management
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Add and manage clinic holidays
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button
+              type="button"
+              (click)="toggleAddHolidayForm()"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              <i class="ri-add-line mr-1"></i>
+              {{ showAddHolidayForm ? "Cancel" : "Add Holiday" }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <!-- Add Holiday Form -->
+        @if (showAddHolidayForm) {
+        <div
+          class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+        >
+          <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Add New Holiday
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Holiday Title <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="newHoliday.title"
+                placeholder="e.g., Christmas Day"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Date <span class="text-red-500">*</span>
+              </label>
+              <div class="flex space-x-2">
+                <select
+                  [(ngModel)]="selectedYear"
+                  (change)="updateDateFromSelects()"
+                  class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm flex-1"
+                >
+                  <option value="">Year</option>
+                  @for (year of availableYears; track year) {
+                  <option [value]="year">{{ year }}</option>
+                  }
+                </select>
+                <select
+                  [(ngModel)]="selectedMonth"
+                  (change)="updateDateFromSelects()"
+                  class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm flex-1"
+                >
+                  <option value="">Month</option>
+                  @for (month of months; track month.value) {
+                  <option [value]="month.value">{{ month.label }}</option>
+                  }
+                </select>
+                <select
+                  [(ngModel)]="selectedDay"
+                  (change)="updateDateFromSelects()"
+                  class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm flex-1"
+                >
+                  <option value="">Day</option>
+                  @for (day of availableDays; track day) {
+                  <option [value]="day">{{ day }}</option>
+                  }
+                </select>
+              </div>
+              @if (newHoliday.date) {
+              <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                Selected: {{ newHoliday.date }}
+              </p>
+              }
+            </div>
+            <div class="flex items-end">
+              <label class="flex items-center">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="newHoliday.recurring"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Recurring Annually</span
+                >
+              </label>
+            </div>
+          </div>
+          <div class="flex items-center justify-end space-x-3 mt-4">
+            <button
+              type="button"
+              (click)="resetHolidayForm()"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              (click)="addHoliday()"
+              [disabled]="!newHoliday.title || !newHoliday.date"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <i class="ri-add-line mr-1"></i>
+              Add Holiday
+            </button>
+          </div>
+        </div>
+        } @if (holidays().length === 0) {
+        <div class="text-center py-8">
+          <i
+            class="ri-calendar-2-line text-4xl text-gray-300 dark:text-gray-600 mb-4"
+          ></i>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            No holidays configured
+          </p>
+        </div>
+        } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (holiday of holidays(); track holiday) {
+          <div
+            class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+          >
+            <div class="flex items-center flex-1">
               <i
-                class="ri-calendar-event-line text-blue-600 dark:text-blue-400"
+                class="ri-calendar-event-line text-purple-600 dark:text-purple-400 mr-3"
               ></i>
-              <div>
+              <div class="flex-1">
+                @if (isStringHoliday(holiday)) {
                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                  {{ formatDate(holiday) }}
+                  {{ holiday | date : "mediumDate" }}
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ holiday }}
+                } @else {
+                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                  {{ holiday.title }}
                 </div>
+                <div
+                  class="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-2"
+                >
+                  <span>{{ holiday.date | date : "mediumDate" }}</span>
+                  @if (holiday.recurring) {
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                  >
+                    <i class="ri-repeat-line mr-1"></i>
+                    Recurring
+                  </span>
+                  }
+                </div>
+                }
               </div>
             </div>
             <button
-              (click)="onRemoveHoliday(holiday)"
-              [disabled]="isSaving()"
-              class="p-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+              type="button"
+              (click)="removeHoliday(holiday)"
+              class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors ml-3"
             >
               <i class="ri-delete-bin-line"></i>
             </button>
           </div>
           }
         </div>
+        }
       </div>
-      } @else {
-      <div class="text-center py-8">
-        <i class="ri-calendar-event-line text-4xl text-gray-400 mb-2"></i>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          No holidays configured yet
-        </p>
-      </div>
-      }
     </div>
+    }
+
+    <!-- Appointments Tab -->
+    @if (activeTab() === 'appointments') {
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div
+        class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50"
+      >
+        <div class="flex items-center">
+          <i
+            class="ri-calendar-check-line text-2xl text-indigo-600 dark:text-indigo-400 mr-3"
+          ></i>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Appointment Settings
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Configure appointment behavior and restrictions
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 space-y-6">
+        <!-- Holiday and Weekend Restrictions -->
+        <div class="space-y-4">
+          <h4 class="text-md font-medium text-gray-900 dark:text-white">
+            Scheduling Restrictions
+          </h4>
+
+          <div class="space-y-3">
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                [(ngModel)]="appointmentSettingsForm.allowOnHolidays"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                Allow appointments on holidays
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Appointment Management -->
+        <div class="space-y-4">
+          <h4 class="text-md font-medium text-gray-900 dark:text-white">
+            Appointment Management
+          </h4>
+
+          <div class="space-y-3">
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                [(ngModel)]="appointmentSettingsForm.allowCancelledEdit"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                Allow editing cancelled appointments
+              </span>
+            </label>
+
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                [(ngModel)]="appointmentSettingsForm.allowCancelledDelete"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                Allow deleting cancelled appointments
+              </span>
+            </label>
+
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                [(ngModel)]="appointmentSettingsForm.allowCompletedDelete"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                Allow deleting completed appointments
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Status Colors -->
+        <div class="space-y-4">
+          <h4 class="text-md font-medium text-gray-900 dark:text-white">
+            Appointment Status Colors
+          </h4>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for (status of appointmentStatuses; track status.key) {
+            <div class="space-y-2">
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize"
+              >
+                {{ status.label }}
+              </label>
+              <div class="flex items-center space-x-3">
+                <input
+                  type="color"
+                  [(ngModel)]="appointmentSettingsForm.statusColors[status.key]"
+                  class="h-10 w-16 border border-gray-300 dark:border-gray-600 rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  [(ngModel)]="appointmentSettingsForm.statusColors[status.key]"
+                  class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                  placeholder="#3b82f6"
+                />
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div
+          class="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700"
+        >
+          <button
+            type="button"
+            (click)="saveAppointmentSettings()"
+            [disabled]="isSaving()"
+            class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+          >
+            @if (isSaving()) {
+            <i class="ri-loader-4-line animate-spin mr-2"></i>
+            Saving... } @else {
+            <i class="ri-save-line mr-2"></i>
+            Save Appointment Settings }
+          </button>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Theme Tab -->
+    @if (activeTab() === 'theme') {
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div
+        class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50"
+      >
+        <div class="flex items-center">
+          <i
+            class="ri-palette-line text-2xl text-pink-600 dark:text-pink-400 mr-3"
+          ></i>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Theme Settings
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Customize the appearance of your application
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="space-y-6">
+          <div>
+            <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4">
+              Color Theme
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button
+                type="button"
+                (click)="themeService.setTheme('light')"
+                [class]="getThemeButtonClasses('light')"
+              >
+                <div class="text-center">
+                  <i class="ri-sun-line text-2xl mb-2"></i>
+                  <div class="text-sm font-medium">Light</div>
+                </div>
+              </button>
+              <button
+                type="button"
+                (click)="themeService.setTheme('dark')"
+                [class]="getThemeButtonClasses('dark')"
+              >
+                <div class="text-center">
+                  <i class="ri-moon-line text-2xl mb-2"></i>
+                  <div class="text-sm font-medium">Dark</div>
+                </div>
+              </button>
+              <button
+                type="button"
+                (click)="themeService.setTheme('system')"
+                [class]="getThemeButtonClasses('system')"
+              >
+                <div class="text-center">
+                  <i class="ri-computer-line text-2xl mb-2"></i>
+                  <div class="text-sm font-medium">System</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
   </div>
   }
 </div>
