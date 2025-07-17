@@ -1,4 +1,120 @@
 <div class="h-full flex flex-col w-full bg-white dark:bg-gray-900">
+  <!-- Day Header -->
+  <div
+    class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-6 py-4"
+  >
+    <div class="flex items-center justify-center">
+      <div>
+        <!-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+          {{
+            currentDate().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric"
+            })
+          }}
+        </h1> -->
+        <p
+          class="text-sm text-gray-500 dark:text-gray-400 mt-1 flex item-center justify-center"
+        >
+          @if (isToday(currentDate())) {
+          <span class="text-blue-600 dark:text-blue-400 font-medium"
+            >Today</span
+          >
+          } @else if (isYesterday(currentDate())) {
+          <span class="text-orange-600 dark:text-orange-400 font-medium"
+            >Yesterday</span
+          >
+          } @else if (isTomorrow(currentDate())) {
+          <span class="text-green-600 dark:text-green-400 font-medium"
+            >Tomorrow</span
+          >
+          } @else {
+          {{ getRelativeDateDescription(currentDate()) }}
+          }
+        </p>
+      </div>
+      @if (isHoliday()) {
+      <div class="flex items-center space-x-2">
+        <i class="ri-gift-line text-red-500 text-xl"></i>
+        <span class="text-sm font-medium text-red-600 dark:text-red-400">
+          {{ getHolidayDetails()?.title || "Holiday" }}
+        </span>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Restriction Banner for non-working days -->
+  @if (!isWorkingDay()) {
+  <div
+    class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 p-4 mb-4 rounded-r-md"
+  >
+    <div class="flex items-start">
+      <div class="flex-shrink-0">
+        <i class="ri-close-circle-line text-red-400 text-xl"></i>
+      </div>
+      <div class="ml-3 flex-1">
+        <h3 class="text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+          🚫 Appointments Not Available
+        </h3>
+        <div class="text-sm text-red-700 dark:text-red-300 space-y-2">
+          @if (isHoliday()) {
+          <p>
+            <strong>🎉 Holiday:</strong>
+            @if (getHolidayDetails()?.title) {
+            <span class="font-semibold text-red-800 dark:text-red-200">{{
+              getHolidayDetails()?.title
+            }}</span>
+            } @else {
+            <span>This date is marked as a clinic holiday.</span>
+            } No appointments can be scheduled on this day.
+          </p>
+          @if (getHolidayDetails()?.recurring) {
+          <p
+            class="text-xs text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 p-2 rounded"
+          >
+            🔄 <strong>Recurring Holiday:</strong> This holiday occurs annually
+            on the same date.
+          </p>
+          }
+          <p
+            class="text-xs text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 p-2 rounded"
+          >
+            💡 <strong>Tip:</strong> You can modify holidays in the Settings →
+            Clinic Configuration section.
+          </p>
+          } @else {
+          <p>
+            <strong>🗓️ Non-Working Day:</strong>
+            {{
+              currentDate().toLocaleDateString("en-US", { weekday: "long" })
+            }}s are not configured as working days for this clinic.
+          </p>
+          <div
+            class="text-xs text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 p-2 rounded space-y-1"
+          >
+            <p>💡 <strong>What you can do:</strong></p>
+            <ul class="ml-4 space-y-1 list-disc">
+              <li>
+                Contact clinic administration to schedule an emergency
+                appointment
+              </li>
+              <li>Choose a different day from the available working days</li>
+              <li>
+                Administrators can modify working hours in Settings → Working
+                Hours
+              </li>
+            </ul>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
   <!-- Time slots with enhanced styling -->
   <div class="flex-1 overflow-auto">
     <div class="relative w-full" #gridContainer>
@@ -37,7 +153,7 @@
       } @for (timeSlot of timeSlots; track timeSlot) {
       <div
         [class]="
-          'flex items-stretch border-b border-gray-200 dark:border-gray-700 time-slot ' +
+          'flex items-stretch border-b border-gray-400 dark:border-gray-600 time-slot ' +
           (isTimeSlotBlocked(timeSlot) ? ' blocked' : '')
         "
       >
@@ -84,13 +200,13 @@
                 'restricted-clickable-area': isRestrictedTimeSlot(timeSlot),
                 'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600':
                   !isRestrictedTimeSlot(timeSlot),
-                'weekend-time-slot': isWeekend(),
+                'weekend-time-slot': !isWorkingDay(),
                 'holiday-time-slot': isHoliday()
               }"
               [title]="
                 isRestrictedTimeSlot(timeSlot)
-                  ? isWeekend()
-                    ? 'Clinic closed on weekends'
+                  ? !isWorkingDay()
+                    ? 'Clinic closed on this day'
                     : isHoliday()
                     ? 'Clinic closed on holidays'
                     : 'Cannot create appointments in the past'
@@ -120,21 +236,27 @@
               'restricted-clickable-area': isRestrictedTimeSlot(timeSlot),
               'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600':
                 !isRestrictedTimeSlot(timeSlot),
-              'weekend-time-slot': isWeekend(),
+              'weekend-time-slot': !isWorkingDay(),
               'holiday-time-slot': isHoliday()
             }"
             [title]="
               isRestrictedTimeSlot(timeSlot)
-                ? isWeekend()
-                  ? 'Clinic closed on weekends'
+                ? !isWorkingDay()
+                  ? '🚫 Clinic closed - Weekend appointments are not allowed. Please schedule during working days.'
                   : isHoliday()
-                  ? 'Clinic closed on holidays'
-                  : 'Cannot create appointments in the past'
-                : 'Click to create new appointment'
+                  ? '🎉 Clinic closed - No appointments on holidays. Please choose a working day.'
+                  : '⏰ Past time - Cannot create appointments in the past. Please select a future time slot.'
+                : '✨ Click to create new appointment - Available time slot'
             "
           >
             @if (!isRestrictedTimeSlot(timeSlot)) {
             <i class="ri-add-line text-gray-400 hover:text-blue-500"></i>
+            } @else {
+            <!-- Show 🚫 icon for all restricted time slots (consistent with month view) -->
+            <i
+              class="ri-forbid-line text-gray-400 dark:text-gray-500 text-lg opacity-60"
+              title="Restricted - No appointments allowed"
+            ></i>
             }
           </div>
           } @else {
@@ -208,22 +330,28 @@
                 'restricted-clickable-area': isRestrictedTimeSlot(timeSlot),
                 'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600':
                   !isRestrictedTimeSlot(timeSlot),
-                'weekend-time-slot': isWeekend(),
+                'weekend-time-slot': !isWorkingDay(),
                 'holiday-time-slot': isHoliday()
               }"
               [title]="
                 isRestrictedTimeSlot(timeSlot)
-                  ? isWeekend()
-                    ? 'Clinic closed on weekends'
+                  ? !isWorkingDay()
+                    ? '🚫 Clinic closed - Weekend appointments are not allowed. Please schedule during working days.'
                     : isHoliday()
-                    ? 'Clinic closed on holidays'
-                    : 'Cannot create appointments in the past'
-                  : 'Click to create new appointment'
+                    ? '🎉 Clinic closed - No appointments on holidays. Please choose a working day.'
+                    : '⏰ Past time - Cannot create appointments in the past. Please select a future time slot.'
+                  : '✨ Click to create new appointment - Available time slot'
               "
             >
               @if (!isRestrictedTimeSlot(timeSlot)) {
               <i
                 class="ri-add-line text-gray-400 hover:text-blue-500 text-sm"
+              ></i>
+              } @else {
+              <!-- Show 🚫 icon for all restricted time slots (consistent with month view) -->
+              <i
+                class="ri-forbid-line text-gray-400 dark:text-gray-500 text-lg opacity-60"
+                title="Restricted - No appointments allowed"
               ></i>
               }
             </div>

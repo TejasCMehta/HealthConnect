@@ -77,12 +77,7 @@ export class DayViewComponent implements OnInit, OnDestroy {
   public isDragDropLoading = signal<boolean>(false);
 
   get timeSlots(): string[] {
-    const slots: string[] = [];
-    for (let hour = 8; hour < 18; hour++) {
-      slots.push(`${hour.toString().padStart(2, "0")}:00`);
-      slots.push(`${hour.toString().padStart(2, "0")}:30`);
-    }
-    return slots;
+    return this.calendarService.generateTimeSlots(this.currentDate(), 30);
   }
 
   /**
@@ -275,16 +270,16 @@ export class DayViewComponent implements OnInit, OnDestroy {
     const aptMinute = aptStart.getMinutes();
     const slotStartMinute = slotMinute;
 
-    // If appointment starts exactly at slot time, offset it up slightly to align with border
+    // If appointment starts exactly at slot time, no offset needed
     if (aptMinute === slotStartMinute) {
-      return -12; // Move up by 12px to align with slot border better
+      return 0;
     }
 
     // Calculate offset based on minutes past the slot start
     const minuteOffset = aptMinute - slotStartMinute;
     // Each minute = slotHeight / 30 (since each slot is 30 minutes)
     const slotHeight = 65;
-    const offsetPixels = (minuteOffset / 30) * slotHeight - 12; // Reduce top position by 12px
+    const offsetPixels = (minuteOffset / 30) * slotHeight;
 
     return offsetPixels;
   }
@@ -305,28 +300,55 @@ export class DayViewComponent implements OnInit, OnDestroy {
   }
 
   isWeekend(date: Date = this.currentDate()): boolean {
-    const day = date.getDay();
-    return day === 0 || day === 6; // Sunday or Saturday
+    return this.calendarService.isWeekend(date);
+  }
+
+  isWorkingDay(date: Date = this.currentDate()): boolean {
+    return this.calendarService.isWorkingDay(date);
   }
 
   isHoliday(date: Date = this.currentDate()): boolean {
-    // Example holidays - in a real app, this would come from a service
-    const holidays = [
-      "2025-01-01", // New Year's Day
-      "2025-07-04", // Independence Day
-      "2025-12-25", // Christmas
-      // Add more holidays as needed
-    ];
+    return this.calendarService.isHoliday(date);
+  }
 
-    const dateString = date.toISOString().split("T")[0];
-    return holidays.includes(dateString);
+  getHolidayDetails(
+    date: Date = this.currentDate()
+  ): { title: string; recurring: boolean } | null {
+    return this.calendarService.getHolidayDetails(date);
+  }
+
+  isYesterday(date: Date): boolean {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return date.toDateString() === yesterday.toDateString();
+  }
+
+  isTomorrow(date: Date): boolean {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return date.toDateString() === tomorrow.toDateString();
+  }
+
+  getRelativeDateDescription(date: Date): string {
+    const today = new Date();
+    const diffTime = date.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Tomorrow";
+    if (diffDays === -1) return "Yesterday";
+    if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`;
+    if (diffDays < -1 && diffDays >= -7)
+      return `${Math.abs(diffDays)} days ago`;
+    if (diffDays > 7) return "In the future";
+    return "In the past";
   }
 
   isRestrictedTimeSlot(timeSlot: string): boolean {
     const date = this.currentDate();
     return (
       this.isPastTimeSlot(timeSlot) ||
-      this.isWeekend(date) ||
+      !this.isWorkingDay(date) ||
       this.isHoliday(date)
     );
   }
@@ -346,13 +368,23 @@ export class DayViewComponent implements OnInit, OnDestroy {
   }
 
   onTimeSlotClick(timeSlot: string): void {
-    // Don't allow clicking on restricted time slots (past, weekends, holidays)
-    if (this.isRestrictedTimeSlot(timeSlot)) {
+    // Don't allow clicking on restricted or past time slots
+    if (this.isRestrictedTimeSlot(timeSlot) || this.isPastTimeSlot(timeSlot)) {
+      this.toasterService.showError(
+        "Invalid Time Slot",
+        "Cannot select a past or restricted time slot."
+      );
       return;
     }
 
+    // Snap to 30-minute slot
+    const [hour, minute] = timeSlot.split(":").map(Number);
+    const currentDate = this.currentDate();
+    const slotDate = new Date(currentDate);
+    slotDate.setHours(hour, minute, 0, 0);
+
     this.timeSlotSelect.emit({
-      date: this.currentDate(),
+      date: slotDate,
       time: timeSlot,
     });
   }
@@ -404,12 +436,40 @@ export class DayViewComponent implements OnInit, OnDestroy {
     appointment: Appointment;
     newEndTime: string;
   }): void {
-    console.log(
-      "Resize updated:",
-      event.appointment.title,
-      "New end time:",
-      event.newEndTime
-    );
+    // Snap new end time to nearest 30-minute slot and validate
+    const start = new Date(event.appointment.startTime);
+    let newEnd = new Date(event.newEndTime);
+    // Snap to next 30-min slot
+    newEnd.setMinutes(Math.ceil(newEnd.getMinutes() / 30) * 30, 0, 0);
+    if (newEnd <= start) {
+      this.toasterService.showError(
+        "Invalid Resize",
+        "End time must be after start time."
+      );
+      return;
+    }
+    // Block resizing to past
+    if (newEnd < new Date()) {
+      this.toasterService.showError(
+        "Invalid Resize",
+        "Cannot resize to a past time."
+      );
+      return;
+    }
+    // Block resizing outside clinic hours (8-18)
+    if (
+      newEnd.getHours() < 8 ||
+      newEnd.getHours() > 18 ||
+      (newEnd.getHours() === 18 && newEnd.getMinutes() > 0)
+    ) {
+      this.toasterService.showError(
+        "Invalid Resize",
+        "End time must be within clinic hours (8:00-18:00)"
+      );
+      return;
+    }
+    // Update the resize service state
+    this.resizeService.updateResize(newEnd.getTime());
   }
 
   /**
@@ -507,9 +567,50 @@ export class DayViewComponent implements OnInit, OnDestroy {
     newDoctorId: number;
     isValidTarget: boolean;
   }): void {
-    console.log("Day view drag update:", event);
-    // The appointment card component handles the drag calculation internally
-    // and passes the results to us
+    // Snap new start time to nearest 30-minute slot and validate
+    let newStart = new Date(event.newStartTime);
+    newStart.setMinutes(Math.floor(newStart.getMinutes() / 30) * 30, 0, 0);
+    let newEnd = new Date(event.newEndTime);
+    newEnd.setMinutes(Math.ceil(newEnd.getMinutes() / 30) * 30, 0, 0);
+    if (newStart < new Date()) {
+      this.toasterService.showError(
+        "Invalid Drag",
+        "Cannot move appointment to a past time."
+      );
+      return;
+    }
+    if (
+      newStart.getHours() < 8 ||
+      newEnd.getHours() > 18 ||
+      (newEnd.getHours() === 18 && newEnd.getMinutes() > 0)
+    ) {
+      this.toasterService.showError(
+        "Invalid Drag",
+        "Appointment must be within clinic hours (8:00-18:00)"
+      );
+      return;
+    }
+    // Use the real mouse coordinates from the drag event for accurate slot calculation
+    const gridContainer = this.gridContainer?.nativeElement || undefined;
+    const doctors = this.doctors ? this.doctors() : undefined;
+    // event should include currentX and currentY (mouse position relative to grid)
+    // If not present, you may need to update the drag event emitter in the appointment card
+    if (
+      typeof (event as any).currentX === "number" &&
+      typeof (event as any).currentY === "number"
+    ) {
+      this.dragDropService.updateDrag(
+        (event as any).currentX,
+        (event as any).currentY,
+        gridContainer,
+        doctors
+      );
+    } else {
+      // fallback: do not update if coordinates are missing
+      console.warn(
+        "Drag event missing currentX/currentY, cannot update drag position accurately."
+      );
+    }
   }
 
   /**

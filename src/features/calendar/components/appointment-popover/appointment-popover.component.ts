@@ -4,11 +4,16 @@ import {
   output,
   computed,
   signal,
+  inject,
   OnInit,
   OnChanges,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Appointment } from "../../../../shared/models/appointment.model";
+import {
+  SettingsService,
+  Settings,
+} from "../../../settings/services/settings.service";
 
 export interface PopoverPosition {
   x: number;
@@ -25,6 +30,11 @@ export interface PopoverPosition {
   styleUrl: "./appointment-popover.component.scss",
 })
 export class AppointmentPopoverComponent implements OnInit, OnChanges {
+  private settingsService = inject(SettingsService);
+
+  // Settings signal
+  private settingsSignal = signal<Settings | null>(null);
+
   public appointment = input.required<Appointment>();
   public isOpen = input<boolean>(false);
   public position = input<PopoverPosition>({ x: 0, y: 0 });
@@ -196,6 +206,17 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
     if (this.isOpen()) {
       this.startOpenAnimation();
     }
+
+    // Load settings for status colors
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        this.settingsSignal.set(settings);
+      },
+      error: (error) => {
+        console.error("Error loading settings in appointment popover:", error);
+        this.settingsSignal.set(null);
+      },
+    });
   }
 
   ngOnChanges() {
@@ -339,7 +360,21 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
   }
 
   getStatusColor(): string {
+    const settings = this.settingsSignal();
     const status = this.appointment().status.toLowerCase();
+
+    if (settings && settings.appointments.statusColors) {
+      const statusKey =
+        status as keyof typeof settings.appointments.statusColors;
+      const color = settings.appointments.statusColors[statusKey];
+
+      if (color) {
+        // Convert hex color to Tailwind-like classes
+        return this.getStatusClassFromColor(color, status);
+      }
+    }
+
+    // Fallback to default status colors
     switch (status) {
       case "scheduled":
       case "schedule":
@@ -350,6 +385,51 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
       case "cancelled":
       case "canceled":
         return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "confirmed":
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
+      case "no-show":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+    }
+  }
+
+  private getStatusClassFromColor(hexColor: string, status: string): string {
+    // Map common colors to Tailwind classes
+    const colorMap: { [key: string]: string } = {
+      "#3B82F6":
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      "#10B981":
+        "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200",
+      "#EF4444": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      "#059669":
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      "#9CA3AF":
+        "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+      "#F59E0B":
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+    };
+
+    const upperColor = hexColor.toUpperCase();
+    if (colorMap[upperColor]) {
+      return colorMap[upperColor];
+    }
+
+    // Default fallback based on status
+    switch (status) {
+      case "scheduled":
+      case "schedule":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      case "completed":
+      case "complete":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "cancelled":
+      case "canceled":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "confirmed":
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
+      case "no-show":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
     }

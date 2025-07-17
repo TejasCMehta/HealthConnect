@@ -1,6 +1,15 @@
 <div class="h-full w-full">
-  <!-- Calendar Header with Days of Week -->
-  <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
+  <!-- Calendar Header with Days of W            (isCurrentMonth(day)
+              ? 'text-gray-900 dark:text-white'
+              : 'text-gray-400 dark:text-gray-500') +
+            ' ' +
+            (!isWorkingDay(day) && isCurrentMonth(day)
+              ? 'text-gray-600 dark:text-gray-400'
+              : '') +
+            ' ' +
+            (isHoliday(day) && isCurrentMonth(day)
+              ? 'text-red-600 dark:text-red-400'
+              : '')<div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
     @for (day of weekDays; track day) {
     <div
       [class]="
@@ -42,15 +51,15 @@
         (!isCurrentMonth(day) ? 'bg-gray-50 dark:bg-gray-750' : '') +
         ' ' +
         (isRestrictedForNewAppointments(day)
-          ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
+          ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed pointer-events-none'
           : 'hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer') +
         ' ' +
-        (isWeekend(day) && !isPastDate(day) && !isToday(day)
+        (!isWorkingDay(day) && !isPastDate(day) && !isToday(day)
           ? 'bg-gray-50/80 dark:bg-gray-800/80'
           : '') +
         ' ' +
-        (isHoliday(day) && !isPastDate(day) && !isWeekend(day) && !isToday(day)
-          ? 'bg-red-50/30 dark:bg-red-900/20'
+        (isHoliday(day) && !isPastDate(day) && !isToday(day)
+          ? 'bg-red-50/30 dark:bg-red-900/20 cursor-not-allowed pointer-events-none'
           : '')
       "
       (click)="!isRestrictedForNewAppointments(day) ? onDateClick(day) : null"
@@ -82,7 +91,10 @@
 
         <!-- Holiday indicator -->
         @if (isHoliday(day) && isCurrentMonth(day)) {
-        <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+        <div
+          class="w-2 h-2 bg-red-400 rounded-full"
+          [title]="getHolidayDetails(day)?.title || 'Holiday'"
+        ></div>
         }
       </div>
 

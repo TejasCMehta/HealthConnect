@@ -98,12 +98,12 @@
       </div>
       } } @else {
       <!-- Compact mode: Start time - Patient name in one line (fixed height) -->
-      <div class="flex items-center space-x-1 text-xs leading-none h-full">
+      <div class="flex items-center space-x-1 text-sm leading-tight h-full">
         <span
           class="font-medium flex-shrink-0 text-gray-700 dark:text-gray-300"
           [class.text-blue-700]="isResizing()"
           [class.text-green-600]="isDragging()"
-          style="line-height: 1; font-size: 11px"
+          style="line-height: 1.2; font-size: 13px"
         >
           {{ startTime }}
         </span>
@@ -113,12 +113,12 @@
           [class.text-green-700]="isDragging()"
           [title]="appointment().patient?.name || 'Unknown Patient'"
           style="
-            max-width: 70px;
+            max-width: 80px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            line-height: 1;
-            font-size: 11px;
+            line-height: 1.2;
+            font-size: 13px;
           "
         >
           {{ appointment().patient?.name || "Unknown Patient" }}

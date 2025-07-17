@@ -155,35 +155,40 @@ export class MonthViewComponent {
   }
 
   isWeekend(date: Date): boolean {
-    const day = date.getDay();
-    return day === 0 || day === 6; // Sunday or Saturday
+    return this.calendarService.isWeekend(date);
+  }
+
+  isWorkingDay(date: Date): boolean {
+    return this.calendarService.isWorkingDay(date);
   }
 
   isHoliday(date: Date): boolean {
-    // Example holidays - in a real app, this would come from a service
-    const holidays = [
-      "2024-01-01", // New Year's Day
-      "2024-07-04", // Independence Day
-      "2024-12-25", // Christmas
-      // Add more holidays as needed
-    ];
+    return this.calendarService.isHoliday(date);
+  }
 
-    const dateString = date.toISOString().split("T")[0];
-    return holidays.includes(dateString);
+  getHolidayDetails(date: Date): { title: string; recurring: boolean } | null {
+    return this.calendarService.getHolidayDetails(date);
   }
 
   isRestrictedDay(date: Date): boolean {
-    return this.isWeekend(date) || this.isHoliday(date);
+    return !this.isWorkingDay(date) || this.isHoliday(date);
   }
 
   isRestrictedForNewAppointments(date: Date): boolean {
     return (
-      this.isPastDate(date) || this.isWeekend(date) || this.isHoliday(date)
+      this.isPastDate(date) || !this.isWorkingDay(date) || this.isHoliday(date)
     );
   }
 
   onDateClick(date: Date): void {
-    this.dateSelect.emit(date);
+    // Normalize the date to avoid timezone issues
+    // Create a new date with the same year, month, and day in local timezone
+    const normalizedDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+    this.dateSelect.emit(normalizedDate);
   }
 
   onAppointmentClick(appointment: Appointment, event: MouseEvent): void {

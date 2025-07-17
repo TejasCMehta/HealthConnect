@@ -180,3 +180,26 @@
     }
   }
 }
+
+// Consistent restricted day styling across all views
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+
+  // Only disable pointer events for empty click areas, not appointment cards
+  .day-number,
+  .day-content
+    > :not(app-appointment-card):not(.appointment-card):not(
+      .appointment-wrapper
+    ) {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  // Allow appointment cards to remain clickable
+  app-appointment-card,
+  .appointment-card,
+  .appointment-wrapper {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+}

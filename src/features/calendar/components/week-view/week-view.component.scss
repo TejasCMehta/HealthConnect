@@ -164,3 +164,114 @@
     background-color: rgba(55, 65, 81, 0.2);
   }
 }
+
+// Custom grid layout to make time column narrower
+.grid-cols-8 {
+  grid-template-columns: 80px repeat(7, 1fr);
+}
+
+// Restricted day styling for non-working days (consistent with month view)
+.restricted-day-column {
+  background-color: #f3f4f6;
+  opacity: 0.6;
+  cursor: not-allowed !important;
+
+  :host-context(.dark) & {
+    background-color: #374151;
+  }
+
+  // Only disable pointer events for the empty click areas, not appointment cards
+  .add-appointment-area,
+  .empty-time-slot {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  // Allow appointment cards to remain clickable
+  app-appointment-card,
+  .appointment-card,
+  .appointment-wrapper {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+}
+
+// Restricted time slot styling (consistent with month view)
+.restricted-time-slot {
+  background-color: #f9fafb !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+
+  :host-context(.dark) & {
+    background-color: #374151 !important;
+  }
+
+  // Only disable pointer events for empty click areas, not appointment cards
+  .add-appointment-area,
+  .empty-time-slot {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  // Allow appointment cards to remain clickable
+  app-appointment-card,
+  .appointment-card,
+  .appointment-wrapper {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+}
+
+// Weekend day styling (consistent with month view)
+.weekend-day {
+  background-color: #f9fafb !important;
+  cursor: not-allowed !important;
+
+  :host-context(.dark) & {
+    background-color: #374151 !important;
+  }
+
+  // Only disable pointer events for empty click areas, not appointment cards
+  .add-appointment-area,
+  .empty-time-slot {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  // Allow appointment cards to remain clickable
+  app-appointment-card,
+  .appointment-card,
+  .appointment-wrapper {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+}
+
+// Holiday day styling (consistent with month view)
+.holiday-day {
+  background-color: #fef2f2 !important;
+  cursor: not-allowed !important;
+
+  :host-context(.dark) & {
+    background-color: #7f1d1d !important;
+  }
+
+  // Only disable pointer events for empty click areas, not appointment cards
+  .add-appointment-area,
+  .empty-time-slot {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  // Allow appointment cards to remain clickable
+  app-appointment-card,
+  .appointment-card,
+  .appointment-wrapper {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+}
+
+:host {
+  display: block;
+}

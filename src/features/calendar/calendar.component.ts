@@ -23,6 +23,10 @@ import { ConfirmationDialogComponent } from "../../shared/components/confirmatio
 import { CalendarService } from "./services/calendar.service";
 import { AppointmentService } from "./services/appointment.service";
 import { DoctorService } from "../doctors/services/doctor.service";
+import {
+  SettingsService,
+  Settings,
+} from "../settings/services/settings.service";
 import { Appointment } from "../../shared/models/appointment.model";
 import { Doctor } from "../../shared/models/doctor.model";
 import { ToasterService } from "../../shared/services/toaster.service";
@@ -51,6 +55,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private toasterService = inject(ToasterService);
   private doctorService = inject(DoctorService);
+  private settingsService = inject(SettingsService);
 
   @ViewChild("calendarContainer", { read: ElementRef })
   calendarContainer!: ElementRef;
@@ -66,6 +71,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   public currentDate = signal(new Date());
   public appointments = signal<Appointment[]>([]);
   public doctors = signal<Doctor[]>([]);
+  public settings = signal<Settings | null>(null);
   public isLoading = signal(true);
   public isFormOpen = signal(false);
   public selectedAppointment = signal<Appointment | null>(null);
@@ -84,6 +90,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   private savedScrollPosition = 0;
 
   ngOnInit(): void {
+    this.loadSettings();
     this.loadAppointments();
     this.loadDoctors();
 
@@ -93,6 +100,21 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     // Clean up any event listeners if needed
+  }
+
+  private loadSettings(): void {
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        this.settings.set(settings);
+        // Notify services about updated settings
+        this.calendarService.updateSettings(settings);
+      },
+      error: (error) => {
+        console.error("Error loading settings:", error);
+        // Use default settings if loading fails
+        this.settings.set(null);
+      },
+    });
   }
 
   private loadAppointments(): void {
@@ -241,6 +263,12 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.currentDate.set(date);
   }
 
+  onDateSelect(date: Date): void {
+    // Switch to day view when a day is clicked in month view
+    this.currentDate.set(date);
+    this.currentView.set("day");
+  }
+
   onAppointmentSelect(appointment: Appointment): void {
     // In day view, open form directly. In month/week view, show popover
     if (this.currentView() === "day") {
@@ -383,6 +411,14 @@ export class CalendarComponent implements OnInit, OnDestroy {
   onPopoverDelete(): void {
     const appointment = this.popoverAppointment();
     if (appointment) {
+      // Check if deletion is allowed based on settings
+      if (!this.canDeleteAppointment(appointment)) {
+        this.toasterService.showError(
+          `Cannot delete ${appointment.status} appointments. Check your settings.`
+        );
+        return;
+      }
+
       // Show confirmation dialog
       this.confirmationDialog
         .open({
@@ -400,9 +436,13 @@ export class CalendarComponent implements OnInit, OnDestroy {
                 next: () => {
                   this.loadAppointments();
                   this.closePopover();
+                  this.toasterService.showSuccess(
+                    "Appointment deleted successfully"
+                  );
                 },
                 error: (error) => {
                   console.error("Error deleting appointment:", error);
+                  this.toasterService.showError("Failed to delete appointment");
                 },
               });
           }
@@ -699,5 +739,147 @@ export class CalendarComponent implements OnInit, OnDestroy {
         }, 50);
       }, 100);
     });
+  }
+
+  // Settings-based validation methods
+  isWorkingDay(date: Date): boolean {
+    const settings = this.settings();
+    if (!settings) return true; // Default to allowing if settings not loaded
+
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const dayName = dayNames[
+      date.getDay()
+    ] as keyof typeof settings.workingDays;
+
+    // Check both workingDays AND workingHours enabled status
+    const isWorkingDayEnabled = settings.workingDays[dayName];
+
+    // Check working hours for this specific day
+    const dayWorkingHours = (settings.workingHours as any)[dayName];
+    const isWorkingHoursEnabled = dayWorkingHours && dayWorkingHours.enabled;
+
+    // Day is working only if BOTH settings allow it
+    return isWorkingDayEnabled && isWorkingHoursEnabled;
+  }
+
+  isHoliday(date: Date): boolean {
+    const settings = this.settings();
+    if (!settings) return false; // Default to not holiday if settings not loaded
+
+    // Use local date string to avoid timezone issues
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
+
+    return settings.holidays.some((holiday) => {
+      if (typeof holiday === "string") {
+        return holiday === dateStr;
+      }
+      return holiday.date === dateStr;
+    });
+  }
+
+  isWithinWorkingHours(date: Date, time: string): boolean {
+    const settings = this.settings();
+    if (!settings) return true; // Default to allowing if settings not loaded
+
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const dayName = dayNames[
+      date.getDay()
+    ] as keyof typeof settings.workingHours;
+
+    if (dayName === "default") return true; // Skip default key
+
+    const dayWorkingHours = settings.workingHours[dayName] as any;
+
+    if (!dayWorkingHours || !dayWorkingHours.enabled) return false;
+
+    return time >= dayWorkingHours.start && time <= dayWorkingHours.end;
+  }
+
+  canDeleteAppointment(appointment: Appointment): boolean {
+    const settings = this.settings();
+    if (!settings) return true; // Default to allowing if settings not loaded
+
+    const status = appointment.status.toLowerCase();
+
+    switch (status) {
+      case "cancelled":
+        return settings.appointments.allowCancelledDelete;
+      case "completed":
+        return settings.appointments.allowCompletedDelete;
+      default:
+        return true; // Allow deletion of other statuses
+    }
+  }
+
+  canEditAppointment(appointment: Appointment): boolean {
+    const settings = this.settings();
+    if (!settings) return true; // Default to allowing if settings not loaded
+
+    const status = appointment.status.toLowerCase();
+
+    if (status === "cancelled") {
+      return settings.appointments.allowCancelledEdit;
+    }
+
+    return true; // Allow editing of other statuses
+  }
+
+  getStatusColor(status: string): string {
+    const settings = this.settings();
+    if (!settings) {
+      // Default colors if settings not loaded
+      switch (status.toLowerCase()) {
+        case "scheduled":
+          return "#3B82F6";
+        case "confirmed":
+          return "#10B981";
+        case "cancelled":
+          return "#EF4444";
+        case "completed":
+          return "#059669";
+        case "no-show":
+          return "#9CA3AF";
+        default:
+          return "#6B7280";
+      }
+    }
+
+    const statusKey =
+      status.toLowerCase() as keyof typeof settings.appointments.statusColors;
+    return settings.appointments.statusColors[statusKey] || "#6B7280";
+  }
+
+  canScheduleOnDate(date: Date): boolean {
+    const settings = this.settings();
+    if (!settings) return true; // Default to allowing if settings not loaded
+
+    // Check if it's a working day
+    if (!this.isWorkingDay(date)) return false;
+
+    // Check if it's a holiday and holidays are not allowed
+    if (this.isHoliday(date) && !settings.appointments.allowOnHolidays) {
+      return false;
+    }
+
+    return true;
   }
 }

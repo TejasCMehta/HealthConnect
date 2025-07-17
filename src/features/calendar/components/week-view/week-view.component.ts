@@ -250,8 +250,8 @@ export class WeekViewComponent implements OnInit, OnDestroy {
     // Calculate exact number of 30-minute slots this appointment spans
     const slotsSpanned = durationMinutes / 30;
 
-    // Each 30-minute slot has a height of 60px in week view
-    const slotHeight = 60;
+    // Each 30-minute slot has a height of 75px in week view (must match HTML min-h-[75px])
+    const slotHeight = 75;
 
     // For appointments spanning multiple slots, we need the full height
     const totalHeight = slotsSpanned * slotHeight;
@@ -275,7 +275,7 @@ export class WeekViewComponent implements OnInit, OnDestroy {
     // Calculate offset based on minutes past the slot start
     const minuteOffset = aptMinute - slotStartMinute;
     // Each minute = slotHeight / 30 (since each slot is 30 minutes)
-    const slotHeight = 60;
+    const slotHeight = 75; // Must match HTML min-h-[75px] and slotHeight="75"
     const offsetPixels = (minuteOffset / 30) * slotHeight - 4; // Reduce top position by 4px
 
     return offsetPixels;
@@ -320,27 +320,21 @@ export class WeekViewComponent implements OnInit, OnDestroy {
   }
 
   isWeekend(date: Date): boolean {
-    const day = date.getDay();
-    return day === 0 || day === 6; // Sunday or Saturday
+    return this.calendarService.isWeekend(date);
+  }
+
+  isWorkingDay(date: Date): boolean {
+    return this.calendarService.isWorkingDay(date);
   }
 
   isHoliday(date: Date): boolean {
-    // Example holidays - in a real app, this would come from a service
-    const holidays = [
-      "2025-01-01", // New Year's Day
-      "2025-07-04", // Independence Day
-      "2025-12-25", // Christmas
-      // Add more holidays as needed
-    ];
-
-    const dateString = date.toISOString().split("T")[0];
-    return holidays.includes(dateString);
+    return this.calendarService.isHoliday(date);
   }
 
   isRestrictedTimeSlot(date: Date, timeSlot: string): boolean {
     return (
       this.isPastTimeSlot(date, timeSlot) ||
-      this.isWeekend(date) ||
+      !this.isWorkingDay(date) ||
       this.isHoliday(date)
     );
   }
@@ -362,6 +356,13 @@ export class WeekViewComponent implements OnInit, OnDestroy {
     if (this.isRestrictedTimeSlot(date, timeSlot)) {
       return;
     }
+
+    // Normalize the date to avoid timezone issues
+    const normalizedDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
 
     this.timeSlotSelect.emit({
       date: date,
@@ -610,6 +611,10 @@ export class WeekViewComponent implements OnInit, OnDestroy {
   isTimeSlotBlocked(date: Date, timeSlot: string): boolean {
     return this.dragDropService.isTimeSlotBlocked(date, timeSlot);
   }
+
+  /**
+   * Check if a day is today
+   */
 
   ngOnInit() {
     // Component initialization logic

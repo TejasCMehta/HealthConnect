@@ -4,6 +4,10 @@ import { Appointment } from "../../../shared/models/appointment.model";
 import { Doctor } from "../../../shared/models/doctor.model";
 import { AppointmentService } from "./appointment.service";
 import { ToasterService } from "../../../shared/services/toaster.service";
+import {
+  SettingsService,
+  Settings,
+} from "../../settings/services/settings.service";
 
 export interface DragState {
   isDragging: boolean;
@@ -47,6 +51,27 @@ export interface DragDropConfirmation {
 export class AppointmentDragDropService {
   private appointmentService = inject(AppointmentService);
   private toasterService = inject(ToasterService);
+  private settingsService = inject(SettingsService);
+
+  // Settings signal for reactive updates
+  private settingsSignal = signal<Settings | null>(null);
+
+  constructor() {
+    // Load settings on initialization
+    this.loadSettings();
+  }
+
+  private loadSettings(): void {
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        this.settingsSignal.set(settings);
+      },
+      error: (error) => {
+        console.error("Error loading settings in drag-drop service:", error);
+        this.settingsSignal.set(null);
+      },
+    });
+  }
 
   private dragState = signal<DragState>({
     isDragging: false,
@@ -66,20 +91,6 @@ export class AppointmentDragDropService {
   });
 
   public readonly drag = this.dragState.asReadonly();
-
-  // Working hours configuration (can be made configurable)
-  private readonly workingHours = {
-    start: 8, // 8 AM
-    end: 18, // 6 PM
-  };
-
-  // Holidays configuration (can be loaded from API)
-  private readonly holidays: string[] = [
-    "2025-12-25", // Christmas
-    "2025-01-01", // New Year
-    "2025-07-04", // Independence Day
-    // Add more holidays as needed
-  ];
 
   /**
    * Start drag operation
@@ -194,13 +205,39 @@ export class AppointmentDragDropService {
       const containerRect = gridContainer.getBoundingClientRect();
       const relativeY = currentY - containerRect.top;
 
-      // In week/day views, each time slot represents 30 minutes
-      // Calculate the total minutes from the start of the day (8 AM)
-      const startOfDayHour = 8; // 8 AM start
-      const minutesPerSlot = 30;
+      // Get working hours for the current day
+      const settings = this.settingsSignal();
+      let startOfDayHour = 8;
+      let endOfDayHour = 18;
+      if (settings) {
+        const dayNames = [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+        ];
+        const dayName = dayNames[
+          originalStart.getDay()
+        ] as keyof typeof settings.workingHours;
+        if (dayName !== "default") {
+          const dayWorkingHours = settings.workingHours[dayName] as any;
+          if (dayWorkingHours && dayWorkingHours.enabled) {
+            startOfDayHour = parseInt(dayWorkingHours.start.split(":")[0]);
+            endOfDayHour = parseInt(dayWorkingHours.end.split(":")[0]);
+          }
+        }
+      }
 
+      const minutesPerSlot = 30;
+      const totalSlots =
+        ((endOfDayHour - startOfDayHour) * 60) / minutesPerSlot;
       // Calculate which 30-minute slot we're in based on Y position
-      const slotIndex = Math.floor(relativeY / state.slotHeight);
+      let slotIndex = Math.floor(relativeY / state.slotHeight);
+      // Clamp slotIndex to valid range
+      slotIndex = Math.max(0, Math.min(slotIndex, totalSlots - 1));
       const totalMinutesFromStart = slotIndex * minutesPerSlot;
 
       // Create new time based on the calculated slot
@@ -340,33 +377,79 @@ export class AppointmentDragDropService {
     const endHour = endTime.getHours();
     const endMinutes = endTime.getMinutes();
 
-    if (
-      startHour < this.workingHours.start ||
-      endHour > this.workingHours.end ||
-      (endHour === this.workingHours.end && endMinutes > 0)
-    ) {
-      return {
-        isValid: false,
-        errorMessage: `Appointment must be within clinic hours (${this.workingHours.start} AM - ${this.workingHours.end} PM)`,
-      };
+    const settings = this.settingsSignal();
+    if (settings) {
+      const dayNames = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ];
+      const dayName = dayNames[
+        startTime.getDay()
+      ] as keyof typeof settings.workingHours;
+
+      if (dayName !== "default") {
+        const dayWorkingHours = settings.workingHours[dayName] as any;
+
+        if (dayWorkingHours && dayWorkingHours.enabled) {
+          const workingStart = parseInt(dayWorkingHours.start.split(":")[0]);
+          const workingEnd = parseInt(dayWorkingHours.end.split(":")[0]);
+
+          if (
+            startHour < workingStart ||
+            endHour > workingEnd ||
+            (endHour === workingEnd && endMinutes > 0)
+          ) {
+            return {
+              isValid: false,
+              errorMessage: `Appointment must be within clinic hours (${dayWorkingHours.start} - ${dayWorkingHours.end})`,
+            };
+          }
+        } else {
+          return {
+            isValid: false,
+            errorMessage: "Clinic is closed on this day",
+          };
+        }
+      }
     }
 
-    // Check if it's a weekend
-    const dayOfWeek = startTime.getDay();
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
-      return {
-        isValid: false,
-        errorMessage: "Cannot schedule appointments on weekends",
-      };
+    // Check if it's a working day based on settings
+    if (settings) {
+      const dayNames = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ];
+      const dayName = dayNames[
+        startTime.getDay()
+      ] as keyof typeof settings.workingDays;
+
+      if (!settings.workingDays[dayName]) {
+        return {
+          isValid: false,
+          errorMessage: "Cannot schedule appointments on non-working days",
+        };
+      }
     }
 
     // Check if it's a holiday
     const dateStr = startTime.toISOString().split("T")[0];
-    if (this.holidays.includes(dateStr)) {
-      return {
-        isValid: false,
-        errorMessage: "Cannot schedule appointments on holidays",
-      };
+    if (settings && this.isHoliday(dateStr, settings.holidays)) {
+      if (!settings.appointments.allowOnHolidays) {
+        return {
+          isValid: false,
+          errorMessage: "Cannot schedule appointments on holidays",
+        };
+      }
     }
 
     return { isValid: true };
@@ -507,18 +590,34 @@ export class AppointmentDragDropService {
   }
 
   /**
-   * Check if a date is a holiday
+   * Check if a date string is a holiday based on settings
    */
-  private isHoliday(date: Date): boolean {
+  private isHoliday(dateString: string, holidays: (string | any)[]): boolean {
+    return holidays.some((holiday) => {
+      if (typeof holiday === "string") {
+        return holiday === dateString;
+      }
+      // If holiday is an object with date property
+      return holiday.date === dateString;
+    });
+  }
+
+  /**
+   * Check if a date is a holiday (legacy method for backward compatibility)
+   */
+  private isHolidayDate(date: Date): boolean {
+    const settings = this.settingsSignal();
+    if (!settings) return false;
+
     const dateString = date.toISOString().split("T")[0];
-    return this.holidays.includes(dateString);
+    return this.isHoliday(dateString, settings.holidays);
   }
 
   /**
    * Check if a date is blocked (weekend or holiday)
    */
   private isDateBlocked(date: Date): boolean {
-    return this.isWeekend(date) || this.isHoliday(date);
+    return this.isWeekend(date) || this.isHolidayDate(date);
   }
 
   /**

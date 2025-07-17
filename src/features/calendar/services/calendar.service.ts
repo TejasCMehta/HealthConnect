@@ -1,9 +1,21 @@
 import { Injectable, signal } from "@angular/core";
+import { Settings } from "../../settings/services/settings.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class CalendarService {
+  // Settings signal for reactive updates
+  private settingsSignal = signal<Settings | null>(null);
+  public settings = this.settingsSignal.asReadonly();
+
+  /**
+   * Update settings from the main calendar component
+   */
+  updateSettings(settings: Settings): void {
+    this.settingsSignal.set(settings);
+  }
+
   // Calendar utility methods
 
   /**
@@ -81,13 +93,38 @@ export class CalendarService {
   }
 
   /**
-   * Generate time slots for day/week view
+   * Generate time slots for day/week view based on settings working hours
    */
-  generateTimeSlots(
-    startHour: number = 8,
-    endHour: number = 18,
-    intervalMinutes: number = 30
-  ): string[] {
+  generateTimeSlots(date?: Date, intervalMinutes: number = 30): string[] {
+    const settings = this.settingsSignal();
+    let startHour = 8;
+    let endHour = 18;
+
+    if (settings && date) {
+      const dayNames = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ];
+      const dayName = dayNames[
+        date.getDay()
+      ] as keyof typeof settings.workingHours;
+
+      // Skip 'default' key and handle specific day working hours
+      if (dayName !== "default") {
+        const dayWorkingHours = settings.workingHours[dayName] as any;
+
+        if (dayWorkingHours && dayWorkingHours.enabled) {
+          startHour = parseInt(dayWorkingHours.start.split(":")[0]);
+          endHour = parseInt(dayWorkingHours.end.split(":")[0]);
+        }
+      }
+    }
+
     const slots: string[] = [];
 
     for (let hour = startHour; hour < endHour; hour++) {
@@ -131,19 +168,117 @@ export class CalendarService {
   }
 
   /**
-   * Check if a date is a weekend
+   * Check if a date is a weekend based on settings
    */
   isWeekend(date: Date): boolean {
-    const day = date.getDay();
-    return day === 0 || day === 6; // Sunday = 0, Saturday = 6
+    const settings = this.settingsSignal();
+    if (!settings) {
+      // Default behavior - Sunday and Saturday are weekends
+      const day = date.getDay();
+      return day === 0 || day === 6; // Sunday = 0, Saturday = 6
+    }
+
+    // Check working days from settings
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const dayName = dayNames[
+      date.getDay()
+    ] as keyof typeof settings.workingDays;
+    return !settings.workingDays[dayName];
   }
 
   /**
-   * Check if a date is a holiday
+   * Check if a date is a working day based on both workingDays and workingHours settings
    */
-  isHoliday(date: Date, holidays: string[]): boolean {
-    const dateStr = date.toISOString().split("T")[0];
-    return holidays.includes(dateStr);
+  isWorkingDay(date: Date): boolean {
+    const settings = this.settingsSignal();
+    if (!settings) return true;
+
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const dayName = dayNames[
+      date.getDay()
+    ] as keyof typeof settings.workingDays;
+
+    // Check both workingDays AND workingHours enabled status
+    const isWorkingDayEnabled = settings.workingDays[dayName];
+
+    // Check working hours for this specific day
+    const dayWorkingHours = (settings.workingHours as any)[dayName];
+    const isWorkingHoursEnabled = dayWorkingHours && dayWorkingHours.enabled;
+
+    // Day is working only if BOTH settings allow it
+    return isWorkingDayEnabled && isWorkingHoursEnabled;
+  }
+
+  /**
+   * Check if a date is a holiday based on settings
+   */
+  isHoliday(date: Date, holidays?: string[]): boolean {
+    const settings = this.settingsSignal();
+    const holidayList = holidays || (settings ? settings.holidays : []);
+
+    // Use local date string to avoid timezone issues
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
+
+    return holidayList.some((holiday) => {
+      if (typeof holiday === "string") {
+        return holiday === dateStr;
+      }
+      // If holiday is an object with date property
+      return (holiday as any).date === dateStr;
+    });
+  }
+
+  /**
+   * Get holiday details for a specific date
+   */
+  getHolidayDetails(date: Date): { title: string; recurring: boolean } | null {
+    const settings = this.settingsSignal();
+    if (!settings) return null;
+
+    // Use local date string to avoid timezone issues
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
+
+    const holiday = settings.holidays.find((holiday) => {
+      if (typeof holiday === "string") {
+        return holiday === dateStr;
+      }
+      // If holiday is an object with date property
+      return (holiday as any).date === dateStr;
+    });
+
+    if (holiday) {
+      if (typeof holiday === "string") {
+        return { title: "Holiday", recurring: false };
+      }
+      return {
+        title: (holiday as any).title || "Holiday",
+        recurring: (holiday as any).recurring || false,
+      };
+    }
+
+    return null;
   }
 
   /**

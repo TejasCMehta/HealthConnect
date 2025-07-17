@@ -14,7 +14,7 @@
 // Time slots with subtle grid lines
 .time-slot {
   background: #ffffff;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+  border-bottom: 1px solid rgba(75, 85, 99, 0.22); // slightly lighter for better balance
 
   &:hover {
     background-color: rgba(59, 130, 246, 0.01);
@@ -22,7 +22,7 @@
 
   :host-context(.dark) & {
     background: #1f2937;
-    border-bottom-color: rgba(75, 85, 99, 0.2);
+    border-bottom-color: rgba(229, 231, 235, 0.13); // slightly lighter in dark
 
     &:hover {
       background-color: rgba(59, 130, 246, 0.02);
@@ -128,29 +128,52 @@
   }
 }
 
-// Restricted time slots - minimal indication
+// Restricted time slots styling (consistent with month view)
 .restricted-time-slot {
-  background-color: rgba(243, 244, 246, 0.2);
+  background-color: #f9fafb !important;
   opacity: 0.6;
+  cursor: not-allowed !important;
 
   :host-context(.dark) & {
-    background-color: rgba(55, 65, 81, 0.2);
+    background-color: #374151 !important;
+  }
+
+  // Only disable pointer events for empty click areas, not appointment cards
+  .add-appointment-area,
+  .empty-time-slot {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  // Allow appointment cards to remain clickable
+  app-appointment-card,
+  .appointment-card,
+  .appointment-wrapper {
+    pointer-events: auto !important;
+    cursor: pointer !important;
   }
 }
 
+// Restricted clickable area styling (consistent with month view)
 .restricted-clickable-area {
   background-color: #f3f4f6 !important;
   border-color: #d1d5db !important;
   cursor: not-allowed !important;
-  opacity: 0.7 !important;
+  opacity: 0.6 !important;
+  pointer-events: none !important;
 
   &:hover {
     background-color: #f3f4f6 !important;
     border-color: #d1d5db !important;
   }
+
+  * {
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
 }
 
-// Dark mode for restricted clickable areas
+// Dark mode for restricted clickable areas (consistent with month view)
 :host-context(.dark) .restricted-clickable-area {
   background-color: #374151 !important;
   border-color: #4b5563 !important;
@@ -158,5 +181,56 @@
   &:hover {
     background-color: #374151 !important;
     border-color: #4b5563 !important;
+  }
+}
+
+// Weekend/holiday time slot styling (consistent with month view)
+.weekend-time-slot {
+  background-color: #f9fafb !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+
+  :host-context(.dark) & {
+    background-color: #374151 !important;
+  }
+
+  // Only disable pointer events for empty click areas, not appointment cards
+  .add-appointment-area,
+  .empty-time-slot {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  // Allow appointment cards to remain clickable
+  app-appointment-card,
+  .appointment-card,
+  .appointment-wrapper {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+}
+
+.holiday-time-slot {
+  background-color: #fef2f2 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+
+  :host-context(.dark) & {
+    background-color: #7f1d1d !important;
+  }
+
+  // Only disable pointer events for empty click areas, not appointment cards
+  .add-appointment-area,
+  .empty-time-slot {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  // Allow appointment cards to remain clickable
+  app-appointment-card,
+  .appointment-card,
+  .appointment-wrapper {
+    pointer-events: auto !important;
+    cursor: pointer !important;
   }
 }
