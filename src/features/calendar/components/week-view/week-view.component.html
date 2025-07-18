@@ -32,6 +32,7 @@
           >
           }
         </div>
+        <!-- end of slot column -->
         <div
           [class]="
             'text-xs ' +
@@ -194,6 +195,22 @@
               "
             ></app-appointment-card>
           </div>
+          }
+          <!-- Show small + icon at bottom right if slot has appointments -->
+          @if (!isRestrictedTimeSlot(day, timeSlot)) {
+          <button
+            type="button"
+            class="absolute bottom-1 right-1 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-md p-1 flex items-center justify-center z-30"
+            style="width: 22px; height: 22px"
+            (click)="onTimeSlotClick(day, timeSlot)"
+            [title]="
+              isRestrictedTimeSlot(day, timeSlot)
+                ? 'Cannot add appointment to restricted slot'
+                : 'Add appointment to this slot'
+            "
+          >
+            <i class="ri-add-line text-base"></i>
+          </button>
           } }
         </div>
         }
