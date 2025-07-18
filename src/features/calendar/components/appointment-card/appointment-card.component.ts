@@ -109,6 +109,9 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
   private dragListeners: (() => void)[] = [];
   private dragThreshold = 5; // Minimum pixels to move before starting drag
 
+  // Add isHovering property and getStatusBadgeColor method
+  isHovering = false;
+
   ngOnInit() {
     this.currentEndTime.set(this.appointment().endTime);
 
@@ -687,5 +690,19 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
       mouseY
     );
     this.floatingDragData.set(previewData);
+  }
+
+  getStatusBadgeColor() {
+    // Example: map status to color, replace with your logic or use SettingsService
+    switch (this.appointment().status) {
+      case "scheduled":
+        return "#fbbf24"; // yellow
+      case "completed":
+        return "#22c55e"; // green
+      case "cancelled":
+        return "#ef4444"; // red
+      default:
+        return "#9ca3af"; // gray
+    }
   }
 }

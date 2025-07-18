@@ -456,7 +456,23 @@
       "doctorId": 1,
       "startTime": "2025-07-23T05:00:00.000Z",
       "endTime": "2025-07-23T06:00:00.000Z",
-      "status": "scheduled"
+      "status": "scheduled",
+      "patient": {
+        "id": 1752343850389,
+        "name": "JOhn Hang",
+        "email": "jo@jo.com",
+        "phone": "9929299",
+        "dateOfBirth": "1988-03-13",
+        "address": "sdvsd"
+      },
+      "doctor": {
+        "id": 1,
+        "name": "John Smith",
+        "specialty": "Cardiology",
+        "email": "john@clinic.com",
+        "phone": "+1234567890",
+        "color": "#ec4899"
+      }
     }
   ],
   "settings": {
