@@ -54,7 +54,7 @@
     },
     {
       "id": 1752343850389,
-      "name": "JOhn Hang",
+      "name": "John Hang",
       "email": "jo@jo.com",
       "phone": "9929299",
       "dateOfBirth": "1988-03-13",
@@ -369,16 +369,6 @@
       }
     },
     {
-      "id": 1752745099467,
-      "title": "Bob Wilson - Dr. John Smith",
-      "description": "asdf",
-      "patientId": 2,
-      "doctorId": 1,
-      "startTime": "2025-07-29T07:30:00.000Z",
-      "endTime": "2025-07-29T08:30:00.000Z",
-      "status": "scheduled"
-    },
-    {
       "id": 1752757814338,
       "title": "Alice Johnson1 - Dr. John Smith",
       "description": "test date time",
@@ -444,9 +434,25 @@
       "description": "sadff",
       "patientId": 1,
       "doctorId": 1,
-      "startTime": "2025-07-31T07:30:00.000Z",
-      "endTime": "2025-07-31T08:30:00.000Z",
-      "status": "scheduled"
+      "startTime": "2025-07-24T07:30:00.000Z",
+      "endTime": "2025-07-24T08:30:00.000Z",
+      "status": "scheduled",
+      "patient": {
+        "id": 1,
+        "name": "Alice Johnson1",
+        "email": "alice@example.com",
+        "phone": "+1234567892",
+        "dateOfBirth": "1990-05-15",
+        "address": "123 Main St, City, State 12345"
+      },
+      "doctor": {
+        "id": 1,
+        "name": "John Smith",
+        "specialty": "Cardiology",
+        "email": "john@clinic.com",
+        "phone": "+1234567890",
+        "color": "#ec4899"
+      }
     },
     {
       "id": 1752831508426,
@@ -556,11 +562,11 @@
       "allowCancelledDelete": true,
       "allowCompletedDelete": false,
       "statusColors": {
-        "scheduled": "#3b82f6",
-        "confirmed": "#10b981",
-        "cancelled": "#ef4444",
-        "completed": "#6b7280",
-        "no-show": "#f59e0b"
+        "scheduled": "#fef3c7",
+        "confirmed": "#d1fae5",
+        "cancelled": "#fee2e2",
+        "completed": "#dbeafe",
+        "no-show": "#f3f4f6"
       }
     },
     "filters": {

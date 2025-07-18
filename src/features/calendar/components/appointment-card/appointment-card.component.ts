@@ -30,6 +30,42 @@ import {
   styleUrl: "./appointment-card.component.scss",
 })
 export class AppointmentCardComponent implements OnInit, OnDestroy {
+  /**
+   * Returns true if the appointment's end time is before now (i.e., in the past)
+   */
+  public isPastAppointment(): boolean {
+    const end = new Date(this.appointment().endTime);
+    return end.getTime() < Date.now();
+  }
+  // Local copy of status color palette
+  statusColorOptions: Record<string, Array<{ light: string; dark: string }>> = {
+    scheduled: [
+      { light: "#bbf7d0", dark: "#16a34a" },
+      { light: "#dbeafe", dark: "#2563eb" },
+      { light: "#fef3c7", dark: "#f59e0b" },
+    ],
+    confirmed: [
+      { light: "#d1fae5", dark: "#059669" },
+      { light: "#f3f4f6", dark: "#6b7280" },
+      { light: "#f0fdf4", dark: "#22c55e" },
+    ],
+    cancelled: [
+      { light: "#fee2e2", dark: "#dc2626" },
+      { light: "#f3f4f6", dark: "#6b7280" },
+      { light: "#fef3c7", dark: "#f59e0b" },
+    ],
+    completed: [
+      { light: "#e0e7ff", dark: "#6366f1" },
+      { light: "#f3f4f6", dark: "#6b7280" },
+      { light: "#dbeafe", dark: "#2563eb" },
+    ],
+    "no-show": [
+      { light: "#fef3c7", dark: "#f59e0b" },
+      { light: "#f3f4f6", dark: "#6b7280" },
+      { light: "#fee2e2", dark: "#dc2626" },
+    ],
+  };
+
   private resizeService = inject(AppointmentResizeService);
   private dragDropService = inject(AppointmentDragDropService);
   private settingsService = inject(SettingsService);
@@ -125,6 +161,14 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
         this.settingsSignal.set(null);
       },
     });
+  }
+
+  onMouseEnter() {
+    this.isHovering = true;
+  }
+
+  onMouseLeave() {
+    this.isHovering = false;
   }
 
   ngOnDestroy() {
@@ -692,17 +736,25 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
     this.floatingDragData.set(previewData);
   }
 
-  getStatusBadgeColor() {
-    // Example: map status to color, replace with your logic or use SettingsService
-    switch (this.appointment().status) {
-      case "scheduled":
-        return "#fbbf24"; // yellow
-      case "completed":
-        return "#22c55e"; // green
-      case "cancelled":
-        return "#ef4444"; // red
-      default:
-        return "#9ca3af"; // gray
+  // Returns the selected color object for the appointment status
+  getStatusColorObj(): { light: string; dark: string } {
+    const settings = this.settingsSignal();
+    const status = this.appointment().status?.toLowerCase();
+    if (
+      settings &&
+      settings.appointments &&
+      settings.appointments.statusColors
+    ) {
+      const statusKey =
+        status as keyof typeof settings.appointments.statusColors;
+      const selectedLight = settings.appointments.statusColors[statusKey];
+      const colorOptions = this.statusColorOptions[statusKey] || [];
+      const found = colorOptions.find(
+        (opt: { light: string; dark: string }) => opt.light === selectedLight
+      );
+      if (found) return found;
     }
+    // Fallback to green
+    return { light: "#bbf7d0", dark: "#16a34a" };
   }
 }

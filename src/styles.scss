@@ -602,20 +602,15 @@ body {
 
 /* Today date super highlight */
 .super-today-highlight {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
-  color: white !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3),
-    0 4px 12px rgba(59, 130, 246, 0.4) !important;
+  background: none !important;
+  color: #2563eb !important; /* blue-600 for light mode */
   font-weight: 800 !important;
-  transform: scale(1.15) !important;
-  z-index: 10 !important;
-  position: relative !important;
-  border-radius: 50% !important;
+  text-shadow: 0 1px 2px rgba(37, 99, 235, 0.15);
 }
 
 .dark .super-today-highlight {
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.4),
-    0 4px 12px rgba(96, 165, 250, 0.5) !important;
+  color: #60a5fa !important; /* blue-400 for dark mode */
+  text-shadow: 0 1px 2px rgba(96, 165, 250, 0.15);
 }
 
 /* Today cell highlighting for month view */

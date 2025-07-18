@@ -22,6 +22,48 @@ import { ToasterService } from "../../shared/services/toaster.service";
   styleUrls: ["./settings.component.scss"],
 })
 export class SettingsComponent implements OnInit {
+  // Restrict to 3 unique theme-safe color options per status
+  statusColorOptions: Record<string, Array<{ light: string; dark: string }>> = {
+    scheduled: [
+      { light: "#bbf7d0", dark: "#16a34a" },
+      { light: "#dbeafe", dark: "#2563eb" },
+      { light: "#fef3c7", dark: "#f59e0b" },
+    ],
+    confirmed: [
+      { light: "#d1fae5", dark: "#059669" },
+      { light: "#f3f4f6", dark: "#6b7280" },
+      { light: "#f0fdf4", dark: "#22c55e" },
+    ],
+    cancelled: [
+      { light: "#fee2e2", dark: "#dc2626" },
+      { light: "#f3f4f6", dark: "#6b7280" },
+      { light: "#fef3c7", dark: "#f59e0b" },
+    ],
+    completed: [
+      { light: "#e0e7ff", dark: "#6366f1" },
+      { light: "#f3f4f6", dark: "#6b7280" },
+      { light: "#dbeafe", dark: "#2563eb" },
+    ],
+    "no-show": [
+      { light: "#fef3c7", dark: "#f59e0b" },
+      { light: "#f3f4f6", dark: "#6b7280" },
+      { light: "#fee2e2", dark: "#dc2626" },
+    ],
+  };
+
+  // Helper to get selected color object for a status
+  getSelectedStatusColor(
+    status: "scheduled" | "confirmed" | "cancelled" | "completed" | "no-show"
+  ): { light: string; dark: string } {
+    const colorHex = this.appointmentSettingsForm.statusColors[status];
+    const options = this.statusColorOptions[status];
+    return (
+      options.find(
+        (opt: { light: string; dark: string }) =>
+          opt.light === colorHex || opt.dark === colorHex
+      ) || options[0]
+    );
+  }
   private settingsService = inject(SettingsService);
   public themeService = inject(ThemeService);
   public authService = inject(AuthService);
@@ -613,17 +655,29 @@ export class SettingsComponent implements OnInit {
       this.isSaving.set(true);
       console.log("Saving appointment settings:", this.appointmentSettingsForm);
 
-      // Simulate async save operation
-      setTimeout(() => {
-        // Here you would typically call a service to persist the settings
-        // this.settingsService.saveAppointmentSettings(this.appointmentSettingsForm);
+      // Merge current settings with updated appointment settings
+      const updatedSettings: Settings = {
+        ...this.settings(),
+        appointments: this.appointmentSettingsForm,
+      };
 
-        this.isSaving.set(false);
-        this.toasterService.showSuccess(
-          "Settings Saved",
-          "Appointment settings saved successfully!"
-        );
-      }, 1000);
+      this.settingsService.updateSettings(updatedSettings).subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.toasterService.showSuccess(
+            "Settings Saved",
+            "Appointment settings saved successfully!"
+          );
+        },
+        error: (err) => {
+          this.isSaving.set(false);
+          this.toasterService.showError(
+            "Save Failed",
+            "Failed to save appointment settings. Please try again."
+          );
+          console.error("Error saving appointment settings:", err);
+        },
+      });
     }
   }
 

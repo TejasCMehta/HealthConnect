@@ -330,4 +330,26 @@ export class SettingsService {
 
     return slots;
   }
+  /**
+   * Returns the color for a given appointment status from settings, or a default if not found.
+   */
+  getStatusColor(status: string): string {
+    // You may need to fetch settings from an API or cache. For now, use a default fallback.
+    // If you have a local settings object, replace this logic accordingly.
+    // Example assumes settings are available via a property or method.
+    // If not, you may need to refactor to make settings available here.
+    // For demonstration, fallback to gray if not found.
+    // Replace with your actual settings retrieval logic if needed.
+    const defaultColors: { [key: string]: string } = {
+      scheduled: "#3B82F6",
+      confirmed: "#10B981",
+      cancelled: "#EF4444",
+      completed: "#059669",
+      "no-show": "#9CA3AF",
+    };
+    const key = status.toLowerCase();
+    // If you have a settings object, use it here. Otherwise, fallback to default.
+    // Example: if (this.settings?.appointments?.statusColors?.[key]) { return this.settings.appointments.statusColors[key]; }
+    return defaultColors[key] || "#6B7280";
+  }
 }

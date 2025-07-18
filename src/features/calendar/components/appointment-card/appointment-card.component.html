@@ -1,20 +1,8 @@
 <div
   [class]="
     'appointment-card transition-colors border-l-4 border-r-4 flex flex-col relative ' +
-    (appointment().status === 'scheduled'
-      ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10 '
-      : '') +
-    (appointment().status === 'completed'
-      ? 'border-green-400 bg-green-50 dark:bg-green-900/10 '
-      : '') +
-    (appointment().status === 'cancelled'
-      ? 'border-red-400 bg-red-50 dark:bg-red-900/10 '
-      : '') +
-    (!appointment().status
-      ? 'border-gray-400 bg-gray-50 dark:bg-gray-900/10 '
-      : '') +
     (compact() ? 'compact p-1 rounded-md' : 'p-3 shadow-sm rounded-r-md') +
-    (disableHover() ? '' : ' hover:bg-opacity-80') +
+    (disableHover() ? '' : '') +
     (isResizing() ? ' resizing' : '') +
     (isDragging() ? ' dragging cursor-grabbing' : '') +
     (isDragging() && dragPreview() && !dragPreview()!.isValidTarget
@@ -28,24 +16,47 @@
   [style.height.px]="compact() ? null : dynamicHeight || slotHeight()"
   [style.min-height.px]="compact() ? null : slotHeight()"
   [style.borderLeft]="'4px solid ' + (appointment().doctor?.color || '#9ca3af')"
-  [style.borderRight]="'2px solid ' + getStatusBadgeColor()"
-  [style.background]="isHovering ? getStatusBadgeColor() : null"
+  [style.borderRight]="'4px solid ' + getStatusColorObj().dark"
+  [ngStyle]="{
+    background: isHovering ? getStatusColorObj().light : '',
+    transition: 'background-color 0.15s',
+  }"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
 >
-  <!-- Central Drag Handle for All Views -->
-  @if (enableDrag() && !isDragging()) {
-  <div
+  <!-- Central Drag Handle for All Views except past/completed in month view -->
+  @if ( enableDrag() && !isDragging() && !(viewType() === 'month' &&
+  (isPastAppointment() || appointment().status === 'completed')) ) {
+  <span
     class="drag-handle-center"
-    (mousedown)="onMouseDown($event)"
-    title="Drag to move appointment"
+    style="position: absolute; top: 4px; right: 4px; z-index: 10"
+    (mouseenter)="isHovering = true"
+    (mouseleave)="isHovering = false"
   >
-    <div class="drag-icon">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M13,6V11H18V7.75L22.25,12L18,16.25V13H13V18H16.25L12,22.25L7.75,18H11V13H6V16.25L1.75,12L6,7.75V11H11V6H7.75L12,1.75L16.25,6H13Z"
-        />
-      </svg>
-    </div>
-  </div>
+    <button
+      *ngIf="isHovering"
+      class="rounded-full shadow flex items-center justify-center"
+      (mousedown)="onMouseDown($event)"
+      title="Drag to move appointment"
+      [ngStyle]="{
+        width: '20px',
+        height: '20px',
+        background: '#f3f4f6',
+        border: 'none',
+        outline: 'none',
+        borderRadius: '4px',
+        cursor: isHovering ? 'move' : 'grab',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0
+      }"
+    >
+      <span style="font-size: 16px; color: #333; display: block; margin: auto"
+        >⠿</span
+      >
+    </button>
+  </span>
   }
 
   <!-- Appointment Card Row -->
@@ -76,25 +87,6 @@
       </span>
       }
     </span>
-    <!-- Drag handle (only on hover) -->
-    <span
-      class="drag-handle"
-      (mouseenter)="isHovering = true"
-      (mouseleave)="isHovering = false"
-      style="margin-left: 8px"
-    >
-      <svg
-        *ngIf="isHovering"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        style="vertical-align: middle"
-      >
-        <rect x="6" y="7" width="12" height="2" rx="1" fill="#888" />
-        <rect x="6" y="15" width="12" height="2" rx="1" fill="#888" />
-      </svg>
-    </span>
   </div>
 
   <!-- Resize Handle (if resize is enabled, show in both compact and non-compact modes) -->
@@ -120,7 +112,7 @@
         (compact() ? 'w-6 h-0.5' : 'w-10 h-1') +
         (isResizing()
           ? compact()
-            ? ' bg-blue-600 w-8 h-1'
+            ? ' bg-blue-600'
             : ' bg-blue-600 w-12 h-1.5'
           : '')
       "
