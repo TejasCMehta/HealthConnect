@@ -37,7 +37,9 @@ export class AppointmentFormComponent implements OnInit {
   private settingsService = inject(SettingsService);
   private cdr = inject(ChangeDetectorRef);
   private toasterService = inject(ToasterService);
+
   public validationService = inject(FormValidationService);
+  public holidays = signal<(string | { date: string })[]>([]);
 
   public appointment = input<Appointment | null>(null);
   public selectedTimeSlot = input<{ date: Date; time: string } | null>(null);
@@ -214,21 +216,23 @@ export class AppointmentFormComponent implements OnInit {
   private loadFormData(): void {
     console.log("Loading form data for appointment form...");
 
-    // Load working hours
-    this.settingsService.getWorkingHours().subscribe({
-      next: (hours) => {
-        console.log("Working hours loaded:", hours);
-        this.workingHours.set(hours);
+    // Load settings (working hours + holidays)
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        console.log("Settings loaded:", settings);
+        this.workingHours.set(settings.workingHours.default);
         this.workingHoursLoaded.set(true);
-        this.generateTimeSlots(); // Generate time slots when working hours are loaded
+        this.holidays.set(settings.holidays || []);
+        this.generateTimeSlots();
         this.checkIfDataLoadedAndSetForm();
       },
       error: (error) => {
-        console.error("Error loading working hours:", error);
+        console.error("Error loading settings:", error);
         // Use default working hours
         this.workingHours.set({ start: "08:00", end: "18:00" });
         this.workingHoursLoaded.set(true);
-        this.generateTimeSlots(); // Generate time slots with default hours
+        this.holidays.set([]);
+        this.generateTimeSlots();
         this.checkIfDataLoadedAndSetForm();
       },
     });
@@ -447,6 +451,7 @@ export class AppointmentFormComponent implements OnInit {
   }
 
   private isWeekend(date: Date): boolean {
+    // Use the same logic as calendar.service.ts for working days
     const dayNames = [
       "sunday",
       "monday",
@@ -462,9 +467,18 @@ export class AppointmentFormComponent implements OnInit {
   }
 
   private isHoliday(date: Date): boolean {
-    // This would check against the holidays from settings
-    // For now, just return false
-    return false;
+    // Use loaded holidays from settings
+    const holidays = this.holidays();
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
+    return holidays.some((holiday: any) => {
+      if (typeof holiday === "string") {
+        return holiday === dateStr;
+      }
+      return holiday.date === dateStr;
+    });
   }
 
   private async checkAppointmentConflicts(
@@ -648,35 +662,41 @@ export class AppointmentFormComponent implements OnInit {
       return false;
     }
 
-    // Validate appointment date
+    // Validate appointment date and time are not in the past
     const appointmentDate = new Date(form.appointmentDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // If date is before today, block and show specific message
     if (appointmentDate < today) {
       this.validationService.setFieldError(
         "appointmentDate",
-        "Appointment date cannot be in the past"
+        "Cannot create appointments for past days."
       );
       isValid = false;
-    }
-
-    // Check if it's a weekend (if weekends are not allowed)
-    if (this.isWeekend(appointmentDate)) {
-      this.validationService.setFieldError(
-        "appointmentDate",
-        "Appointments cannot be scheduled on weekends"
-      );
-      isValid = false;
-    }
-
-    // Check if it's a holiday
-    if (this.isHoliday(appointmentDate)) {
-      this.validationService.setFieldError(
-        "appointmentDate",
-        "Appointments cannot be scheduled on holidays"
-      );
-      isValid = false;
+    } else {
+      // If date is today, block if start time is in the past
+      if (appointmentDate.getTime() === today.getTime()) {
+        const now = new Date();
+        const [startHour, startMinute] = form.startTime.split(":").map(Number);
+        const startDateTime = new Date(appointmentDate);
+        startDateTime.setHours(startHour, startMinute, 0, 0);
+        if (startDateTime < now) {
+          this.validationService.setFieldError(
+            "startTime",
+            "Cannot create appointment for a time that has already passed"
+          );
+          isValid = false;
+        }
+      }
+      // Only show holiday/weekend message for valid future/today dates
+      if (this.isWeekend(appointmentDate) || this.isHoliday(appointmentDate)) {
+        this.validationService.setFieldError(
+          "appointmentDate",
+          "Appointments cannot be scheduled on holidays or weekends"
+        );
+        isValid = false;
+      }
     }
 
     // Validate time range
