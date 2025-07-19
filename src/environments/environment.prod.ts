@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "", // Use relative URL in production (same domain)
+  apiUrl: 'https://healthconnect-cc41.onrender.com'
 };
