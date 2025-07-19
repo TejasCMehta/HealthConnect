@@ -349,9 +349,34 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
       existingResizing.classList.remove("actively-resizing");
     }
 
+    // Validate clientY value with comprehensive bounds checking
+    if (!isFinite(event.clientY) || isNaN(event.clientY)) {
+      console.warn("Invalid clientY value in resize start:", event.clientY);
+      return;
+    }
+
+    // Check for reasonable mouse coordinate bounds
+    if (event.clientY < -5000 || event.clientY > 50000) {
+      console.warn("clientY outside reasonable viewport bounds in start:", {
+        clientY: event.clientY,
+        screenY: event.screenY,
+        pageY: event.pageY,
+        eventType: event.type,
+        target: event.target,
+      });
+      return;
+    }
+
     this.resizeStartY = event.clientY;
     this.isResizing.set(true);
     this.resizeValidationError.set(null); // Clear any previous validation errors
+
+    console.log(
+      "Resize start with clientY:",
+      event.clientY,
+      "slotHeight:",
+      this.slotHeight()
+    );
 
     // Add global class to document body to indicate resize mode
     document.body.classList.add("appointment-resizing");
@@ -387,23 +412,63 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
   private onResizeMove = (event: MouseEvent): void => {
     if (!this.isResizing()) return;
 
-    const newEndTime = this.resizeService.updateResize(event.clientY);
-    this.currentEndTime.set(newEndTime);
-
-    // Check validation and provide feedback
-    const validation = this.resizeService.validateResize();
-    if (!validation.isValid) {
-      this.resizeValidationError.set(
-        validation.errorMessage || "Invalid resize"
-      );
-    } else {
-      this.resizeValidationError.set(null);
+    // Validate clientY value with more comprehensive checks
+    if (!isFinite(event.clientY) || isNaN(event.clientY)) {
+      console.warn("Invalid clientY value in resize move:", event.clientY);
+      return;
     }
 
-    this.resizeUpdate.emit({
-      appointment: this.appointment(),
-      newEndTime,
-    });
+    // Check for reasonable mouse coordinate bounds (viewport should be within reasonable pixel range)
+    if (event.clientY < -5000 || event.clientY > 50000) {
+      console.warn("clientY outside reasonable viewport bounds:", {
+        clientY: event.clientY,
+        screenY: event.screenY,
+        pageY: event.pageY,
+        eventType: event.type,
+        target: event.target,
+      });
+      return;
+    }
+
+    try {
+      const newEndTime = this.resizeService.updateResize(event.clientY);
+
+      // Validate that we received a valid time string
+      if (!newEndTime || newEndTime === "Invalid Date") {
+        console.warn(
+          "Invalid end time received from resize service:",
+          newEndTime
+        );
+        return;
+      }
+
+      // Validate that the date string can be parsed properly
+      const testDate = new Date(newEndTime);
+      if (isNaN(testDate.getTime())) {
+        console.warn("Cannot parse end time from resize service:", newEndTime);
+        return;
+      }
+
+      this.currentEndTime.set(newEndTime);
+
+      // Check validation and provide feedback
+      const validation = this.resizeService.validateResize();
+      if (!validation.isValid) {
+        this.resizeValidationError.set(
+          validation.errorMessage || "Invalid resize"
+        );
+      } else {
+        this.resizeValidationError.set(null);
+      }
+
+      this.resizeUpdate.emit({
+        appointment: this.appointment(),
+        newEndTime,
+      });
+    } catch (error) {
+      console.error("Error during resize move:", error);
+      // Don't crash - just ignore this resize movement
+    }
   };
 
   /**

@@ -448,40 +448,12 @@ export class DayViewComponent implements OnInit, OnDestroy {
     appointment: Appointment;
     newEndTime: string;
   }): void {
-    // Snap new end time to nearest 30-minute slot and validate
-    const start = new Date(event.appointment.startTime);
-    let newEnd = new Date(event.newEndTime);
-    // Snap to next 30-min slot
-    newEnd.setMinutes(Math.ceil(newEnd.getMinutes() / 30) * 30, 0, 0);
-    if (newEnd <= start) {
-      this.toasterService.showError(
-        "Invalid Resize",
-        "End time must be after start time."
-      );
-      return;
-    }
-    // Block resizing to past
-    if (newEnd < new Date()) {
-      this.toasterService.showError(
-        "Invalid Resize",
-        "Cannot resize to a past time."
-      );
-      return;
-    }
-    // Block resizing outside clinic hours (8-18)
-    if (
-      newEnd.getHours() < 8 ||
-      newEnd.getHours() > 18 ||
-      (newEnd.getHours() === 18 && newEnd.getMinutes() > 0)
-    ) {
-      this.toasterService.showError(
-        "Invalid Resize",
-        "End time must be within clinic hours (8:00-18:00)"
-      );
-      return;
-    }
-    // Update the resize service state
-    this.resizeService.updateResize(newEnd.getTime());
+    // The appointment card component handles the resize logic internally
+    // This event is just for informational purposes if we need to show feedback
+    console.log("Appointment resize update:", {
+      appointmentId: event.appointment.id,
+      newEndTime: event.newEndTime,
+    });
   }
 
   /**

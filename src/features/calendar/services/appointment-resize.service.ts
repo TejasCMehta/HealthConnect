@@ -46,6 +46,32 @@ export class AppointmentResizeService {
     startY: number,
     slotHeight: number = 30
   ): void {
+    // Validate input parameters
+    if (!appointment) {
+      console.warn("Cannot start resize: invalid appointment");
+      return;
+    }
+
+    if (!isFinite(startY) || isNaN(startY)) {
+      console.warn("Cannot start resize: invalid startY value:", startY);
+      return;
+    }
+
+    if (!isFinite(slotHeight) || isNaN(slotHeight) || slotHeight <= 0) {
+      console.warn(
+        "Cannot start resize: invalid slotHeight value:",
+        slotHeight
+      );
+      return;
+    }
+
+    console.log("Starting resize with values:", {
+      appointmentTitle: appointment.title,
+      startY,
+      slotHeight,
+      originalEndTime: appointment.endTime,
+    });
+
     this.resizeState.set({
       isResizing: true,
       appointment,
@@ -65,14 +91,98 @@ export class AppointmentResizeService {
       return state.newEndTime;
     }
 
+    // Validate input parameters
+    if (!isFinite(currentY) || isNaN(currentY)) {
+      console.warn("Invalid currentY value:", currentY);
+      return state.newEndTime;
+    }
+
+    if (!isFinite(state.startY) || isNaN(state.startY)) {
+      console.warn("Invalid startY value:", state.startY);
+      return state.newEndTime;
+    }
+
+    if (
+      !isFinite(state.slotHeight) ||
+      isNaN(state.slotHeight) ||
+      state.slotHeight <= 0
+    ) {
+      console.warn("Invalid slotHeight value:", state.slotHeight);
+      return state.newEndTime;
+    }
+
+    // Additional bounds checking for reasonable viewport coordinates
+    if (currentY < -10000 || currentY > 10000) {
+      console.warn("currentY is outside reasonable viewport bounds:", currentY);
+      return state.newEndTime;
+    }
+
+    if (state.startY < -10000 || state.startY > 10000) {
+      console.warn(
+        "startY is outside reasonable viewport bounds:",
+        state.startY
+      );
+      return state.newEndTime;
+    }
+
     const delta = currentY - state.startY;
+
+    // Add reasonable bounds to prevent extreme values
+    const maxDelta = state.slotHeight * 48; // Maximum 24 hours (48 slots of 30 minutes)
+    const minDelta = state.slotHeight * -48; // Minimum -24 hours
+
+    if (delta > maxDelta || delta < minDelta) {
+      console.warn("Delta out of reasonable bounds:", {
+        delta,
+        currentY,
+        startY: state.startY,
+        maxDelta,
+        minDelta,
+      });
+      return state.newEndTime;
+    }
+
     const slotIncrements = Math.round(delta / state.slotHeight);
+
+    // Additional validation on slotIncrements
+    if (
+      !isFinite(slotIncrements) ||
+      isNaN(slotIncrements) ||
+      Math.abs(slotIncrements) > 48
+    ) {
+      console.warn("Invalid slotIncrements calculated:", {
+        slotIncrements,
+        delta,
+        slotHeight: state.slotHeight,
+      });
+      return state.newEndTime;
+    }
 
     // Calculate new end time
     const originalEnd = new Date(state.originalEndTime);
-    const newEnd = new Date(
-      originalEnd.getTime() + slotIncrements * 30 * 60 * 1000
-    );
+    const newEndTime = originalEnd.getTime() + slotIncrements * 30 * 60 * 1000;
+
+    // Validate that the calculated time is valid
+    if (isNaN(newEndTime) || newEndTime < 0) {
+      console.warn("Invalid time calculated during resize:", {
+        originalEnd: state.originalEndTime,
+        slotIncrements,
+        newEndTime,
+      });
+      return state.newEndTime;
+    }
+
+    const newEnd = new Date(newEndTime);
+
+    // Additional validation to ensure the date is valid
+    if (isNaN(newEnd.getTime())) {
+      console.warn("Invalid date created during resize:", {
+        originalEnd: state.originalEndTime,
+        slotIncrements,
+        newEndTime,
+      });
+      return state.newEndTime;
+    }
 
     // Validate that end time is after start time
     const startTime = new Date(state.appointment.startTime);
@@ -161,6 +271,12 @@ export class AppointmentResizeService {
           return state.newEndTime;
         }
       }
+    }
+
+    // Final validation before converting to ISO string
+    if (isNaN(newEnd.getTime())) {
+      console.warn("Final date validation failed before toISOString:", newEnd);
+      return state.newEndTime;
     }
 
     const newEndTimeStr = newEnd.toISOString();
