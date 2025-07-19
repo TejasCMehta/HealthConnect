@@ -84,6 +84,8 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
     newEndTime: string;
     newDoctorId: number;
     isValidTarget: boolean;
+    currentX: number;
+    currentY: number;
   }>();
   public dragComplete = output<{
     appointment: Appointment;
@@ -664,6 +666,8 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
         newEndTime: this.appointment().endTime,
         newDoctorId: this.appointment().doctorId,
         isValidTarget: false,
+        currentX: event.clientX,
+        currentY: event.clientY,
       });
 
       // Update floating preview for invalid position
@@ -690,6 +694,8 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
       newEndTime: result.newEndTime,
       newDoctorId: result.newDoctorId,
       isValidTarget: result.isValidTarget,
+      currentX: event.clientX,
+      currentY: event.clientY,
     });
 
     // Update floating preview

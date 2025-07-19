@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "ng serve",
     "build": "ng build",
-    "lint": "ng lint"
+    "build:prod": "ng build --configuration production",
+    "lint": "ng lint",
+    "heroku-postbuild": "ng build --configuration production"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +29,7 @@
     "autoprefixer": "^10.4.21",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
+    "express": "^4.21.2",
     "json-server": "^1.0.0-beta.3",
     "jsonwebtoken": "^9.0.2",
     "postcss": "^8.5.6",

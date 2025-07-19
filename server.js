@@ -58,6 +58,15 @@ function isAuthenticated(req, res, next) {
   }
 }
 
+// Health check endpoint for Render
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    service: "HealthConnect Clinic API",
+  });
+});
+
 // Login endpoint
 app.post("/auth/login", (req, res) => {
   const { username, password } = req.body;
@@ -270,6 +279,19 @@ app.delete("/api/:resource/:id", (req, res) => {
   saveDb();
 
   res.json({ success: true });
+});
+
+// Serve static files from Angular build
+app.use(express.static(path.join(__dirname, "dist/clinic-portal")));
+
+// Handle Angular routing - serve index.html for any non-API routes
+app.get("*", (req, res) => {
+  // Skip API routes
+  if (req.path.startsWith("/api/") || req.path.startsWith("/auth/")) {
+    return res.status(404).json({ error: "API endpoint not found" });
+  }
+
+  res.sendFile(path.join(__dirname, "dist/clinic-portal/index.html"));
 });
 
 const PORT = process.env.PORT || 8000;

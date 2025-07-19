@@ -550,6 +550,8 @@ export class DayViewComponent implements OnInit, OnDestroy {
     newEndTime: string;
     newDoctorId: number;
     isValidTarget: boolean;
+    currentX: number;
+    currentY: number;
   }): void {
     // Snap new start time to nearest 30-minute slot and validate
     let newStart = new Date(event.newStartTime);
@@ -577,24 +579,14 @@ export class DayViewComponent implements OnInit, OnDestroy {
     // Use the real mouse coordinates from the drag event for accurate slot calculation
     const gridContainer = this.gridContainer?.nativeElement || undefined;
     const doctors = this.doctors ? this.doctors() : undefined;
-    // event should include currentX and currentY (mouse position relative to grid)
-    // If not present, you may need to update the drag event emitter in the appointment card
-    if (
-      typeof (event as any).currentX === "number" &&
-      typeof (event as any).currentY === "number"
-    ) {
-      this.dragDropService.updateDrag(
-        (event as any).currentX,
-        (event as any).currentY,
-        gridContainer,
-        doctors
-      );
-    } else {
-      // fallback: do not update if coordinates are missing
-      console.warn(
-        "Drag event missing currentX/currentY, cannot update drag position accurately."
-      );
-    }
+
+    // Now we have currentX and currentY coordinates from the event
+    this.dragDropService.updateDrag(
+      event.currentX,
+      event.currentY,
+      gridContainer,
+      doctors
+    );
   }
 
   /**
