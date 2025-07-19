@@ -248,6 +248,63 @@ export class CalendarService {
   }
 
   /**
+   * Check if a time slot is during lunch break
+   */
+  isLunchBreak(date: Date, timeSlot: string): boolean {
+    const settings = this.settingsSignal();
+    if (!settings) return false;
+
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const dayName = dayNames[date.getDay()];
+    const dayWorkingHours = (settings.workingHours as any)[dayName];
+
+    // Check if day is enabled
+    if (!dayWorkingHours || !dayWorkingHours.enabled) {
+      return false;
+    }
+
+    // Check global lunch break first
+    const globalLunchBreak = (settings.workingHours as any).globalLunchBreak;
+    if (globalLunchBreak?.enabled && globalLunchBreak.applyToAllDays) {
+      // If day has override and override is enabled, use day-specific settings
+      if (
+        dayWorkingHours.lunchBreak?.overrideGlobal &&
+        globalLunchBreak.allowExceptions
+      ) {
+        if (dayWorkingHours.lunchBreak?.enabled) {
+          const lunchStart = dayWorkingHours.lunchBreak.start;
+          const lunchEnd = dayWorkingHours.lunchBreak.end;
+          return timeSlot >= lunchStart && timeSlot < lunchEnd;
+        }
+        return false;
+      } else {
+        // Use global lunch break settings
+        const lunchStart = globalLunchBreak.start;
+        const lunchEnd = globalLunchBreak.end;
+        return timeSlot >= lunchStart && timeSlot < lunchEnd;
+      }
+    }
+
+    // Fall back to day-specific lunch break if no global settings
+    if (!dayWorkingHours.lunchBreak?.enabled) {
+      return false;
+    }
+
+    const lunchStart = dayWorkingHours.lunchBreak.start;
+    const lunchEnd = dayWorkingHours.lunchBreak.end;
+
+    return timeSlot >= lunchStart && timeSlot < lunchEnd;
+  }
+
+  /**
    * Get holiday details for a specific date
    */
   getHolidayDetails(date: Date): { title: string; recurring: boolean } | null {

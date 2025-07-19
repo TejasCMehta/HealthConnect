@@ -470,8 +470,8 @@
       "description": "",
       "patientId": 1,
       "doctorId": 2,
-      "startTime": "2025-07-22T06:30:00.000Z",
-      "endTime": "2025-07-22T07:00:00.000Z",
+      "startTime": "2025-07-23T07:30:00.000Z",
+      "endTime": "2025-07-23T08:00:00.000Z",
       "status": "scheduled",
       "patient": {
         "id": 1,
@@ -489,6 +489,16 @@
         "phone": "+1234567891",
         "color": "#8b5cf6"
       }
+    },
+    {
+      "id": 1752904177095,
+      "title": "Alice Johnson1 - Dr. John Smith",
+      "description": "",
+      "patientId": 1,
+      "doctorId": 1,
+      "startTime": "2025-07-25T06:30:00.000Z",
+      "endTime": "2025-07-25T07:30:00.000Z",
+      "status": "scheduled"
     }
   ],
   "settings": {
@@ -508,37 +518,80 @@
       "monday": {
         "start": "08:00",
         "end": "18:00",
-        "enabled": true
+        "enabled": true,
+        "lunchBreak": {
+          "enabled": false,
+          "start": "12:00",
+          "end": "13:00"
+        }
       },
       "tuesday": {
         "start": "08:00",
         "end": "18:00",
-        "enabled": true
+        "enabled": true,
+        "lunchBreak": {
+          "enabled": false,
+          "start": "12:00",
+          "end": "13:00"
+        }
       },
       "wednesday": {
         "start": "08:00",
         "end": "18:00",
-        "enabled": true
+        "enabled": true,
+        "lunchBreak": {
+          "enabled": false,
+          "start": "12:00",
+          "end": "13:00"
+        }
       },
       "thursday": {
         "start": "08:00",
         "end": "18:00",
-        "enabled": true
+        "enabled": true,
+        "lunchBreak": {
+          "enabled": false,
+          "start": "12:00",
+          "end": "13:00"
+        }
       },
       "friday": {
         "start": "10:00",
         "end": "16:00",
-        "enabled": true
+        "enabled": true,
+        "lunchBreak": {
+          "enabled": true,
+          "start": "11:30",
+          "end": "12:30"
+        }
       },
       "saturday": {
         "start": "09:00",
         "end": "16:00",
-        "enabled": false
+        "enabled": false,
+        "lunchBreak": {
+          "enabled": false,
+          "start": "12:00",
+          "end": "13:00"
+        }
       },
       "sunday": {
         "start": "10:00",
         "end": "14:00",
-        "enabled": false
+        "enabled": false,
+        "lunchBreak": {
+          "enabled": false,
+          "start": "12:00",
+          "end": "13:00"
+        }
+      },
+      "globalLunchBreak": {
+        "enabled": true,
+        "start": "12:00",
+        "end": "13:00",
+        "applyToAllDays": true,
+        "enforceStrictly": true,
+        "allowExceptions": false
       }
     },
     "holidays": [
@@ -576,7 +629,7 @@
         "confirmed": "blue",
         "cancelled": "red",
         "completed": "emerald",
-        "no-show": "#f59e0b"
+        "no-show": "gray"
       }
     },
     "filters": {

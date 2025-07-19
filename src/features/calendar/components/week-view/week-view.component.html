@@ -132,7 +132,9 @@
             "
             [title]="
               isRestrictedTimeSlot(day, timeSlot)
-                ? !isWorkingDay(day)
+                ? isLunchBreak(day, timeSlot)
+                  ? '🍽️ Lunch Break - No appointments allowed during lunch time'
+                  : !isWorkingDay(day)
                   ? '🚫 Clinic closed - Weekend appointments are not allowed. Please schedule during working days.'
                   : isHoliday(day)
                   ? '🎉 Clinic closed - No appointments on holidays. Please choose a working day.'
@@ -144,8 +146,11 @@
             <i
               class="ri-add-line text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
             ></i>
+            } @else if (isLunchBreak(day, timeSlot)) {
+            <!-- Lunch break indicator -->
+            <app-lunch-break></app-lunch-break>
             } @else {
-            <!-- Show 🚫 icon for all restricted time slots (consistent with month view) -->
+            <!-- Show 🚫 icon for all other restricted time slots -->
             <i
               class="ri-forbid-line text-gray-400 dark:text-gray-500 text-lg opacity-60"
               title="Restricted - No appointments allowed"

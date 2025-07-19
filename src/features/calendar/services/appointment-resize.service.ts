@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from "@angular/core";
 import { Observable } from "rxjs";
 import { Appointment } from "../../../shared/models/appointment.model";
 import { AppointmentService } from "./appointment.service";
+import { CalendarService } from "./calendar.service";
 import { ToasterService } from "../../../shared/services/toaster.service";
 
 export interface ResizeState {
@@ -23,6 +24,7 @@ export interface ResizeValidationResult {
 })
 export class AppointmentResizeService {
   private appointmentService = inject(AppointmentService);
+  private calendarService = inject(CalendarService);
   private toasterService = inject(ToasterService);
 
   private resizeState = signal<ResizeState>({
@@ -142,6 +144,21 @@ export class AppointmentResizeService {
       return {
         isValid: false,
         errorMessage: "Cannot schedule appointments on weekends",
+      };
+    }
+
+    // Check if new end time conflicts with lunch break
+    const endTimeString = `${newEndTime
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${newEndTime
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
+    if (this.calendarService.isLunchBreak(newEndTime, endTimeString)) {
+      return {
+        isValid: false,
+        errorMessage: "Cannot extend appointment into lunch break time",
       };
     }
 

@@ -3,6 +3,7 @@ import { Observable, of } from "rxjs";
 import { Appointment } from "../../../shared/models/appointment.model";
 import { Doctor } from "../../../shared/models/doctor.model";
 import { AppointmentService } from "./appointment.service";
+import { CalendarService } from "./calendar.service";
 import { ToasterService } from "../../../shared/services/toaster.service";
 import {
   SettingsService,
@@ -50,6 +51,7 @@ export interface DragDropConfirmation {
 })
 export class AppointmentDragDropService {
   private appointmentService = inject(AppointmentService);
+  private calendarService = inject(CalendarService);
   private toasterService = inject(ToasterService);
   private settingsService = inject(SettingsService);
 
@@ -416,6 +418,26 @@ export class AppointmentDragDropService {
           };
         }
       }
+    }
+
+    // Check if appointment conflicts with lunch break
+    const startTimeString = `${startTime
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${startTime.getMinutes().toString().padStart(2, "0")}`;
+    const endTimeString = `${endTime
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${endTime.getMinutes().toString().padStart(2, "0")}`;
+
+    if (
+      this.calendarService.isLunchBreak(startTime, startTimeString) ||
+      this.calendarService.isLunchBreak(endTime, endTimeString)
+    ) {
+      return {
+        isValid: false,
+        errorMessage: "Cannot schedule appointments during lunch break",
+      };
     }
 
     // Check if it's a working day based on settings

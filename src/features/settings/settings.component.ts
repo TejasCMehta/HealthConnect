@@ -95,13 +95,93 @@ export class SettingsComponent implements OnInit {
   };
 
   workingHoursForm: Record<string, DayWorkingHours> = {
-    monday: { start: "09:00", end: "17:00", enabled: true },
-    tuesday: { start: "09:00", end: "17:00", enabled: true },
-    wednesday: { start: "09:00", end: "17:00", enabled: true },
-    thursday: { start: "09:00", end: "17:00", enabled: true },
-    friday: { start: "09:00", end: "17:00", enabled: true },
-    saturday: { start: "09:00", end: "13:00", enabled: true },
-    sunday: { start: "10:00", end: "14:00", enabled: false },
+    monday: {
+      start: "09:00",
+      end: "17:00",
+      enabled: true,
+      lunchBreak: {
+        enabled: false,
+        start: "12:00",
+        end: "13:00",
+        overrideGlobal: false,
+      },
+    },
+    tuesday: {
+      start: "09:00",
+      end: "17:00",
+      enabled: true,
+      lunchBreak: {
+        enabled: false,
+        start: "12:00",
+        end: "13:00",
+        overrideGlobal: false,
+      },
+    },
+    wednesday: {
+      start: "09:00",
+      end: "17:00",
+      enabled: true,
+      lunchBreak: {
+        enabled: false,
+        start: "12:00",
+        end: "13:00",
+        overrideGlobal: false,
+      },
+    },
+    thursday: {
+      start: "09:00",
+      end: "17:00",
+      enabled: true,
+      lunchBreak: {
+        enabled: false,
+        start: "12:00",
+        end: "13:00",
+        overrideGlobal: false,
+      },
+    },
+    friday: {
+      start: "09:00",
+      end: "17:00",
+      enabled: true,
+      lunchBreak: {
+        enabled: false,
+        start: "12:00",
+        end: "13:00",
+        overrideGlobal: false,
+      },
+    },
+    saturday: {
+      start: "09:00",
+      end: "13:00",
+      enabled: true,
+      lunchBreak: {
+        enabled: false,
+        start: "12:00",
+        end: "13:00",
+        overrideGlobal: false,
+      },
+    },
+    sunday: {
+      start: "10:00",
+      end: "14:00",
+      enabled: false,
+      lunchBreak: {
+        enabled: false,
+        start: "12:00",
+        end: "13:00",
+        overrideGlobal: false,
+      },
+    },
+  };
+
+  // Global lunch break form
+  globalLunchBreakForm = {
+    enabled: false,
+    start: "12:00",
+    end: "13:00",
+    applyToAllDays: true,
+    enforceStrictly: true,
+    allowExceptions: false,
   };
 
   // Appointment settings form
@@ -282,16 +362,77 @@ export class SettingsComponent implements OnInit {
     // Populate clinic form
     this.clinicForm = { ...settings.clinic };
 
+    // Populate global lunch break form
+    if (settings.workingHours.globalLunchBreak) {
+      this.globalLunchBreakForm = { ...settings.workingHours.globalLunchBreak };
+    }
+
     // Populate working hours form
     if (settings.workingHours) {
       this.workingHoursForm = {
-        monday: settings.workingHours.monday,
-        tuesday: settings.workingHours.tuesday,
-        wednesday: settings.workingHours.wednesday,
-        thursday: settings.workingHours.thursday,
-        friday: settings.workingHours.friday,
-        saturday: settings.workingHours.saturday,
-        sunday: settings.workingHours.sunday,
+        monday: {
+          ...settings.workingHours.monday,
+          lunchBreak: settings.workingHours.monday?.lunchBreak || {
+            enabled: false,
+            start: "12:00",
+            end: "13:00",
+            overrideGlobal: false,
+          },
+        },
+        tuesday: {
+          ...settings.workingHours.tuesday,
+          lunchBreak: settings.workingHours.tuesday?.lunchBreak || {
+            enabled: false,
+            start: "12:00",
+            end: "13:00",
+            overrideGlobal: false,
+          },
+        },
+        wednesday: {
+          ...settings.workingHours.wednesday,
+          lunchBreak: settings.workingHours.wednesday?.lunchBreak || {
+            enabled: false,
+            start: "12:00",
+            end: "13:00",
+            overrideGlobal: false,
+          },
+        },
+        thursday: {
+          ...settings.workingHours.thursday,
+          lunchBreak: settings.workingHours.thursday?.lunchBreak || {
+            enabled: false,
+            start: "12:00",
+            end: "13:00",
+            overrideGlobal: false,
+          },
+        },
+        friday: {
+          ...settings.workingHours.friday,
+          lunchBreak: settings.workingHours.friday?.lunchBreak || {
+            enabled: false,
+            start: "12:00",
+            end: "13:00",
+            overrideGlobal: false,
+          },
+        },
+        saturday: {
+          ...settings.workingHours.saturday,
+          lunchBreak: settings.workingHours.saturday?.lunchBreak || {
+            enabled: false,
+            start: "12:00",
+            end: "13:00",
+            overrideGlobal: false,
+          },
+        },
+        sunday: {
+          ...settings.workingHours.sunday,
+          lunchBreak: settings.workingHours.sunday?.lunchBreak || {
+            enabled: false,
+            start: "12:00",
+            end: "13:00",
+            overrideGlobal: false,
+          },
+        },
       };
     }
 
@@ -369,7 +510,73 @@ export class SettingsComponent implements OnInit {
     this.workingHoursForm[day].enabled = !this.workingHoursForm[day].enabled;
   }
 
+  // Global lunch break methods
+  toggleGlobalLunchBreak() {
+    console.log(
+      "toggleGlobalLunchBreak called - current state:",
+      this.globalLunchBreakForm.enabled
+    );
+    this.globalLunchBreakForm.enabled = !this.globalLunchBreakForm.enabled;
+    console.log(
+      "toggleGlobalLunchBreak - new state:",
+      this.globalLunchBreakForm.enabled
+    );
+
+    // If enabling global lunch break and applyToAllDays is true, update all days
+    if (
+      this.globalLunchBreakForm.enabled &&
+      this.globalLunchBreakForm.applyToAllDays
+    ) {
+      console.log("Applying global lunch break to all days");
+      this.applyGlobalLunchBreakToAllDays();
+    }
+  }
+
+  applyGlobalLunchBreakToAllDays() {
+    Object.keys(this.workingHoursForm).forEach((day) => {
+      if (this.workingHoursForm[day].enabled) {
+        this.workingHoursForm[day].lunchBreak = {
+          enabled: this.globalLunchBreakForm.enabled,
+          start: this.globalLunchBreakForm.start,
+          end: this.globalLunchBreakForm.end,
+          overrideGlobal: false,
+        };
+      }
+    });
+  }
+
+  toggleApplyToAllDays() {
+    this.globalLunchBreakForm.applyToAllDays =
+      !this.globalLunchBreakForm.applyToAllDays;
+
+    if (
+      this.globalLunchBreakForm.applyToAllDays &&
+      this.globalLunchBreakForm.enabled
+    ) {
+      this.applyGlobalLunchBreakToAllDays();
+    }
+  }
+
+  toggleDayLunchBreakOverride(day: string) {
+    if (this.workingHoursForm[day].lunchBreak) {
+      this.workingHoursForm[day].lunchBreak!.overrideGlobal =
+        !this.workingHoursForm[day].lunchBreak!.overrideGlobal;
+    }
+  }
+
+  isDayUsingGlobalLunchBreak(day: string): boolean {
+    return (
+      this.globalLunchBreakForm.enabled &&
+      this.globalLunchBreakForm.applyToAllDays &&
+      !this.workingHoursForm[day].lunchBreak?.overrideGlobal
+    );
+  }
+
   async onWorkingHoursSubmit() {
+    console.log("onWorkingHoursSubmit called");
+    console.log("Current globalLunchBreakForm:", this.globalLunchBreakForm);
+    console.log("Current workingHoursForm:", this.workingHoursForm);
+
     this.isSaving.set(true);
     this.error.set(null);
 
@@ -378,25 +585,29 @@ export class SettingsComponent implements OnInit {
         ...this.settings(),
         workingHours: {
           ...this.settings().workingHours,
+          globalLunchBreak: this.globalLunchBreakForm,
           ...this.workingHoursForm,
         },
       };
 
+      console.log("Updated settings to save:", updatedSettings);
+
       this.settingsService.updateSettings(updatedSettings).subscribe({
         next: (settings) => {
+          console.log("Settings saved successfully:", settings);
           this.settings.set(settings);
           this.showSuccessMessage("Working hours updated successfully");
           this.isSaving.set(false);
         },
         error: (error) => {
-          this.error.set("Failed to update working hours");
           console.error("Error updating working hours:", error);
+          this.error.set("Failed to update working hours");
           this.isSaving.set(false);
         },
       });
     } catch (error) {
-      this.error.set("Failed to update working hours");
       console.error("Error updating working hours:", error);
+      this.error.set("Failed to update working hours");
       this.isSaving.set(false);
     }
   }
@@ -634,17 +845,30 @@ export class SettingsComponent implements OnInit {
       this.isSaving.set(true);
       console.log("Saving appointment settings:", this.appointmentSettingsForm);
 
-      // Simulate async save operation
-      setTimeout(() => {
-        // Here you would typically call a service to persist the settings
-        // this.settingsService.saveAppointmentSettings(this.appointmentSettingsForm);
+      // Update settings with new appointment settings
+      const updatedSettings = {
+        ...this.settings(),
+        appointments: this.appointmentSettingsForm,
+      };
 
-        this.isSaving.set(false);
-        this.toasterService.showSuccess(
-          "Settings Saved",
-          "Appointment settings saved successfully!"
-        );
-      }, 1000);
+      this.settingsService.updateSettings(updatedSettings).subscribe({
+        next: (settings) => {
+          this.settings.set(settings);
+          this.isSaving.set(false);
+          this.toasterService.showSuccess(
+            "Settings Saved",
+            "Appointment settings saved successfully!"
+          );
+        },
+        error: (error) => {
+          console.error("Error saving appointment settings:", error);
+          this.isSaving.set(false);
+          this.toasterService.showError(
+            "Save Failed",
+            "Failed to save appointment settings. Please try again."
+          );
+        },
+      });
     }
   }
 

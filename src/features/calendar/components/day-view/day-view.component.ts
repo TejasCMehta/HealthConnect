@@ -15,6 +15,7 @@ import { Doctor } from "../../../../shared/models/doctor.model";
 import { AppointmentCardComponent } from "../appointment-card/appointment-card.component";
 import { ResizeConfirmationModalComponent } from "../resize-confirmation-modal/resize-confirmation-modal.component";
 import { DragDropConfirmationComponent } from "../drag-drop-confirmation/drag-drop-confirmation.component";
+import { LunchBreakComponent } from "../lunch-break/lunch-break.component";
 import { CalendarService } from "../../services/calendar.service";
 import { AppointmentResizeService } from "../../services/appointment-resize.service";
 import {
@@ -33,6 +34,7 @@ import { Settings } from "../../../settings/services/settings.service";
     AppointmentCardComponent,
     ResizeConfirmationModalComponent,
     DragDropConfirmationComponent,
+    LunchBreakComponent,
   ],
   templateUrl: "./day-view.component.html",
   styleUrl: "./day-view.component.scss",
@@ -351,8 +353,16 @@ export class DayViewComponent implements OnInit, OnDestroy {
     return (
       this.isPastTimeSlot(timeSlot) ||
       !this.isWorkingDay(date) ||
-      this.isHoliday(date)
+      this.isHoliday(date) ||
+      this.isLunchBreak(date, timeSlot)
     );
+  }
+
+  /**
+   * Check if time slot is during lunch break
+   */
+  isLunchBreak(date: Date, timeSlot: string): boolean {
+    return this.calendarService.isLunchBreak(date, timeSlot);
   }
 
   onAppointmentClick(appointment: Appointment, event?: MouseEvent): void {

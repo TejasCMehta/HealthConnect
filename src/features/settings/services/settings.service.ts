@@ -11,6 +11,12 @@ export interface DayWorkingHours {
   start: string;
   end: string;
   enabled: boolean;
+  lunchBreak?: {
+    enabled: boolean;
+    start: string;
+    end: string;
+    overrideGlobal?: boolean;
+  };
 }
 
 export interface WorkingDays {
@@ -64,6 +70,14 @@ export interface Settings {
   clinic: ClinicInfo;
   workingHours: {
     default: WorkingHours;
+    globalLunchBreak?: {
+      enabled: boolean;
+      start: string;
+      end: string;
+      applyToAllDays: boolean;
+      enforceStrictly: boolean;
+      allowExceptions: boolean;
+    };
     monday: DayWorkingHours;
     tuesday: DayWorkingHours;
     wednesday: DayWorkingHours;

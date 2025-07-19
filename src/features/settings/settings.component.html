@@ -215,6 +215,209 @@
         </div>
       </div>
       <form (ngSubmit)="onWorkingHoursSubmit()" class="p-6">
+        <!-- Global Lunch Break Configuration -->
+        <div
+          class="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-6 mb-6"
+        >
+          <!-- Header Section -->
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+              <div
+                class="flex items-center justify-center w-12 h-12 bg-orange-100 dark:bg-orange-800 rounded-full"
+              >
+                <span class="text-2xl">🍽️</span>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold text-gray-900 dark:text-white">
+                  Global Lunch Break
+                </h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Configure clinic-wide lunch break settings
+                </p>
+              </div>
+            </div>
+
+            <!-- Toggle Switch -->
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                [(ngModel)]="globalLunchBreakForm.enabled"
+                name="globalLunchBreakEnabled"
+                class="sr-only peer"
+              />
+              <div
+                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-600"
+              ></div>
+              <span
+                class="ml-3 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                @if (globalLunchBreakForm.enabled) {
+                <span class="text-orange-600 dark:text-orange-400">● ON</span>
+                } @else {
+                <span class="text-gray-400">○ OFF</span>
+                }
+              </span>
+            </label>
+          </div>
+
+          <!-- Preview Section -->
+          @if (globalLunchBreakForm.enabled) {
+          <div class="mb-6">
+            <div
+              class="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-dashed border-orange-300 dark:border-orange-600"
+            >
+              <div class="flex items-center justify-center">
+                <div class="text-center">
+                  <div
+                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-400 to-yellow-400 text-white rounded-full font-semibold shadow-lg"
+                  >
+                    <span class="text-lg mr-2">🍽️</span>
+                    <span class="text-sm uppercase tracking-wide"
+                      >BREAK TIME</span
+                    >
+                  </div>
+                  <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    {{ globalLunchBreakForm.start }} -
+                    {{ globalLunchBreakForm.end }}
+                  </div>
+                  <div
+                    class="mt-1 text-xs text-orange-600 dark:text-orange-400"
+                  >
+                    Applied to all working days
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          } @if (globalLunchBreakForm.enabled) {
+          <div class="space-y-6">
+            <!-- Time Configuration -->
+            <div
+              class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+            >
+              <h5
+                class="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center"
+              >
+                <span class="text-orange-500 mr-2">⏰</span>
+                Break Time Schedule
+              </h5>
+              <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                  <label
+                    class="text-sm text-gray-700 dark:text-gray-300 font-medium"
+                    >From:</label
+                  >
+                  <select
+                    [(ngModel)]="globalLunchBreakForm.start"
+                    name="globalLunchStart"
+                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-medium"
+                  >
+                    @for (time of timeOptions; track time) {
+                    <option [value]="time">{{ time }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-gray-400 mx-2">→</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <label
+                    class="text-sm text-gray-700 dark:text-gray-300 font-medium"
+                    >To:</label
+                  >
+                  <select
+                    [(ngModel)]="globalLunchBreakForm.end"
+                    name="globalLunchEnd"
+                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-medium"
+                  >
+                    @for (time of timeOptions; track time) {
+                    <option [value]="time">{{ time }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Options -->
+            <div
+              class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+            >
+              <h5
+                class="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center"
+              >
+                <span class="text-blue-500 mr-2">⚙️</span>
+                Break Settings
+              </h5>
+              <div class="space-y-3">
+                <label
+                  class="flex items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="globalLunchBreakForm.applyToAllDays"
+                    (change)="toggleApplyToAllDays()"
+                    name="applyToAllDays"
+                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-3"
+                  />
+                  <div class="flex items-center">
+                    <span
+                      class="text-sm text-gray-700 dark:text-gray-300 font-medium"
+                      >Apply to all working days</span
+                    >
+                    <span
+                      class="ml-2 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded"
+                      >🌍 Global</span
+                    >
+                  </div>
+                </label>
+
+                <label
+                  class="flex items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="globalLunchBreakForm.enforceStrictly"
+                    name="enforceStrictly"
+                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-3"
+                  />
+                  <div class="flex items-center">
+                    <span
+                      class="text-sm text-gray-700 dark:text-gray-300 font-medium"
+                      >Enforce strictly</span
+                    >
+                    <span
+                      class="ml-2 text-xs text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded"
+                      >🚫 No appointments</span
+                    >
+                  </div>
+                </label>
+
+                <label
+                  class="flex items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="globalLunchBreakForm.allowExceptions"
+                    name="allowExceptions"
+                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-3"
+                  />
+                  <div class="flex items-center">
+                    <span
+                      class="text-sm text-gray-700 dark:text-gray-300 font-medium"
+                      >Allow individual day overrides</span
+                    >
+                    <span
+                      class="ml-2 text-xs text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded"
+                      >🔧 Flexible</span
+                    >
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+
         <div class="space-y-6">
           @for (day of workingDays; track day) {
           <div
@@ -265,6 +468,92 @@
                   }
                 </select>
               </div>
+            </div>
+
+            <!-- Lunch Break Configuration -->
+            <div class="mt-3 pl-8">
+              <!-- Show global lunch break status -->
+              @if (isDayUsingGlobalLunchBreak(day)) {
+              <div
+                class="mb-2 p-3 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200 dark:border-orange-700 rounded-lg"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <div
+                      class="inline-flex items-center px-2 py-1 bg-gradient-to-r from-orange-400 to-yellow-400 text-white rounded-full text-xs font-semibold"
+                    >
+                      <span class="mr-1">🍽️</span>
+                      <span>BREAK TIME</span>
+                    </div>
+                    <span class="text-xs text-orange-700 dark:text-orange-300">
+                      {{ globalLunchBreakForm.start }} -
+                      {{ globalLunchBreakForm.end }}
+                    </span>
+                    <span
+                      class="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded"
+                      >🌍 Global</span
+                    >
+                  </div>
+                  @if (globalLunchBreakForm.allowExceptions) {
+                  <button
+                    type="button"
+                    (click)="toggleDayLunchBreakOverride(day)"
+                    class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-200 bg-white dark:bg-gray-800 px-2 py-1 rounded border border-orange-200 dark:border-orange-700 hover:border-orange-300 dark:hover:border-orange-600 transition-colors"
+                  >
+                    🔧 Override for {{ day }}
+                  </button>
+                  }
+                </div>
+              </div>
+              } @else {
+              <div class="flex items-center space-x-4">
+                <label class="flex items-center">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="workingHoursForm[day].lunchBreak!.enabled"
+                    [name]="'lunch-enabled-' + day"
+                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-2"
+                  />
+                  <span
+                    class="text-sm text-gray-700 dark:text-gray-300 flex items-center"
+                  >
+                    <span class="flex items-center">
+                      🍽️ Lunch Break @if (globalLunchBreakForm.enabled &&
+                      globalLunchBreakForm.applyToAllDays) {
+                      <span
+                        class="ml-2 text-xs text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded"
+                        >🔧 Custom Override</span
+                      >
+                      }
+                    </span>
+                  </span>
+                </label>
+
+                @if (workingHoursForm[day].lunchBreak!.enabled) {
+                <div class="flex items-center space-x-2">
+                  <select
+                    [(ngModel)]="workingHoursForm[day].lunchBreak!.start"
+                    [name]="'lunch-start-' + day"
+                    class="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
+                  >
+                    @for (time of timeOptions; track time) {
+                    <option [value]="time">{{ time }}</option>
+                    }
+                  </select>
+                  <span class="text-xs text-gray-400">→</span>
+                  <select
+                    [(ngModel)]="workingHoursForm[day].lunchBreak!.end"
+                    [name]="'lunch-end-' + day"
+                    class="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
+                  >
+                    @for (time of timeOptions; track time) {
+                    <option [value]="time">{{ time }}</option>
+                    }
+                  </select>
+                </div>
+                }
+              </div>
+              }
             </div>
             } @else {
             <span class="text-sm text-gray-400 dark:text-gray-500">Closed</span>

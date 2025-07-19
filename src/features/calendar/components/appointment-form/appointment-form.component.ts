@@ -12,6 +12,7 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Appointment } from "../../../../shared/models/appointment.model";
 import { AppointmentService } from "../../services/appointment.service";
+import { CalendarService } from "../../services/calendar.service";
 import { PatientService } from "../../../patients/services/patient.service";
 import { DoctorService } from "../../../doctors/services/doctor.service";
 import {
@@ -32,6 +33,7 @@ import { FieldErrorComponent } from "../../../../shared/components/field-error/f
 })
 export class AppointmentFormComponent implements OnInit {
   private appointmentService = inject(AppointmentService);
+  private calendarService = inject(CalendarService);
   private patientService = inject(PatientService);
   private doctorService = inject(DoctorService);
   private settingsService = inject(SettingsService);
@@ -334,6 +336,7 @@ export class AppointmentFormComponent implements OnInit {
     }
 
     const slots: string[] = [];
+    const appointmentDate = this.form().appointmentDate;
 
     const [startHour, startMinute] = workingHours.start.split(":").map(Number);
     const [endHour, endMinute] = workingHours.end.split(":").map(Number);
@@ -352,11 +355,23 @@ export class AppointmentFormComponent implements OnInit {
       const timeString = `${hour.toString().padStart(2, "0")}:${minute
         .toString()
         .padStart(2, "0")}`;
-      slots.push(timeString);
+
+      // Filter out lunch break times if appointment date is set
+      if (appointmentDate) {
+        const appointmentDateObj = new Date(appointmentDate);
+        if (
+          !this.calendarService.isLunchBreak(appointmentDateObj, timeString)
+        ) {
+          slots.push(timeString);
+        }
+      } else {
+        // If no date is set yet, include all time slots
+        slots.push(timeString);
+      }
     }
 
     this.availableTimeSlots.set(slots);
-    console.log("Generated time slots:", slots);
+    console.log("Generated time slots (excluding lunch break):", slots);
   }
 
   private generateEndTimeSlots(
@@ -386,6 +401,7 @@ export class AppointmentFormComponent implements OnInit {
     const endTotalMinutes = endHour * 60 + endMinute;
 
     const slots: string[] = [];
+    const appointmentDate = this.form().appointmentDate;
 
     // Generate slots starting from 30 minutes after start time
     for (
@@ -398,7 +414,19 @@ export class AppointmentFormComponent implements OnInit {
       const timeString = `${hour.toString().padStart(2, "0")}:${minute
         .toString()
         .padStart(2, "0")}`;
-      slots.push(timeString);
+
+      // Filter out lunch break times if appointment date is set
+      if (appointmentDate) {
+        const appointmentDateObj = new Date(appointmentDate);
+        if (
+          !this.calendarService.isLunchBreak(appointmentDateObj, timeString)
+        ) {
+          slots.push(timeString);
+        }
+      } else {
+        // If no date is set yet, include all time slots
+        slots.push(timeString);
+      }
     }
 
     // If we have an existing end time (editing appointment), ensure it's included
@@ -756,6 +784,61 @@ export class AppointmentFormComponent implements OnInit {
       }
     }
 
+    // Validate lunch break restrictions
+    const isStartTimeLunchBreak = this.calendarService.isLunchBreak(
+      appointmentDate,
+      form.startTime
+    );
+    const isEndTimeLunchBreak = this.calendarService.isLunchBreak(
+      appointmentDate,
+      form.endTime
+    );
+
+    if (isStartTimeLunchBreak) {
+      this.validationService.setFieldError(
+        "startTime",
+        "🍽️ Cannot schedule appointments during lunch break time"
+      );
+      isValid = false;
+    }
+
+    if (isEndTimeLunchBreak) {
+      this.validationService.setFieldError(
+        "endTime",
+        "🍽️ Cannot schedule appointments during lunch break time"
+      );
+      isValid = false;
+    }
+
+    // Additional check: if appointment spans across lunch break
+    if (!isStartTimeLunchBreak && !isEndTimeLunchBreak) {
+      // Check if any time slot within the appointment duration is a lunch break
+      const startTimeMinutes = startTotalMinutes;
+      const endTimeMinutes = endTotalMinutes;
+
+      // Check every 15-minute interval within the appointment duration
+      for (
+        let minutes = startTimeMinutes;
+        minutes < endTimeMinutes;
+        minutes += 15
+      ) {
+        const checkHour = Math.floor(minutes / 60);
+        const checkMinute = minutes % 60;
+        const timeString = `${checkHour
+          .toString()
+          .padStart(2, "0")}:${checkMinute.toString().padStart(2, "0")}`;
+
+        if (this.calendarService.isLunchBreak(appointmentDate, timeString)) {
+          this.validationService.setFieldError(
+            "endTime",
+            "🍽️ Appointment duration cannot overlap with lunch break time"
+          );
+          isValid = false;
+          break;
+        }
+      }
+    }
+
     // Check for appointment conflicts
     const conflicts = await this.checkAppointmentConflicts(
       form.patientId,
@@ -792,10 +875,35 @@ export class AppointmentFormComponent implements OnInit {
       }
     }
 
+    // Real-time lunch break validation for time fields
+    if (
+      (field === "startTime" || field === "endTime") &&
+      value &&
+      this.form().appointmentDate
+    ) {
+      const appointmentDate = new Date(this.form().appointmentDate);
+      if (this.calendarService.isLunchBreak(appointmentDate, value)) {
+        const fieldDisplayName =
+          field === "startTime" ? "start time" : "end time";
+        this.validationService.setFieldError(
+          field,
+          `🍽️ Cannot schedule ${fieldDisplayName} during lunch break`
+        );
+      }
+    }
+
     // Auto-populate end time when start time is selected
     if (field === "startTime" && value) {
       this.generateEndTimeSlots(value);
       this.autoPopulateEndTime(value);
+    }
+
+    // Regenerate time slots when appointment date changes to apply lunch break filtering
+    if (field === "appointmentDate" && value) {
+      this.generateTimeSlots();
+      if (this.form().startTime) {
+        this.generateEndTimeSlots(this.form().startTime);
+      }
     }
 
     // Clear end time if start time is cleared
