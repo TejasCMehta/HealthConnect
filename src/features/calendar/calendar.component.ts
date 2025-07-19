@@ -365,7 +365,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
     // Calculate initial position with better centering
     let x = rect.left + rect.width / 2;
-    let y = rect.bottom + 12; // Increased gap for better visual separation
+    let y = rect.bottom + 8; // Reduced gap for closer positioning
 
     // Viewport width and height
     const viewportWidth = window.innerWidth;
@@ -389,19 +389,19 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
     // Adjust vertical position with better spacing
     if (y + popoverHeight > viewportHeight - 16) {
-      // Position above the element with more gap
-      y = rect.top - popoverHeight - 12;
+      // Position above the element with smaller gap
+      y = rect.top - popoverHeight - 8;
       placement = "bottom"; // Popover above trigger, pointer points down
 
       // If still doesn't fit, check horizontal placement
       if (y < 16) {
         // Try positioning to the side
         if (rect.right + popoverWidth + 16 < viewportWidth) {
-          x = rect.right + 16;
+          x = rect.right + 12;
           y = Math.max(16, rect.top + rect.height / 2 - popoverHeight / 2);
           placement = "left"; // Popover to the right, pointer points left
         } else if (rect.left - popoverWidth - 16 > 0) {
-          x = rect.left - popoverWidth - 16;
+          x = rect.left - popoverWidth - 12;
           y = Math.max(16, rect.top + rect.height / 2 - popoverHeight / 2);
           placement = "right"; // Popover to the left, pointer points right
         } else {
@@ -411,13 +411,19 @@ export class CalendarComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Add additional offset to bring popover closer based on placement
-    if (placement === "bottom") {
-      // Popover is above the appointment, bring it closer by moving down
-      y = y + 10;
+    // Bring popover much closer to the appointment based on placement
+    if (placement === "top") {
+      // Popover is below the appointment, bring it closer by reducing gap
+      y = rect.bottom + 4;
+    } else if (placement === "bottom") {
+      // Popover is above the appointment, bring it MUCH closer
+      y = rect.top - popoverHeight + 16; // Only leave 16px gap instead of full height
+    } else if (placement === "left") {
+      // Popover is to the right of the appointment, bring it closer
+      x = rect.right + 8;
     } else if (placement === "right") {
-      // Popover is to the left of the appointment, bring it closer by moving right
-      x = x + 50;
+      // Popover is to the left of the appointment, bring it closer
+      x = rect.left - popoverWidth - 8;
     }
 
     // Ensure y is not negative

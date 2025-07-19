@@ -88,10 +88,10 @@ export class AppointmentPopoverComponent implements OnInit, OnChanges {
       display: "block",
     };
 
-    // Triangle arrow dimensions: 24px wide (12px + 12px), 16px tall
-    // For centering: -12px for width, -8px for height
+    // Triangle arrow dimensions: 24px wide (12px + 12px), 12px tall for closer positioning
+    // For centering: -12px for width, -6px for height
     const triangleHalfWidth = 12;
-    const triangleHeight = 16;
+    const triangleHeight = 12; // Reduced from 16px for closer positioning
 
     // Position the triangle arrow to point toward appointment
     switch (placement) {

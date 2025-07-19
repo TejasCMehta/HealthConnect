@@ -52,7 +52,9 @@
         <span
           class="font-medium text-sm text-gray-900 dark:text-white flex-shrink-0"
           [class.text-blue-700]="isResizing()"
+          [class.dark:text-blue-400]="isResizing()"
           [class.text-green-700]="isDragging()"
+          [class.dark:text-green-400]="isDragging()"
         >
           {{ startTime }}
         </span>
@@ -60,13 +62,17 @@
         <span
           class="font-medium text-sm text-gray-900 dark:text-white truncate"
           [class.text-blue-700]="isResizing()"
+          [class.dark:text-blue-400]="isResizing()"
           [class.text-green-700]="isDragging()"
+          [class.dark:text-green-400]="isDragging()"
           [title]="appointment().patient?.name || 'Unknown Patient'"
         >
           {{ appointment().patient?.name || "Unknown Patient" }}
         </span>
         @if (isResizing()) {
-        <span class="ml-1 text-xs font-normal text-blue-500 animate-pulse">
+        <span
+          class="ml-1 text-xs font-normal text-blue-500 dark:text-blue-400 animate-pulse"
+        >
           (resizing...)
         </span>
         } @if (isDragging()) {
@@ -74,8 +80,8 @@
           [class]="
             'ml-1 text-xs font-normal animate-pulse ' +
             (dragPreview() && dragPreview()!.isValidTarget
-              ? 'text-green-500'
-              : 'text-red-500')
+              ? 'text-green-500 dark:text-green-400'
+              : 'text-red-500 dark:text-red-400')
           "
         >
           @if (dragPreview() && dragPreview()!.isValidTarget) { (moving...) }
@@ -103,7 +109,9 @@
         <span
           class="font-medium flex-shrink-0 text-gray-700 dark:text-gray-300"
           [class.text-blue-700]="isResizing()"
+          [class.dark:text-blue-400]="isResizing()"
           [class.text-green-600]="isDragging()"
+          [class.dark:text-green-400]="isDragging()"
           style="line-height: 1.2; font-size: 13px"
         >
           {{ startTime }}
@@ -111,7 +119,9 @@
         <span
           class="truncate text-gray-600 dark:text-gray-400"
           [class.text-blue-700]="isResizing()"
+          [class.dark:text-blue-400]="isResizing()"
           [class.text-green-700]="isDragging()"
+          [class.dark:text-green-400]="isDragging()"
           [title]="appointment().patient?.name || 'Unknown Patient'"
           style="
             max-width: 80px;
@@ -173,11 +183,21 @@
     @if (isResizing()) {
     <div
       [class]="
-        'absolute left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2 py-1 rounded shadow-lg z-50 ' +
-        (compact() ? 'text-xs -bottom-5' : 'text-xs -bottom-6')
+        'absolute left-1/2 transform -translate-x-1/2 px-2 py-1 rounded shadow-lg z-50 whitespace-nowrap ' +
+        (compact() ? 'text-xs -bottom-5' : 'text-xs -bottom-6') +
+        (resizeValidationError()
+          ? ' bg-red-600 text-white'
+          : ' bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-200')
       "
     >
+      @if (resizeValidationError()) {
+      <div class="flex items-center">
+        <i class="ri-error-warning-line mr-1"></i>
+        {{ resizeValidationError() }}
+      </div>
+      } @else {
       {{ endTime }}
+      }
     </div>
     }
   </div>

@@ -83,7 +83,7 @@ import { DoctorService } from "../../../doctors/services/doctor.service";
             } @if (confirmationData()!.changes.doctorChanged) {
             <div class="flex items-center text-sm">
               <svg
-                class="w-4 h-4 text-green-500 mr-2"
+                class="w-4 h-4 text-green-500 dark:text-green-400 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

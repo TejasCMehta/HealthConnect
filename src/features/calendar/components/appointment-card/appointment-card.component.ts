@@ -95,6 +95,7 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
   public isResizing = signal<boolean>(false);
   public isDragging = signal<boolean>(false);
   public currentEndTime = signal<string>("");
+  public resizeValidationError = signal<string | null>(null);
   public dragPreview = signal<{
     newStartTime: string;
     newEndTime: string;
@@ -350,6 +351,7 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
 
     this.resizeStartY = event.clientY;
     this.isResizing.set(true);
+    this.resizeValidationError.set(null); // Clear any previous validation errors
 
     // Add global class to document body to indicate resize mode
     document.body.classList.add("appointment-resizing");
@@ -388,6 +390,16 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
     const newEndTime = this.resizeService.updateResize(event.clientY);
     this.currentEndTime.set(newEndTime);
 
+    // Check validation and provide feedback
+    const validation = this.resizeService.validateResize();
+    if (!validation.isValid) {
+      this.resizeValidationError.set(
+        validation.errorMessage || "Invalid resize"
+      );
+    } else {
+      this.resizeValidationError.set(null);
+    }
+
     this.resizeUpdate.emit({
       appointment: this.appointment(),
       newEndTime,
@@ -401,6 +413,7 @@ export class AppointmentCardComponent implements OnInit, OnDestroy {
     if (!this.isResizing()) return;
 
     this.isResizing.set(false);
+    this.resizeValidationError.set(null); // Clear validation errors
     this.cleanupResizeListeners();
 
     // Remove global classes

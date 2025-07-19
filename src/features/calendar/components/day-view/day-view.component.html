@@ -37,7 +37,7 @@
       </div>
       @if (isHoliday()) {
       <div class="flex items-center space-x-2">
-        <i class="ri-gift-line text-red-500 text-xl"></i>
+        <i class="ri-gift-line text-red-500 dark:text-red-400 text-xl"></i>
         <span class="text-sm font-medium text-red-600 dark:text-red-400">
           {{ getHolidayDetails()?.title || "Holiday" }}
         </span>
@@ -127,7 +127,7 @@
         <!-- Time label -->
         <div class="absolute left-0 w-20 flex justify-end pr-4">
           <div
-            class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg time-label"
+            class="bg-blue-500 dark:bg-blue-400 text-white dark:text-gray-900 text-xs px-2 py-1 rounded-full shadow-lg time-label"
           >
             {{
               currentTime.toLocaleTimeString("en-US", {
@@ -141,12 +141,12 @@
 
         <!-- Current time line -->
         <div
-          class="absolute h-0.5 bg-blue-500 shadow-lg time-line"
+          class="absolute h-0.5 bg-blue-500 dark:bg-blue-400 shadow-lg time-line"
           style="left: 5rem; right: 0"
         >
           <!-- Circular indicator at the start -->
           <div
-            class="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 rounded-full shadow-lg time-dot"
+            class="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full shadow-lg time-dot"
           ></div>
         </div>
       </div>
@@ -232,7 +232,11 @@
               !isRestrictedTimeSlot(timeSlot) ? onTimeSlotClick(timeSlot) : null
             "
             [ngClass]="{
-              'w-full h-10 border border-dashed rounded-md transition-colors flex items-center justify-center': true,
+              'w-full h-10 border border-dashed rounded-md transition-colors': true,
+              'flex items-center justify-center': !isLunchBreak(
+                currentDate(),
+                timeSlot
+              ),
               'restricted-clickable-area': isRestrictedTimeSlot(timeSlot),
               'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600':
                 !isRestrictedTimeSlot(timeSlot),

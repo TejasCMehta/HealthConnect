@@ -59,7 +59,7 @@
         <!-- Time label column -->
         <div class="absolute left-0 w-[12.5%] flex justify-end pr-2">
           <div
-            class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg time-label"
+            class="bg-blue-500 dark:bg-blue-400 text-white dark:text-gray-900 text-xs px-2 py-1 rounded-full shadow-lg time-label"
           >
             {{
               currentTime.toLocaleTimeString("en-US", {
@@ -75,13 +75,13 @@
         @for (day of weekDays; track day.toISOString(); let i = $index) { @if
         (isToday(day)) {
         <div
-          class="absolute h-0.5 bg-blue-500 shadow-lg time-line"
+          class="absolute h-0.5 bg-blue-500 dark:bg-blue-400 shadow-lg time-line"
           [style.left]="12.5 + i * 12.5 + '%'"
           [style.width]="'12.5%'"
         >
           <!-- Circular indicator at the start -->
           <div
-            class="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 rounded-full shadow-lg time-dot"
+            class="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full shadow-lg time-dot"
           ></div>
         </div>
         } }
@@ -125,7 +125,10 @@
                 : null
             "
             [class]="
-              'absolute inset-0 transition-colors flex items-center justify-center ' +
+              'absolute inset-0 transition-colors ' +
+              (isLunchBreak(day, timeSlot)
+                ? ''
+                : 'flex items-center justify-center ') +
               (isRestrictedTimeSlot(day, timeSlot)
                 ? 'cursor-not-allowed opacity-50 pointer-events-none'
                 : 'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20')

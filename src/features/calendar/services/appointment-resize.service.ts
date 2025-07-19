@@ -87,6 +87,82 @@ export class AppointmentResizeService {
       return state.newEndTime;
     }
 
+    // Check if new end time conflicts with lunch break
+    const endTimeString = `${newEnd
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${newEnd.getMinutes().toString().padStart(2, "0")}`;
+
+    // Allow appointments to end exactly at lunch break start time (e.g., 12:00)
+    // But don't allow them to end DURING lunch break (e.g., 12:30)
+    if (this.calendarService.isLunchBreak(newEnd, endTimeString)) {
+      // Check if this is exactly the lunch break start time
+      const settings = this.calendarService.settings();
+      if (settings) {
+        const globalLunchBreak = (settings.workingHours as any)
+          .globalLunchBreak;
+        if (globalLunchBreak?.enabled && globalLunchBreak.applyToAllDays) {
+          const lunchStart = globalLunchBreak.start;
+          // If ending exactly at lunch break start time, allow it
+          if (endTimeString === lunchStart) {
+            // This is allowed - appointment can end at lunch break start
+          } else {
+            // This is during lunch break, not allowed
+            return state.newEndTime;
+          }
+        } else {
+          // Use day-specific lunch break logic
+          const dayNames = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+          ];
+          const dayName = dayNames[newEnd.getDay()];
+          const dayWorkingHours = (settings.workingHours as any)[dayName];
+          if (dayWorkingHours?.lunchBreak?.enabled) {
+            const lunchStart = dayWorkingHours.lunchBreak.start;
+            if (endTimeString === lunchStart) {
+              // This is allowed - appointment can end at lunch break start
+            } else {
+              // This is during lunch break, not allowed
+              return state.newEndTime;
+            }
+          }
+        }
+      }
+    }
+
+    // Also check if any time between current end and new end crosses lunch break
+    const currentEndTime = new Date(state.newEndTime);
+    if (newEnd > currentEndTime) {
+      // Extending appointment - check if any intermediate time hits lunch break
+      const checkStart = new Date(
+        Math.max(currentEndTime.getTime(), startTime.getTime())
+      );
+      for (
+        let checkTime = new Date(checkStart.getTime());
+        checkTime < newEnd;
+        checkTime.setMinutes(checkTime.getMinutes() + 30)
+      ) {
+        const checkTimeString = `${checkTime
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${checkTime
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}`;
+
+        if (this.calendarService.isLunchBreak(checkTime, checkTimeString)) {
+          // Found lunch break in the path - don't allow this resize
+          return state.newEndTime;
+        }
+      }
+    }
+
     const newEndTimeStr = newEnd.toISOString();
 
     this.resizeState.update((current) => ({
@@ -155,11 +231,46 @@ export class AppointmentResizeService {
       .getMinutes()
       .toString()
       .padStart(2, "0")}`;
+
     if (this.calendarService.isLunchBreak(newEndTime, endTimeString)) {
-      return {
-        isValid: false,
-        errorMessage: "Cannot extend appointment into lunch break time",
-      };
+      // Check if this is exactly the lunch break start time
+      const settings = this.calendarService.settings();
+      if (settings) {
+        const globalLunchBreak = (settings.workingHours as any)
+          .globalLunchBreak;
+        if (globalLunchBreak?.enabled && globalLunchBreak.applyToAllDays) {
+          const lunchStart = globalLunchBreak.start;
+          // If ending exactly at lunch break start time, allow it
+          if (endTimeString !== lunchStart) {
+            return {
+              isValid: false,
+              errorMessage: "Cannot extend appointment into lunch break time",
+            };
+          }
+        } else {
+          // Use day-specific lunch break logic
+          const dayNames = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+          ];
+          const dayName = dayNames[newEndTime.getDay()];
+          const dayWorkingHours = (settings.workingHours as any)[dayName];
+          if (dayWorkingHours?.lunchBreak?.enabled) {
+            const lunchStart = dayWorkingHours.lunchBreak.start;
+            if (endTimeString !== lunchStart) {
+              return {
+                isValid: false,
+                errorMessage: "Cannot extend appointment into lunch break time",
+              };
+            }
+          }
+        }
+      }
     }
 
     return { isValid: true };

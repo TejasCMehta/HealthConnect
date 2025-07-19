@@ -430,14 +430,54 @@ export class AppointmentDragDropService {
       .toString()
       .padStart(2, "0")}:${endTime.getMinutes().toString().padStart(2, "0")}`;
 
-    if (
-      this.calendarService.isLunchBreak(startTime, startTimeString) ||
-      this.calendarService.isLunchBreak(endTime, endTimeString)
-    ) {
+    // Check if start time is during lunch break
+    if (this.calendarService.isLunchBreak(startTime, startTimeString)) {
       return {
         isValid: false,
         errorMessage: "Cannot schedule appointments during lunch break",
       };
+    }
+
+    // Check if end time is during lunch break (but allow ending exactly at lunch break start time)
+    if (this.calendarService.isLunchBreak(endTime, endTimeString)) {
+      // Check if this is exactly the lunch break start time
+      const settings = this.settingsSignal();
+      if (settings) {
+        const globalLunchBreak = (settings.workingHours as any)
+          .globalLunchBreak;
+        if (globalLunchBreak?.enabled && globalLunchBreak.applyToAllDays) {
+          const lunchStart = globalLunchBreak.start;
+          // If ending exactly at lunch break start time, allow it
+          if (endTimeString !== lunchStart) {
+            return {
+              isValid: false,
+              errorMessage: "Cannot schedule appointments during lunch break",
+            };
+          }
+        } else {
+          // Use day-specific lunch break logic
+          const dayNames = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+          ];
+          const dayName = dayNames[endTime.getDay()];
+          const dayWorkingHours = (settings.workingHours as any)[dayName];
+          if (dayWorkingHours?.lunchBreak?.enabled) {
+            const lunchStart = dayWorkingHours.lunchBreak.start;
+            if (endTimeString !== lunchStart) {
+              return {
+                isValid: false,
+                errorMessage: "Cannot schedule appointments during lunch break",
+              };
+            }
+          }
+        }
+      }
     }
 
     // Check if it's a working day based on settings

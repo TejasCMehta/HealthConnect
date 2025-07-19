@@ -496,9 +496,25 @@
       "description": "",
       "patientId": 1,
       "doctorId": 1,
-      "startTime": "2025-07-25T06:30:00.000Z",
-      "endTime": "2025-07-25T07:30:00.000Z",
-      "status": "scheduled"
+      "startTime": "2025-07-25T08:00:00.000Z",
+      "endTime": "2025-07-25T09:00:00.000Z",
+      "status": "scheduled",
+      "patient": {
+        "id": 1,
+        "name": "Alice Johnson1",
+        "email": "alice@example.com",
+        "phone": "+1234567892",
+        "dateOfBirth": "1990-05-15",
+        "address": "123 Main St, City, State 12345"
+      },
+      "doctor": {
+        "id": 1,
+        "name": "John Smith",
+        "specialty": "Cardiology",
+        "email": "john@clinic.com",
+        "phone": "+1234567890",
+        "color": "#ec4899"
+      }
     }
   ],
   "settings": {
