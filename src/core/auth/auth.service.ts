@@ -59,11 +59,13 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<any> {
+    console.log("Making login request to:", `${this.API_URL}/auth/login`);
     return this.http
       .post<any>(`${this.API_URL}/auth/login`, { username, password })
       .pipe(
         tap((response) => {
-          if (response.token) {
+          console.log("Login response received:", response);
+          if (response && response.token) {
             localStorage.setItem(this.TOKEN_KEY, response.token);
             // Store refresh token if provided by backend
             if (response.refreshToken) {
@@ -75,7 +77,13 @@ export class AuthService {
             this.currentUser.set(response.user);
             this.isAuthenticated.set(true);
             this.currentUserSubject.next(response.user);
+          } else {
+            console.error("Invalid response structure:", response);
           }
+        }),
+        catchError((error) => {
+          console.error("Login error:", error);
+          return throwError(() => error);
         })
       );
   }

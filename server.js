@@ -9,9 +9,25 @@ const app = express();
 const SECRET_KEY = process.env.JWT_SECRET || "your-secret-key";
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5000",
+      "https://healthconnect-cc41.onrender.com",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`, req.body);
+  next();
+});
 
 // Load database
 let db;
@@ -71,17 +87,26 @@ app.get("/api/health", (req, res) => {
 app.post("/auth/login", (req, res) => {
   const { username, password } = req.body;
 
+  console.log("Login attempt:", {
+    username,
+    password: password ? "***" : "empty",
+  });
+
   const user = db.users.find((u) => u.username === username);
 
   if (!user) {
+    console.log("User not found:", username);
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  // In a real app, you would hash the password properly
-  // For testing, accept any password that isn't empty
+  // For demo purposes, accept any non-empty password
+  // In production, you would use bcrypt.compare(password, user.password)
   if (!password || password.length === 0) {
+    console.log("Empty password provided");
     return res.status(401).json({ error: "Invalid credentials" });
   }
+
+  console.log("Login successful for user:", user.username);
 
   const token = jwt.sign(
     { id: user.id, username: user.username, role: user.role },
@@ -89,7 +114,7 @@ app.post("/auth/login", (req, res) => {
     { expiresIn: "24h" }
   );
 
-  res.json({
+  const response = {
     token,
     user: {
       id: user.id,
@@ -98,7 +123,10 @@ app.post("/auth/login", (req, res) => {
       name: user.name,
       email: user.email,
     },
-  });
+  };
+
+  console.log("Sending response:", { ...response, token: "***" });
+  res.json(response);
 });
 
 // Protected routes middleware
