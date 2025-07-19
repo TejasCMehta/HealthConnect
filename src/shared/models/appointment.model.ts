@@ -6,7 +6,7 @@ export interface Appointment {
   endTime: string;
   title: string;
   description?: string;
-  status: 'scheduled' | 'completed' | 'cancelled';
+  status: "scheduled" | "confirmed" | "completed" | "cancelled" | "no-show";
   patient?: Patient;
   doctor?: Doctor;
 }

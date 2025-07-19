@@ -51,7 +51,7 @@
         (!isCurrentMonth(day) ? 'bg-gray-50 dark:bg-gray-750' : '') +
         ' ' +
         (isRestrictedForNewAppointments(day)
-          ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed pointer-events-none'
+          ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
           : 'hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer') +
         ' ' +
         (!isWorkingDay(day) && !isPastDate(day) && !isToday(day)
@@ -59,7 +59,7 @@
           : '') +
         ' ' +
         (isHoliday(day) && !isPastDate(day) && !isToday(day)
-          ? 'bg-red-50/30 dark:bg-red-900/20 cursor-not-allowed pointer-events-none'
+          ? 'bg-red-50/30 dark:bg-red-900/20 cursor-not-allowed'
           : '')
       "
       (click)="!isRestrictedForNewAppointments(day) ? onDateClick(day) : null"
@@ -111,6 +111,7 @@
         >
           <app-appointment-card
             [appointment]="appointment"
+            [settings]="settings()"
             [compact]="true"
             [enableDrag]="
               !isRestrictedForNewAppointments(day) &&
@@ -129,7 +130,6 @@
             (dragStart)="onDragStart($event)"
             (dragUpdate)="onDragUpdate($event)"
             (dragComplete)="onDragComplete($event)"
-            [class.pointer-events-none]="isRestrictedDay(day)"
             [class.cursor-pointer]="isPastAppointment(appointment)"
           >
           </app-appointment-card>
@@ -160,9 +160,9 @@
       }
 
       <!-- Restricted day overlay -->
-      @if (isRestrictedDay(day)) {
+      @if (isRestrictedDay(day) && !isPastDate(day)) {
       <div
-        class="absolute inset-0 bg-gray-300/20 dark:bg-gray-600/20 rounded-lg flex items-center justify-center"
+        class="absolute inset-0 bg-gray-300/20 dark:bg-gray-600/20 rounded-lg flex items-center justify-center pointer-events-none"
       >
         <i class="ri-forbid-line text-gray-400 text-lg"></i>
       </div>

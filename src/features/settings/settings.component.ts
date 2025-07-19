@@ -13,6 +13,7 @@ import {
 import { ThemeService } from "../../core/services/theme.service";
 import { AuthService } from "../../core/auth/auth.service";
 import { ToasterService } from "../../shared/services/toaster.service";
+import { AppointmentColorsService } from "../../shared/services/appointment-colors.service";
 
 @Component({
   selector: "app-settings",
@@ -26,6 +27,7 @@ export class SettingsComponent implements OnInit {
   public themeService = inject(ThemeService);
   public authService = inject(AuthService);
   private toasterService = inject(ToasterService);
+  private appointmentColorsService = inject(AppointmentColorsService);
 
   // Signals
   settings = signal<Settings>({
@@ -63,11 +65,11 @@ export class SettingsComponent implements OnInit {
       allowCancelledDelete: true,
       allowCompletedDelete: false,
       statusColors: {
-        scheduled: "#3B82F6",
-        confirmed: "#10B981",
-        cancelled: "#EF4444",
-        completed: "#059669",
-        "no-show": "#9CA3AF",
+        scheduled: "blue",
+        confirmed: "green",
+        cancelled: "red",
+        completed: "emerald",
+        "no-show": "yellow",
       },
     },
     filters: {
@@ -108,12 +110,12 @@ export class SettingsComponent implements OnInit {
     allowCancelledEdit: true,
     allowCancelledDelete: true,
     allowCompletedDelete: false,
-    statusColors: {
-      scheduled: "#3b82f6",
-      confirmed: "#10b981",
-      cancelled: "#ef4444",
-      completed: "#6b7280",
-      "no-show": "#f59e0b",
+    statusColors: this.appointmentColorsService?.getDefaultStatusColors() || {
+      scheduled: "blue",
+      confirmed: "green",
+      cancelled: "red",
+      completed: "emerald",
+      "no-show": "yellow",
     },
   };
 
@@ -221,9 +223,28 @@ export class SettingsComponent implements OnInit {
     { key: "no-show" as const, label: "No Show" },
   ];
 
+  // Get color options from service
+  get statusColorOptions() {
+    return this.appointmentColorsService.getColorOptions();
+  }
+
   // Check if user is admin
   get isAdmin(): boolean {
     return this.authService.currentUser()?.role === "admin";
+  }
+
+  // Get color option details by value
+  getColorOption(value: string) {
+    return this.appointmentColorsService.getColorOption(value);
+  }
+
+  // Get status color classes for preview
+  getStatusColorClasses(statusKey: string) {
+    const colorValue =
+      this.appointmentSettingsForm.statusColors[
+        statusKey as keyof typeof this.appointmentSettingsForm.statusColors
+      ];
+    return this.appointmentColorsService.getStatusColorClasses(colorValue);
   }
 
   ngOnInit() {

@@ -23,6 +23,7 @@ import {
 } from "../../services/appointment-drag-drop.service";
 import { DoctorService } from "../../../doctors/services/doctor.service";
 import { ToasterService } from "../../../../shared/services/toaster.service";
+import { Settings } from "../../../settings/services/settings.service";
 
 @Component({
   selector: "app-day-view",
@@ -48,6 +49,7 @@ export class DayViewComponent implements OnInit, OnDestroy {
 
   public currentDate = input<Date>(new Date());
   public appointments = input<Appointment[]>([]);
+  public settings = input<Settings | null>(null); // Add settings input
   public doctors = input<Doctor[]>([]);
   public selectedDoctorId = input<string>("");
 

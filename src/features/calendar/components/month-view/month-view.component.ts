@@ -19,6 +19,7 @@ import {
 import { DragDropConfirmationComponent } from "../drag-drop-confirmation/drag-drop-confirmation.component";
 import { ToasterService } from "../../../../shared/services/toaster.service";
 import { DoctorService } from "../../../doctors/services/doctor.service";
+import { Settings } from "../../../settings/services/settings.service";
 
 @Component({
   selector: "app-month-view",
@@ -44,6 +45,7 @@ export class MonthViewComponent {
   public appointments = input<Appointment[]>([]);
   public doctors = input<Doctor[]>([]);
   public selectedDoctorId = input<string>("");
+  public settings = input<Settings | null>(null); // Add settings input
 
   public appointmentSelect = output<Appointment>();
   public appointmentClick = output<{

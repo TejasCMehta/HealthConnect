@@ -132,6 +132,7 @@
         [appointments]="appointments()"
         [doctors]="doctors()"
         [selectedDoctorId]="selectedDoctorId()"
+        [settings]="settings()"
         (appointmentSelect)="onAppointmentSelect($event)"
         (appointmentClick)="onAppointmentClick($event)"
         (moreAppointmentsClick)="onMoreAppointmentsClick($event.date)"
@@ -143,6 +144,8 @@
       <app-week-view
         [currentDate]="currentDate()"
         [appointments]="appointments()"
+        [doctors]="doctors()"
+        [settings]="settings()"
         (appointmentSelect)="onAppointmentSelect($event)"
         (appointmentClick)="onAppointmentClick($event)"
         (timeSlotSelect)="onTimeSlotSelect($event)"
@@ -153,6 +156,8 @@
       <app-day-view
         [currentDate]="currentDate()"
         [appointments]="appointments()"
+        [doctors]="doctors()"
+        [settings]="settings()"
         (appointmentSelect)="onAppointmentSelect($event)"
         (appointmentClick)="onAppointmentClick($event)"
         (timeSlotSelect)="onTimeSlotSelect($event)"

@@ -69,6 +69,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
   public currentView = signal<CalendarView>("month");
   public currentDate = signal(new Date());
+  public allAppointments = signal<Appointment[]>([]);
   public appointments = signal<Appointment[]>([]);
   public doctors = signal<Doctor[]>([]);
   public settings = signal<Settings | null>(null);
@@ -96,10 +97,56 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
     // Initialize scroll container reference
     this.initializeScrollContainer();
+
+    // Listen for doctor filter changes from sidebar
+    this.setupFilterListeners();
   }
 
   ngOnDestroy(): void {
-    // Clean up any event listeners if needed
+    // Clean up filter event listener
+    if (this.filterListener) {
+      window.removeEventListener("calendarFiltersChanged", this.filterListener);
+    }
+  }
+
+  private filterListener?: EventListener;
+
+  private setupFilterListeners(): void {
+    // Create the event listener
+    this.filterListener = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      this.handleFilterChange(customEvent);
+    };
+
+    // Listen for filter changes from sidebar
+    window.addEventListener("calendarFiltersChanged", this.filterListener);
+  }
+
+  private handleFilterChange(event: CustomEvent): void {
+    const filters = event.detail;
+    if (filters.doctors) {
+      // Filter appointments based on selected doctors
+      const filteredAppts = this.allAppointments().filter(
+        (appointment) =>
+          filters.doctors.length === 0 ||
+          filters.doctors.includes(appointment.doctorId)
+      );
+
+      // Update the displayed appointments with filtered data
+      this.appointments.set(filteredAppts);
+    }
+  }
+
+  private loadFiltersFromStorage(): void {
+    const storedFilters = localStorage.getItem("calendarFilters");
+    if (storedFilters) {
+      try {
+        const filters = JSON.parse(storedFilters);
+        this.handleFilterChange({ detail: filters } as CustomEvent);
+      } catch (error) {
+        console.error("Error loading filters from storage:", error);
+      }
+    }
   }
 
   private loadSettings(): void {
@@ -121,8 +168,12 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.appointmentService.getAppointments().subscribe({
       next: (appointments) => {
-        this.appointments.set(appointments);
+        this.allAppointments.set(appointments);
+        this.appointments.set(appointments); // Initially show all appointments
         this.isLoading.set(false);
+
+        // Apply any existing filters
+        this.loadFiltersFromStorage();
       },
       error: (error) => {
         console.error("Error loading appointments:", error);

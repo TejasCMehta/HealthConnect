@@ -171,6 +171,7 @@
           >
             <app-appointment-card
               [appointment]="appointmentData.appointment"
+              [settings]="settings()"
               [compact]="false"
               [enableResize]="!isPastAppointment(appointmentData.appointment)"
               [enableDrag]="!isPastAppointment(appointmentData.appointment)"

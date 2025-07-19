@@ -112,6 +112,19 @@ export class SidebarComponent implements OnInit {
     return this.selectedDoctors().size === this.doctors().length;
   }
 
+  public getActiveFiltersCount(): number {
+    const totalDoctors = this.doctors().length;
+    const selectedCount = this.selectedDoctors().size;
+
+    // If all doctors are selected, no filters are active
+    if (selectedCount === totalDoctors) {
+      return 0;
+    }
+
+    // Return the number of selected doctors as active filters
+    return selectedCount;
+  }
+
   public toggleAllDoctors(): void {
     if (this.isAllDoctorsSelected()) {
       this.selectedDoctors.set(new Set());

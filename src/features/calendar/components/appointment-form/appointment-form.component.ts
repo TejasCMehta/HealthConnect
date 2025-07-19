@@ -57,7 +57,12 @@ export class AppointmentFormComponent implements OnInit {
     appointmentDate: "",
     startTime: "",
     endTime: "",
-    status: "scheduled" as "scheduled" | "completed" | "cancelled",
+    status: "scheduled" as
+      | "scheduled"
+      | "confirmed"
+      | "completed"
+      | "cancelled"
+      | "no-show",
   });
 
   public patients = signal<any[]>([]);

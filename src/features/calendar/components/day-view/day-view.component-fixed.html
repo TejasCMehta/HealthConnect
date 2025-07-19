@@ -103,6 +103,7 @@
             >
               <app-appointment-card
                 [appointment]="appointmentData.appointment"
+                [settings]="settings()"
                 [compact]="appointmentData.totalColumns > 1"
                 [enableResize]="true"
                 [slotHeight]="65"

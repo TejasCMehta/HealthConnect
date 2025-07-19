@@ -7,30 +7,32 @@
 
 // Clean appointment card styling - minimal and unobtrusive
 .appointment-card {
-  background: #ffffff;
-  border: 1px solid rgba(229, 231, 235, 0.4);
-  border-radius: 6px;
-  padding: 8px;
+  // Remove fixed background to allow TailwindCSS status colors
+  border: 1px solid rgba(229, 231, 235, 0.3);
+  border-radius: 4px;
+  padding: 6px;
   margin: 1px;
   box-sizing: border-box;
   position: relative;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
   cursor: pointer;
+  min-height: 48px; // Reduced height for cleaner look
 
   // Subtle hover effect
   &:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
   // Dark mode
   :host-context(.dark) & {
-    background: #1f2937;
-    border-color: rgba(75, 85, 99, 0.3);
+    // No fixed background in dark mode either
+    border-color: rgba(75, 85, 99, 0.2);
 
     &:hover {
-      border-color: rgba(59, 130, 246, 0.4);
-      box-shadow: 0 1px 3px rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
   }
 
