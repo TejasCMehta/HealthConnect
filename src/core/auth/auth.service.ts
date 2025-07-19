@@ -10,6 +10,7 @@ import {
   switchMap,
 } from "rxjs";
 import { User } from "../../shared/models/user.model";
+import { environment } from "../../environments/environment";
 
 @Injectable({
   providedIn: "root",
@@ -18,7 +19,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  private readonly API_URL = "http://localhost:8000";
+  private readonly API_URL = environment.apiUrl;
   private readonly TOKEN_KEY = "auth_token";
   private readonly REFRESH_TOKEN_KEY = "refresh_token";
 
