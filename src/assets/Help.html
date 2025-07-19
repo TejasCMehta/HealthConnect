@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🏥 HealthConnect - System Help</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f8fafc;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px 0;
+        text-align: center;
+        margin-bottom: 30px;
+        border-radius: 12px;
+      }
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+      .card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #667eea;
+      }
+      .card h2 {
+        color: #2d3748;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+      }
+      .card h3 {
+        color: #4a5568;
+        margin: 15px 0 8px;
+        font-size: 1.1rem;
+      }
+      .card ul {
+        margin-left: 20px;
+      }
+      .card li {
+        margin-bottom: 5px;
+        color: #4a5568;
+      }
+      .tech-stack {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .tech-stack h2,
+      .tech-stack h3 {
+        color: white;
+      }
+      .tech-stack li {
+        color: #e2e8f0;
+      }
+      .warning {
+        background: #fef5e7;
+        border-left-color: #f6ad55;
+      }
+      .warning h2 {
+        color: #c05621;
+      }
+      .info {
+        background: #ebf8ff;
+        border-left-color: #4299e1;
+      }
+      .info h2 {
+        color: #2b6cb0;
+      }
+      .success {
+        background: #f0fff4;
+        border-left-color: #48bb78;
+      }
+      .success h2 {
+        color: #2f855a;
+      }
+      .code {
+        background: #f7fafc;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+        margin: 5px 0;
+      }
+      .emoji {
+        font-size: 1.2rem;
+        margin-right: 8px;
+      }
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2rem;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>🏥 HealthConnect</h1>
+        <p>
+          Comprehensive Clinic Management System - User Guide & Technical
+          Reference
+        </p>
+      </div>
+
+      <div class="grid">
+        <!-- Core Features -->
+        <div class="card">
+          <h2>📅 Calendar Management</h2>
+          <h3>🔄 Multiple Views</h3>
+          <ul>
+            <li>Month/Week/Day view modes</li>
+            <li>Real-time appointment visualization</li>
+            <li>Color-coded doctor assignments</li>
+            <li>✨ Full dark mode support</li>
+          </ul>
+
+          <h3>🎯 Smart Scheduling</h3>
+          <ul>
+            <li>✨ Smart appointment card colors</li>
+            <li>Interactive drag/resize states</li>
+            <li>Status-based color coding</li>
+            <li>Dark mode optimized visuals</li>
+            <li>30-minute time slot snapping</li>
+            <li>Conflict detection & prevention</li>
+            <li>Working hours enforcement</li>
+          </ul>
+        </div>
+
+        <!-- Patient Management -->
+        <div class="card">
+          <h2>👥 Patient Management</h2>
+          <h3>📝 CRUD Operations</h3>
+          <ul>
+            <li>Create, read, update, delete patients</li>
+            <li>Advanced search & filtering</li>
+            <li>Pagination support (1000+ records)</li>
+          </ul>
+
+          <h3>📊 Patient Data</h3>
+          <ul>
+            <li>Demographics & contact info</li>
+            <li>Appointment history tracking</li>
+            <li>Real-time validation</li>
+          </ul>
+        </div>
+
+        <!-- Doctor Management -->
+        <div class="card">
+          <h2>👨‍⚕️ Doctor Management</h2>
+          <h3>👩‍⚕️ Doctor Profiles</h3>
+          <ul>
+            <li>Specialty assignments</li>
+            <li>Color-coded identification</li>
+            <li>Availability tracking</li>
+          </ul>
+
+          <h3>🔒 Access Control</h3>
+          <ul>
+            <li>Admin: Full system access</li>
+            <li>Doctor: Own appointments only</li>
+            <li>Role-based permissions</li>
+          </ul>
+        </div>
+
+        <!-- System Rules -->
+        <div class="card warning">
+          <h2>⚠️ Business Rules & Restrictions</h2>
+          <h3>🕐 Time Constraints</h3>
+          <ul>
+            <li>No past date scheduling</li>
+            <li>Weekend restrictions (configurable)</li>
+            <li>Holiday blocking system</li>
+            <li>🍽️ Lunch break validation</li>
+            <li>✨ Dark mode compatible design</li>
+          </ul>
+
+          <h3>🚫 Conflict Prevention</h3>
+          <ul>
+            <li>No patient double-booking</li>
+            <li>No doctor overlap scheduling</li>
+            <li>Working hours enforcement</li>
+            <li>Global lunch break compliance</li>
+          </ul>
+        </div>
+
+        <!-- Settings & Configuration -->
+        <div class="card info">
+          <h2>🔧 System Settings</h2>
+          <h3>⏰ Working Hours</h3>
+          <ul>
+            <li>Configurable clinic hours</li>
+            <li>Individual day customization</li>
+            <li>Global lunch break settings</li>
+            <li>Exception handling</li>
+          </ul>
+
+          <h3>🎨 Personalization</h3>
+          <ul>
+            <li>Dark/Light theme toggle</li>
+            <li>User preferences</li>
+            <li>Dashboard customization</li>
+          </ul>
+        </div>
+
+        <!-- Authentication -->
+        <div class="card">
+          <h2>🔐 Authentication & Security</h2>
+          <h3>🛡️ Security Features</h3>
+          <ul>
+            <li>JWT token-based auth</li>
+            <li>Password encryption (bcrypt)</li>
+            <li>HTTP interceptor protection</li>
+            <li>Route guards</li>
+          </ul>
+
+          <h3>👤 User Roles</h3>
+          <ul>
+            <li><strong>Admin:</strong> Full system access</li>
+            <li><strong>Doctor:</strong> Limited to own data</li>
+            <li>Role-based UI rendering</li>
+          </ul>
+        </div>
+
+        <!-- How to Use -->
+        <div class="card success">
+          <h2>🚀 How to Use</h2>
+          <h3>📋 Appointment Booking</h3>
+          <ul>
+            <li>Click time slot → Select patient/doctor</li>
+            <li>Drag appointment edge to resize</li>
+            <li>Real-time validation feedback</li>
+            <li>Confirmation dialogs for changes</li>
+          </ul>
+
+          <h3>🎛️ Navigation</h3>
+          <ul>
+            <li>Sidebar: Main feature access</li>
+            <li>Header: User menu & theme toggle</li>
+            <li>Calendar: View switching</li>
+            <li>Forms: Slide-out panels</li>
+          </ul>
+        </div>
+
+        <!-- Technical Architecture -->
+        <div class="card tech-stack">
+          <h2>🏗️ Technical Architecture</h2>
+          <h3>🅰️ Frontend (Angular 19)</h3>
+          <ul>
+            <li>Standalone components</li>
+            <li>Signals for state management</li>
+            <li>RxJS for reactive programming</li>
+            <li>Tailwind CSS styling</li>
+          </ul>
+
+          <h3>🖥️ Backend (Node.js/Express)</h3>
+          <ul>
+            <li>RESTful API design</li>
+            <li>JSON file database</li>
+            <li>JWT authentication</li>
+            <li>CORS enabled</li>
+          </ul>
+        </div>
+
+        <!-- Development & Testing -->
+        <div class="card">
+          <h2>🛠️ Development & Testing</h2>
+          <h3>🏃‍♂️ Build & Run</h3>
+          <div class="code">npm install</div>
+          <div class="code">npm run dev (Angular: :4201)</div>
+          <div class="code">npm start (Express: :8000)</div>
+
+          <h3>📦 Production Build</h3>
+          <div class="code">ng build --prod</div>
+          <div class="code">node server.js</div>
+
+          <h3>🧪 Testing</h3>
+          <ul>
+            <li>Manual UI testing via browser</li>
+            <li>API testing with tools like Postman</li>
+            <li>Cross-browser compatibility</li>
+          </ul>
+        </div>
+
+        <!-- Server-Side Logic -->
+        <div class="card">
+          <h2>🔧 Server-Side Features</h2>
+          <h3>📡 API Endpoints</h3>
+          <ul>
+            <li>/api/auth/* - Authentication</li>
+            <li>/api/appointments/* - Booking system</li>
+            <li>/api/patients/* - Patient management</li>
+            <li>/api/doctors/* - Doctor management</li>
+            <li>/api/settings/* - Configuration</li>
+          </ul>
+
+          <h3>💾 Data Management</h3>
+          <ul>
+            <li>JSON file storage (db.json)</li>
+            <li>Automatic backup on changes</li>
+            <li>Relational data joining</li>
+            <li>Conflict detection algorithms</li>
+          </ul>
+        </div>
+
+        <!-- Project Structure -->
+        <div class="card">
+          <h2>📁 Project Structure</h2>
+          <h3>🗂️ Feature Modules</h3>
+          <ul>
+            <li>/features/auth - Authentication</li>
+            <li>/features/calendar - Booking system</li>
+            <li>/features/patients - Patient management</li>
+            <li>/features/doctors - Doctor management</li>
+            <li>/features/settings - Configuration</li>
+          </ul>
+
+          <h3>🔗 Shared Resources</h3>
+          <ul>
+            <li>/shared/components - Reusable UI</li>
+            <li>/shared/models - Data interfaces</li>
+            <li>/shared/services - Common logic</li>
+            <li>/core - App-wide services</li>
+          </ul>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="card warning">
+          <h2>🔧 Troubleshooting</h2>
+          <h3>🐛 Common Issues</h3>
+          <ul>
+            <li>
+              <strong>Port conflicts:</strong> Change ports in angular.json
+            </li>
+            <li>
+              <strong>CORS errors:</strong> Server includes CORS middleware
+            </li>
+            <li><strong>Authentication:</strong> Check JWT token validity</li>
+            <li><strong>Database:</strong> Verify db.json file permissions</li>
+          </ul>
+
+          <h3>🔄 Reset Steps</h3>
+          <ul>
+            <li>Clear browser storage</li>
+            <li>Restart both servers</li>
+            <li>Check console for errors</li>
+            <li>Verify API connectivity</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div
+        style="
+          text-align: center;
+          margin-top: 40px;
+          color: #718096;
+          font-size: 0.9rem;
+        "
+      >
+        <p>
+          🏥 HealthConnect v1.0 | Built with Angular 19 + Node.js | Modern
+          Clinic Management Solution
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
