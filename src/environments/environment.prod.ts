@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "https://healthconnectx.onrender.com/",
+  apiUrl: "https://healthconnectx.onrender.com",
 };

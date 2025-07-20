@@ -25,7 +25,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`, req.body);
+  console.log(
+    `${new Date().toISOString()} - ${req.method} ${req.path}`,
+    req.body
+  );
   next();
 });
 
@@ -82,7 +85,7 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
     service: "HealthConnect Clinic API",
     environment: process.env.NODE_ENV || "development",
-    port: process.env.PORT || 8000
+    port: process.env.PORT || 8000,
   });
 });
 
@@ -94,7 +97,7 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
     service: "HealthConnect Clinic API",
     environment: process.env.NODE_ENV || "development",
-    port: process.env.PORT || 8000
+    port: process.env.PORT || 8000,
   });
 });
 
