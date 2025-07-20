@@ -25,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`, req.body);
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`, req.body);
   next();
 });
 
@@ -74,12 +74,27 @@ function isAuthenticated(req, res, next) {
   }
 }
 
-// Health check endpoint for Render
+// Health check endpoint for Render (must be before protected middleware)
 app.get("/api/health", (req, res) => {
+  console.log("Health check endpoint hit");
   res.status(200).json({
     status: "OK",
     timestamp: new Date().toISOString(),
     service: "HealthConnect Clinic API",
+    environment: process.env.NODE_ENV || "development",
+    port: process.env.PORT || 8000
+  });
+});
+
+// Also add a root health check
+app.get("/health", (req, res) => {
+  console.log("Root health check endpoint hit");
+  res.status(200).json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    service: "HealthConnect Clinic API",
+    environment: process.env.NODE_ENV || "development",
+    port: process.env.PORT || 8000
   });
 });
 
@@ -325,4 +340,7 @@ app.get("*", (req, res) => {
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Express Server is running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`Health check available at: http://localhost:${PORT}/api/health`);
+  console.log(`Database loaded with ${db.users?.length || 0} users`);
 });
