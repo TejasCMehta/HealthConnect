@@ -144,4 +144,64 @@ export class AuthService {
     const user = this.currentUser();
     return user?.role === role || user?.role === "admin";
   }
+
+  isAdmin(): boolean {
+    const user = this.currentUser();
+    return user?.role === "admin";
+  }
+
+  isDoctor(): boolean {
+    const user = this.currentUser();
+    return user?.role === "doctor";
+  }
+
+  getCurrentUserId(): number | null {
+    const user = this.currentUser();
+    return user?.id || null;
+  }
+
+  canManageSettings(): boolean {
+    return this.isAdmin();
+  }
+
+  canManageDoctors(): boolean {
+    return this.isAdmin();
+  }
+
+  canManagePatients(): boolean {
+    return this.isAdmin();
+  }
+
+  canViewPatients(): boolean {
+    // Both doctors and admins can view patients
+    return this.isAdmin() || this.isDoctor();
+  }
+
+  canAddPatients(): boolean {
+    // Both doctors and admins can add patients
+    return this.isAdmin() || this.isDoctor();
+  }
+
+  canEditPatients(): boolean {
+    // Both doctors and admins can edit patients
+    return this.isAdmin() || this.isDoctor();
+  }
+
+  canDeletePatients(): boolean {
+    // Only admins can delete patients
+    return this.isAdmin();
+  }
+
+  canViewAllAppointments(): boolean {
+    return this.isAdmin();
+  }
+
+  canManageAppointment(appointmentDoctorId?: number): boolean {
+    if (this.isAdmin()) return true;
+    if (this.isDoctor()) {
+      const currentUserId = this.getCurrentUserId();
+      return appointmentDoctorId === currentUserId;
+    }
+    return false;
+  }
 }

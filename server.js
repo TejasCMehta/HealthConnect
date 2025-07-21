@@ -194,12 +194,22 @@ app.get("/api/patients", (req, res) => {
   });
 });
 
-// Settings routes (before generic CRUD routes)
+// Settings routes (before generic CRUD routes) - ADMIN ONLY
 app.get("/api/settings", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
   res.json(db.settings || {});
 });
 
 app.get("/api/settings/working-hours", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
   const workingHours = db.settings?.workingHours?.default || {
     start: "08:00",
     end: "18:00",
@@ -208,6 +218,11 @@ app.get("/api/settings/working-hours", (req, res) => {
 });
 
 app.put("/api/settings/working-hours", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
   if (!db.settings) {
     db.settings = {};
   }
@@ -217,11 +232,21 @@ app.put("/api/settings/working-hours", (req, res) => {
 });
 
 app.get("/api/settings/holidays", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
   const holidays = db.settings?.holidays || [];
   res.json(holidays);
 });
 
 app.put("/api/settings/holidays", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
   if (!db.settings) {
     db.settings = {};
   }
@@ -231,6 +256,11 @@ app.put("/api/settings/holidays", (req, res) => {
 });
 
 app.get("/api/settings/working-days", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
   const workingDays = db.settings?.workingDays || {
     monday: true,
     tuesday: true,
@@ -244,6 +274,11 @@ app.get("/api/settings/working-days", (req, res) => {
 });
 
 app.put("/api/settings/working-days", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
   if (!db.settings) {
     db.settings = {};
   }
@@ -254,6 +289,11 @@ app.put("/api/settings/working-days", (req, res) => {
 
 // General settings update endpoint
 app.put("/api/settings", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
   if (!db.settings) {
     db.settings = {};
   }
@@ -264,7 +304,258 @@ app.put("/api/settings", (req, res) => {
   res.json(db.settings);
 });
 
-// Generic CRUD routes
+// Role-based appointments route (must be before generic CRUD routes)
+app.get("/api/appointments", (req, res) => {
+  const userRole = req.user.role;
+  const userId = req.user.id;
+
+  console.log(
+    `Appointments request from user: ${req.user.username} (${userRole})`
+  );
+
+  let appointments = [...db.appointments];
+
+  // If user is a doctor, only show their appointments
+  if (userRole === "doctor") {
+    appointments = appointments.filter(
+      (appointment) => appointment.doctorId === userId
+    );
+    console.log(
+      `Filtered ${appointments.length} appointments for doctor ${userId}`
+    );
+  }
+
+  res.json(appointments);
+});
+
+// Role-based appointment creation
+app.post("/api/appointments", (req, res) => {
+  const userRole = req.user.role;
+  const userId = req.user.id;
+
+  // Only admins can create appointments for any doctor
+  // Doctors can only create appointments for themselves
+  if (userRole === "doctor" && req.body.doctorId !== userId) {
+    return res
+      .status(403)
+      .json({ error: "Doctors can only create appointments for themselves" });
+  }
+
+  const newAppointment = {
+    id: Date.now(),
+    ...req.body,
+  };
+
+  db.appointments.push(newAppointment);
+  saveDb();
+
+  res.status(201).json(newAppointment);
+});
+
+// Role-based appointment update
+app.put("/api/appointments/:id", (req, res) => {
+  const { id } = req.params;
+  const userRole = req.user.role;
+  const userId = req.user.id;
+
+  const appointmentIndex = db.appointments.findIndex(
+    (item) => item.id === parseInt(id)
+  );
+
+  if (appointmentIndex === -1) {
+    return res.status(404).json({ error: "Appointment not found" });
+  }
+
+  const appointment = db.appointments[appointmentIndex];
+
+  // Check if doctor is trying to modify someone else's appointment
+  if (userRole === "doctor" && appointment.doctorId !== userId) {
+    return res
+      .status(403)
+      .json({ error: "Doctors can only modify their own appointments" });
+  }
+
+  // If doctor is changing doctorId, ensure it's to themselves
+  if (
+    userRole === "doctor" &&
+    req.body.doctorId &&
+    req.body.doctorId !== userId
+  ) {
+    return res
+      .status(403)
+      .json({ error: "Doctors can only assign appointments to themselves" });
+  }
+
+  db.appointments[appointmentIndex] = { ...appointment, ...req.body };
+  saveDb();
+
+  res.json(db.appointments[appointmentIndex]);
+});
+
+// Role-based appointment deletion
+app.delete("/api/appointments/:id", (req, res) => {
+  const { id } = req.params;
+  const userRole = req.user.role;
+  const userId = req.user.id;
+
+  const appointmentIndex = db.appointments.findIndex(
+    (item) => item.id === parseInt(id)
+  );
+
+  if (appointmentIndex === -1) {
+    return res.status(404).json({ error: "Appointment not found" });
+  }
+
+  const appointment = db.appointments[appointmentIndex];
+
+  // Check if doctor is trying to delete someone else's appointment
+  if (userRole === "doctor" && appointment.doctorId !== userId) {
+    return res
+      .status(403)
+      .json({ error: "Doctors can only delete their own appointments" });
+  }
+
+  db.appointments.splice(appointmentIndex, 1);
+  saveDb();
+
+  res.json({ success: true });
+});
+
+// Restrict doctors and patients management to admins only
+app.get("/api/doctors", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
+  res.json(db.doctors || []);
+});
+
+app.post("/api/doctors", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
+
+  const newDoctor = {
+    id: Date.now(),
+    ...req.body,
+  };
+
+  db.doctors.push(newDoctor);
+  saveDb();
+
+  res.status(201).json(newDoctor);
+});
+
+app.put("/api/doctors/:id", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
+
+  const { id } = req.params;
+  const doctorIndex = db.doctors.findIndex((item) => item.id === parseInt(id));
+
+  if (doctorIndex === -1) {
+    return res.status(404).json({ error: "Doctor not found" });
+  }
+
+  db.doctors[doctorIndex] = { ...db.doctors[doctorIndex], ...req.body };
+  saveDb();
+
+  res.json(db.doctors[doctorIndex]);
+});
+
+app.delete("/api/doctors/:id", (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
+
+  const { id } = req.params;
+  const doctorIndex = db.doctors.findIndex((item) => item.id === parseInt(id));
+
+  if (doctorIndex === -1) {
+    return res.status(404).json({ error: "Doctor not found" });
+  }
+
+  db.doctors.splice(doctorIndex, 1);
+  saveDb();
+
+  res.json({ success: true });
+});
+
+// Patient routes with role-based access control (must be before generic CRUD routes)
+app.post("/api/patients", (req, res) => {
+  // Both doctors and admins can add patients
+  if (req.user.role !== "admin" && req.user.role !== "doctor") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Doctor or Admin privileges required." });
+  }
+
+  const newPatient = {
+    id: Date.now(),
+    ...req.body,
+    createdBy: req.user.id,
+    createdAt: new Date().toISOString(),
+  };
+
+  db.patients.push(newPatient);
+  saveDb();
+  res.status(201).json(newPatient);
+});
+
+app.put("/api/patients/:id", (req, res) => {
+  // Both doctors and admins can edit patients
+  if (req.user.role !== "admin" && req.user.role !== "doctor") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Doctor or Admin privileges required." });
+  }
+
+  const { id } = req.params;
+  const index = db.patients.findIndex((patient) => patient.id === parseInt(id));
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Patient not found" });
+  }
+
+  db.patients[index] = {
+    ...db.patients[index],
+    ...req.body,
+    updatedBy: req.user.id,
+    updatedAt: new Date().toISOString(),
+  };
+  saveDb();
+  res.json(db.patients[index]);
+});
+
+app.delete("/api/patients/:id", (req, res) => {
+  // Only admins can delete patients
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin privileges required." });
+  }
+
+  const { id } = req.params;
+  const index = db.patients.findIndex((patient) => patient.id === parseInt(id));
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Patient not found" });
+  }
+
+  db.patients.splice(index, 1);
+  saveDb();
+  res.json({ success: true });
+});
+
+// Generic CRUD routes (moved after specific routes)
 app.get("/api/:resource", (req, res) => {
   const { resource } = req.params;
   const data = db[resource] || [];

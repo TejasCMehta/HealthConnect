@@ -1,3 +1,50 @@
 :host {
   display: block;
 }
+
+// Prevent body scroll when dialog is open
+:host(.modal-open) {
+  body {
+    overflow: hidden;
+  }
+}
+
+// Custom backdrop blur for better visual effect
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+// Enhanced button hover states
+button {
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  transition: transform 150ms ease-out, background-color 200ms ease-out;
+}
+
+// Focus states for accessibility
+button:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+// Modal shadow enhancement
+.shadow-2xl {
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+// Dark mode enhancements
+@media (prefers-color-scheme: dark) {
+  .shadow-2xl {
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+}

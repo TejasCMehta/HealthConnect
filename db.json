@@ -19,15 +19,15 @@
   ],
   "doctors": [
     {
-      "id": 1,
-      "name": "John Smith",
+      "id": 2,
+      "name": "Dr. John Smith",
       "specialty": "Cardiology",
       "email": "john@clinic.com",
       "phone": "+1234567890",
       "color": "#ec4899"
     },
     {
-      "id": 2,
+      "id": 1,
       "name": "Dr. Sarah Johnson",
       "specialty": "Dermatology",
       "email": "sarah@clinic.com",
@@ -59,6 +59,16 @@
       "phone": "9929299",
       "dateOfBirth": "1988-03-13",
       "address": "sdvsd"
+    },
+    {
+      "id": 1753089911673,
+      "name": "Test Patient Admin",
+      "email": "testadmin@example.com",
+      "phone": "+1234567899",
+      "dateOfBirth": "1990-01-01",
+      "address": "123 Test St",
+      "createdBy": 1,
+      "createdAt": "2025-07-21T09:25:11.673Z"
     }
   ],
   "appointments": [
@@ -81,11 +91,11 @@
       },
       "doctor": {
         "id": 2,
-        "name": "Dr. Sarah Johnson",
-        "specialty": "Dermatology",
-        "email": "sarah@clinic.com",
-        "phone": "+1234567891",
-        "color": "#ef4444"
+        "name": "Dr. John Smith",
+        "specialty": "Cardiology",
+        "email": "john@clinic.com",
+        "phone": "+1234567890",
+        "color": "#ec4899"
       }
     },
     {
