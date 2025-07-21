@@ -108,31 +108,102 @@
     </div>
   </div>
 
-  <!-- Right side - Hero Section -->
+  <!-- Right side - Hero Section with Carousel -->
   <div
-    class="hidden lg:flex flex-1 items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700"
+    class="hidden lg:flex flex-1 items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700 p-8"
   >
-    <div class="max-w-md text-center text-white">
-      <i class="ri-calendar-check-line text-8xl mb-6"></i>
-      <h2 class="text-3xl font-bold mb-4">Streamline Your Practice</h2>
-      <p class="text-xl opacity-90">
-        Manage appointments, patients, and schedules all in one place. Built for
-        modern healthcare professionals.
-      </p>
-      <div class="mt-8 grid grid-cols-1 gap-4">
-        <div class="flex items-center">
-          <i class="ri-calendar-line text-2xl mr-3"></i>
-          <span>Advanced Calendar System</span>
+    <div class="max-w-2xl w-full">
+      <!-- Header -->
+      <div class="text-center text-white mb-8">
+        <i class="ri-calendar-check-line text-6xl mb-4"></i>
+        <h2 class="text-3xl font-bold mb-2">Streamline Your Practice</h2>
+        <p class="text-lg opacity-90">
+          Manage appointments, patients, and schedules all in one place
+        </p>
+      </div>
+
+      <!-- Carousel Container -->
+      <div
+        class="relative bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-2xl"
+        (mouseenter)="pauseCarousel()"
+        (mouseleave)="resumeCarousel()"
+      >
+        <!-- Carousel Images -->
+        <div class="relative overflow-hidden rounded-lg mb-4">
+          <div
+            class="flex transition-transform duration-500 ease-in-out"
+            [style.transform]="
+              'translateX(-' + currentImageIndex() * 100 + '%)'
+            "
+          >
+            @for (image of carouselImages(); track image.src) {
+            <div class="w-full flex-shrink-0">
+              <img
+                [src]="image.src"
+                [alt]="image.title"
+                class="w-full h-64 object-cover rounded-lg shadow-lg"
+                style="object-fit: contain; background: white"
+              />
+            </div>
+            }
+          </div>
+
+          <!-- Navigation Arrows -->
+          <button
+            (click)="previousImage()"
+            class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center"
+          >
+            <i class="ri-arrow-left-line text-sm"></i>
+          </button>
+          <button
+            (click)="nextImage()"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center"
+          >
+            <i class="ri-arrow-right-line text-sm"></i>
+          </button>
         </div>
-        <div class="flex items-center">
-          <i class="ri-user-heart-line text-2xl mr-3"></i>
-          <span>Patient Management</span>
+
+        <!-- Image Info -->
+        <div class="text-center text-white">
+          <h3 class="text-xl font-semibold mb-2">
+            {{ carouselImages()[currentImageIndex()].title }}
+          </h3>
+          <p class="text-sm opacity-90">
+            {{ carouselImages()[currentImageIndex()].description }}
+          </p>
         </div>
-        <div class="flex items-center">
-          <i class="ri-dashboard-line text-2xl mr-3"></i>
-          <span>Comprehensive Dashboard</span>
+
+        <!-- Carousel Indicators -->
+        <div class="flex justify-center space-x-2 mt-4">
+          @for (image of carouselImages(); track $index) {
+          <button
+            (click)="goToImage($index)"
+            class="w-3 h-3 rounded-full transition-all duration-200"
+            [class]="
+              currentImageIndex() === $index
+                ? 'bg-white'
+                : 'bg-white/50 hover:bg-white/70'
+            "
+          ></button>
+          }
         </div>
       </div>
+
+      <!-- Features List -->
+      <!-- <div class="mt-6 grid grid-cols-1 gap-3 text-white">
+        <div class="flex items-center text-sm">
+          <i class="ri-calendar-line text-xl mr-3"></i>
+          <span>Advanced Calendar System</span>
+        </div>
+        <div class="flex items-center text-sm">
+          <i class="ri-user-heart-line text-xl mr-3"></i>
+          <span>Patient Management</span>
+        </div>
+        <div class="flex items-center text-sm">
+          <i class="ri-dashboard-line text-xl mr-3"></i>
+          <span>Comprehensive Dashboard</span>
+        </div>
+      </div> -->
     </div>
   </div>
 </div>

@@ -4,3 +4,7 @@ dist
 coverage
 .config
 .DS_Store
+test-*
+enhanced-*
+*.zip
+*.log
